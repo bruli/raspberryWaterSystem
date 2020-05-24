@@ -13,7 +13,7 @@ func (e *executionLogRepository) Get() (*execution.Logs, error) {
 	if err != nil {
 		return nil, err
 	}
-	query := "select seconds, zone, created_at from executions limit 30"
+	query := "select seconds, zone, created_at from executions order by created_at desc limit 30"
 	results, err := db.Query(query)
 	defer results.Close()
 	if err != nil {

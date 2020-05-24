@@ -37,15 +37,15 @@ func (h *homePage) buildResponse() *homePageResponse {
 }
 
 type rainResponse struct {
-	IsRaining bool
-	Value     uint16
+	IsRaining bool`json:"is_raining"`
+	Value     uint16 `json:"value"`
 }
 type homePageResponse struct {
-	SystemStarted *jsontime.JsonTime
-	Temperature   float32
-	Humidity      float32
-	OnWater       bool
-	Rain          *rainResponse
+	SystemStarted *jsontime.JsonTime `json:"system_started"`
+	Temperature   float32 `json:"temperature"`
+	Humidity      float32 `json:"humidity"`
+	OnWater       bool `json:"on_water"`
+	Rain          *rainResponse `json:"rain"`
 }
 
 func newHomePageResponse() *homePageResponse {

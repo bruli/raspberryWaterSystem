@@ -10,8 +10,8 @@ import (
 )
 
 type logBody struct {
-	Message   string
-	CreatedAt jsontime.JsonTime
+	Message   string `json:"message"`
+	CreatedAt jsontime.JsonTime  `json:"created_at"`
 }
 
 func newLogBody(message string, createdAt jsontime.JsonTime) *logBody {
