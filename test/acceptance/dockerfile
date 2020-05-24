@@ -1,0 +1,6 @@
+FROM ubuntu
+
+WORKDIR /app
+
+COPY ./server /app/
+RUN chmod 777 /app/server
