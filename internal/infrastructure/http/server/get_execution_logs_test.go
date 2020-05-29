@@ -11,14 +11,14 @@ import (
 	"testing"
 )
 
-func TestGetExecutionLogsHandler_ServeHTTP(t *testing.T) {
+func TestGetExecutionLogsH_ServeHTTP(t *testing.T) {
 	config := getConfig()
 	lo, err := execution.NewLogsStub()
 	assert.NoError(t, err)
 	repo := execution.LogRepositoryMock{}
 	log := logger.LoggerMock{}
 	router := getRouter()
-	router.getExecutionLogs = newGetExecutionLogsHandler(execution.NewReadLogs(&repo, &log), &log)
+	router.getExecutionLogs = newGetExecutionLogs(execution.NewReadLogs(&repo, &log), &log)
 	server := router.buildServer(config.AuthToken)
 	tests := map[string]struct {
 		code int

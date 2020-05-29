@@ -24,5 +24,5 @@ func NewRepository(config *Config) *Repository {
 
 func (r *Repository) conn() (*sql.DB, error) {
 	return sql.Open("mysql",
-		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", r.config.user, r.config.password, r.config.host, r.config.port, r.config.database))
+		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", r.config.user, r.config.password, r.config.host, r.config.port, r.config.database))
 }

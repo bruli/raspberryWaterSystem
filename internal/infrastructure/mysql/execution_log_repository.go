@@ -2,8 +2,10 @@ package mysql
 
 import (
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
+	"time"
 )
 
+const layout = "2006-01-02 15:04:05"
 type executionLogRepository struct {
 	repository *Repository
 }
@@ -22,10 +24,16 @@ func (e *executionLogRepository) Get() (*execution.Logs, error) {
 	logs := execution.Logs{}
 	for results.Next() {
 		lo := execution.Log{}
-		err = results.Scan(&lo.Seconds, &lo.Zone, &lo.CreatedAt)
+		var createdValue string
+		err = results.Scan(&lo.Seconds, &lo.Zone, &createdValue)
 		if err != nil {
 			return nil, err
 		}
+		createdAt, err := time.Parse(layout, createdValue)
+		if err != nil {
+			return nil, err
+		}
+		lo.CreatedAt = createdAt
 		logs.Add(&lo)
 	}
 	return &logs, nil
@@ -46,6 +54,6 @@ func (e *executionLogRepository) Save(l execution.Log) error {
 		return err
 	}
 	defer ins.Close()
-	_, err = ins.Exec(l.CreatedAt, l.Seconds, l.Zone)
+	_, err = ins.Exec(l.CreatedAt.Format(layout), l.Seconds, l.Zone)
 	return err
 }

@@ -50,7 +50,7 @@ func NewServer(conf *Config) *Server {
 		log),
 		log)
 	getZones := newGetZones(zone.NewGetter(zoneRepository), log)
-	getExecutionLogs := newGetExecutionLogsHandler(
+	getExecutionLogs := newGetExecutionLogs(
 		execution.NewReadLogs(mysql.NewExecutionLogRepository(mysqlRepository), log),
 		log)
 	createExecution := newCreateExecution(

@@ -51,6 +51,6 @@ func (g getExecutionLogs) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	g.response.writeJSONResponse(w, http.StatusOK, data)
 }
 
-func newGetExecutionLogsHandler(readLogs *execution.ReadLogs, log logger.Logger) *getExecutionLogs {
+func newGetExecutionLogs(readLogs *execution.ReadLogs, log logger.Logger) *getExecutionLogs {
 	return &getExecutionLogs{readLogs: readLogs, response: newResponse(log)}
 }

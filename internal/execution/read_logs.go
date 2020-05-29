@@ -20,14 +20,13 @@ func (r *ReadLogs) Read() (*Logs, error) {
 		return nil, err
 	}
 
-	if MaxLogs > len(*l) {
+	if MaxLogs >= len(*l) {
 		return l, nil
 	}
 
 	logs := Logs{}
-	max := len(*l) - MaxLogs
 	m := *l
-	for _, j := range m[max:] {
+	for _, j := range m[:MaxLogs] {
 		logs.Add(j)
 	}
 	return &logs, nil
