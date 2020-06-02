@@ -37,7 +37,8 @@ func getRouter() *router {
 		&getExecutions{},
 		&ExecutionWater{},
 		&getTemperature{},
-		&removeZone{})
+		&removeZone{},
+		&getRain{})
 }
 
 func TestHomePageHandler_ServeHTTP(t *testing.T) {

@@ -64,6 +64,9 @@ func NewServer(conf *Config) *Server {
 	temperat := newGetTemperature(getter, log, st)
 	remover := zone.NewRemover(zoneRepository, log)
 	removeZon := newRemoveZone(remover, log)
+	rainRepo := getRainRepository(conf, log)
+	rainRead := rain.NewReader(rainRepo)
+	getRain := newGetRain(rainRead, log, st)
 
 	rout := newRouter(homepage,
 		createZone,
@@ -73,11 +76,10 @@ func NewServer(conf *Config) *Server {
 		getExecutions,
 		executionWater,
 		temperat,
-		removeZon)
+		removeZon,
+		getRain)
 	executor := execution.NewExecutor(zoneRepository, relayManager, executionLogRepository, notificationSender)
 	executorInTime := execution.NewExecutorInTime(executionRepo, executor, st, notificationSender)
-	rainRepo := getRainRepository(conf, log)
-	rainRead := rain.NewReader(rainRepo)
 	weatherStatusSet := weather.NewStatusSetter(st, weatherRepo, rainRead)
 	weatherWriteRepo := mysql.NewWeatherRepository(mysqlRepository)
 	writerWeath := weather.NewWriter(weatherRepo, weatherWriteRepo)

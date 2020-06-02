@@ -14,7 +14,8 @@ type router struct {
 	getExecutions,
 	executionWater,
 	temperature,
-	removeZone http.Handler
+	removeZone,
+	getRain http.Handler
 }
 
 func newRouter(homepage,
@@ -25,7 +26,8 @@ func newRouter(homepage,
 	getExecutions,
 	executionWater,
 	temperature,
-	removeZone http.Handler) *router {
+	removeZone,
+	getRain http.Handler) *router {
 	return &router{homepage: homepage,
 		createZone:       createZone,
 		getZones:         getZones,
@@ -35,6 +37,7 @@ func newRouter(homepage,
 		executionWater:   executionWater,
 		temperature:      temperature,
 		removeZone:       removeZone,
+		getRain:          getRain,
 	}
 }
 
@@ -49,6 +52,7 @@ func (r *router) buildServer(authToken string) *mux.Router {
 	rout.HandleFunc("/executions", r.getExecutions.ServeHTTP).Methods(http.MethodGet)
 	rout.HandleFunc("/water", r.executionWater.ServeHTTP).Methods(http.MethodPost)
 	rout.HandleFunc("/temperature", r.temperature.ServeHTTP).Methods(http.MethodGet)
+	rout.HandleFunc("/rain", r.getRain.ServeHTTP).Methods(http.MethodGet)
 
 	middleware := newAuthMiddleware(authToken)
 
