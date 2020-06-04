@@ -1,10 +1,11 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
 	"github.com/bruli/raspberryWaterSystem/internal/logger"
 	jsoniter "github.com/json-iterator/go"
-	"net/http"
 )
 
 type getExecutions struct {
@@ -49,11 +50,20 @@ func (g *getExecutions) buildExecutionBody(exec *execution.Execution) ExecutionB
 	if exec.Even != nil {
 		even = g.buildPrograms(exec.Even)
 	}
+	temp := TempPrograms{}
+	if exec.Temp != nil {
+		for _, prgms := range *exec.Temp {
+			pgr := g.buildProgram(&prgms.Program)
+			tempProgram := TempProgram{Program: *pgr, Temperature: prgms.Temperature}
+			temp.Add(&tempProgram)
+		}
+	}
 	return ExecutionBody{
 		Daily:  daily,
 		Weekly: &weekly,
 		Odd:    odd,
 		Even:   even,
+		Temp:   &temp,
 	}
 }
 

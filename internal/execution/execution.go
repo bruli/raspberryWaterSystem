@@ -7,24 +7,26 @@ type Execution struct {
 	Weekly *WeeklyPrograms
 	Odd    *Programs
 	Even   *Programs
+	Temp   *TemperaturePrograms
 }
 
-func New(daily *Programs, weekly *WeeklyPrograms, odd *Programs, even *Programs) (*Execution, error) {
-	if daily == nil && weekly == nil && odd == nil && even == nil {
+func New(daily *Programs, weekly *WeeklyPrograms, odd, even *Programs, temp *TemperaturePrograms) (*Execution, error) {
+	if daily == nil && weekly == nil && odd == nil && even == nil && temp == nil {
 		return nil, NewInvalidCreateExecution("execution can not be empty")
 	}
 
 	if len(daily.GetPrograms()) == 0 &&
 		len(weekly.getPrograms()) == 0 &&
 		len(odd.GetPrograms()) == 0 &&
-		len(even.GetPrograms()) == 0 {
+		len(even.GetPrograms()) == 0 &&
+		len(*temp) == 0 {
 		return nil, NewInvalidCreateExecution("any program are into execution")
 	}
 
-	return &Execution{Daily: daily, Weekly: weekly, Odd: odd, Even: even}, nil
+	return &Execution{Daily: daily, Weekly: weekly, Odd: odd, Even: even, Temp: temp}, nil
 }
 
-func (ex *Execution) GetToday(t time.Time) *Programs {
+func (ex *Execution) GetToday(t time.Time, temp float32) *Programs {
 	day := t.Day()
 	weekday := t.Weekday()
 	hour := t.Format("15:04")
@@ -78,6 +80,18 @@ func (ex *Execution) GetToday(t time.Time) *Programs {
 					for _, p := range *even {
 						execPrgms.Add(p)
 					}
+				}
+			}
+		}
+	}
+
+	if ex.Temp != nil {
+		tempPrgms := ex.Temp.GetPrograms(temp).GetPrograms()
+		if len(tempPrgms) != 0 {
+			te := tempPrgms[hour]
+			if te != nil {
+				for _, p := range *te {
+					execPrgms.Add(p)
 				}
 			}
 		}

@@ -2,8 +2,9 @@ package execution
 
 import (
 	"fmt"
-	"github.com/bruli/raspberryWaterSystem/internal/status"
 	"time"
+
+	"github.com/bruli/raspberryWaterSystem/internal/status"
 )
 
 type ExecutorInTime struct {
@@ -25,7 +26,7 @@ func (e *ExecutorInTime) Execute(t time.Time) error {
 	if err != nil {
 		return fmt.Errorf("failed to get executions: %w", err)
 	}
-	prgms := exec.GetToday(t)
+	prgms := exec.GetToday(t, e.st.Temperature())
 	for _, prg := range *prgms {
 		zons := prg.Executions.Zones
 		for _, z := range zons {

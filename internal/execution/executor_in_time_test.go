@@ -3,13 +3,14 @@ package execution_test
 import (
 	"errors"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
 	"github.com/bruli/raspberryWaterSystem/internal/rain"
 	"github.com/bruli/raspberryWaterSystem/internal/status"
 	"github.com/bruli/raspberryWaterSystem/internal/zone"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestExecutorInTime_Execute(t *testing.T) {
@@ -22,7 +23,8 @@ func TestExecutorInTime_Execute(t *testing.T) {
 	week := execution.WeeklyPrograms{}
 	odd := execution.Programs{}
 	even := execution.Programs{}
-	prgms, err := execution.New(&daily, &week, &odd, &even)
+	temp := execution.TemperaturePrograms{}
+	prgms, err := execution.New(&daily, &week, &odd, &even, &temp)
 	assert.NoError(t, err)
 	zon, err := zone.New("1", "name1", []string{"a"})
 	assert.NoError(t, err)

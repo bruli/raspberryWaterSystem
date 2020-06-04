@@ -1,13 +1,14 @@
 package acceptance
 
 import (
+	"io/ioutil"
+	"net/http"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
 	"github.com/bruli/raspberryWaterSystem/internal/infrastructure/http/server"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"net/http"
-	"testing"
 )
 
 func TestCreateAndGetExecution(t *testing.T) {
@@ -31,7 +32,7 @@ func TestCreateAndGetExecution(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, len(*exec.Daily), len(*responseBody.Daily))
-
+	assert.Equal(t, len(*exec.Temp), len(*responseBody.Temp))
 }
 
 func getExecutionBody() server.ExecutionBody {
@@ -40,6 +41,7 @@ func getExecutionBody() server.ExecutionBody {
 	weeklyPrgms := server.WeeklyPrograms{}
 	odd := server.Programs{}
 	even := server.Programs{}
+	temp := server.TempPrograms{}
 	for _, dailyPrg := range *stub.Daily {
 		pr := getProgram(dailyPrg)
 		daily.Add(&pr)
@@ -63,11 +65,17 @@ func getExecutionBody() server.ExecutionBody {
 		even.Add(&pr)
 
 	}
+	for _, tempPrg := range *stub.Temp {
+		pr := getProgram(&tempPrg.Program)
+		temP := server.TempProgram{Temperature: tempPrg.Temperature, Program: pr}
+		temp.Add(&temP)
+	}
 	body := server.ExecutionBody{
 		Daily:  &daily,
 		Weekly: &weeklyPrgms,
 		Odd:    &odd,
 		Even:   &even,
+		Temp:   &temp,
 	}
 
 	return body

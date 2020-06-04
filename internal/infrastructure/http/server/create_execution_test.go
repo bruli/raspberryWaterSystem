@@ -3,13 +3,14 @@ package server
 import (
 	"bytes"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
 	"github.com/bruli/raspberryWaterSystem/internal/logger"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestCreateExecutionHandler_ServeHTTP(t *testing.T) {
@@ -71,6 +72,7 @@ func createExecutionBody() ExecutionBody {
 	weeklyPrgms := WeeklyPrograms{}
 	odd := Programs{}
 	even := Programs{}
+	temp := TempPrograms{}
 	for _, dailyPrg := range *stub.Daily {
 		pr := getProgram(dailyPrg)
 		daily.Add(&pr)
@@ -94,11 +96,17 @@ func createExecutionBody() ExecutionBody {
 		daily.Add(&pr)
 
 	}
+	for _, tempPrg := range *stub.Temp {
+		pr := getProgram(&tempPrg.Program)
+		temP := TempProgram{Temperature: tempPrg.Temperature, Program: pr}
+		temp.Add(&temP)
+	}
 	body := ExecutionBody{
 		Daily:  &daily,
 		Weekly: &weeklyPrgms,
 		Odd:    &odd,
 		Even:   &even,
+		Temp:   &temp,
 	}
 
 	return body

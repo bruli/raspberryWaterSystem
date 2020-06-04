@@ -1,9 +1,10 @@
 package execution
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
@@ -11,6 +12,7 @@ func TestNew(t *testing.T) {
 	tests := map[string]struct {
 		daily, odd, even *Programs
 		weekly           *WeeklyPrograms
+		temp             *TemperaturePrograms
 		err              error
 	}{
 		"it should return error when is empty": {err: NewInvalidCreateExecution("execution can not be empty")},
@@ -20,12 +22,13 @@ func TestNew(t *testing.T) {
 			weekly: &WeeklyPrograms{},
 			odd:    &Programs{},
 			even:   &Programs{},
+			temp:   &TemperaturePrograms{},
 		},
 		"it should return execution": {daily: stub.Daily, weekly: stub.Weekly, odd: stub.Odd, even: stub.Even},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, err := New(tt.daily, tt.weekly, tt.odd, tt.even)
+			_, err := New(tt.daily, tt.weekly, tt.odd, tt.even, tt.temp)
 			assert.Equal(t, tt.err, err)
 		})
 	}
@@ -160,13 +163,14 @@ func TestExecution_GetToday(t *testing.T) {
 		week := WeeklyPrograms{}
 		odd := Programs{}
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
 		today, err := time.Parse("2006-01-02 15:04:05", "2006-01-02 15:00:00")
 		assert.NoError(t, err)
 
-		prgms := exec.GetToday(today)
+		prgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*prgms))
 		prgm := *prgms
@@ -184,13 +188,14 @@ func TestExecution_GetToday(t *testing.T) {
 		week := WeeklyPrograms{}
 		odd := Programs{}
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
 		today, err := time.Parse("2006-01-02 15:04:05", "2006-01-02 15:00:00")
 		assert.NoError(t, err)
 
-		prgms := exec.GetToday(today)
+		prgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*prgms))
 		prgm := *prgms
@@ -208,13 +213,14 @@ func TestExecution_GetToday(t *testing.T) {
 		week := WeeklyPrograms{}
 		odd := Programs{}
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
 		today, err := time.Parse("2006-01-02 15:04:05", "2006-01-02 15:00:00")
 		assert.NoError(t, err)
 
-		prgms := exec.GetToday(today)
+		prgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 2, len(*prgms))
 	})
@@ -236,10 +242,11 @@ func TestExecution_GetToday(t *testing.T) {
 		week.Add(weekPrgm)
 		odd := Programs{}
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*execPrgms))
 	})
@@ -261,10 +268,11 @@ func TestExecution_GetToday(t *testing.T) {
 		week.Add(weekPrgm)
 		odd := Programs{}
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 2, len(*execPrgms))
 	})
@@ -286,10 +294,11 @@ func TestExecution_GetToday(t *testing.T) {
 		week.Add(weekPrgm)
 		odd := Programs{}
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*execPrgms))
 		execPrgm := *execPrgms
@@ -313,10 +322,11 @@ func TestExecution_GetToday(t *testing.T) {
 		odd.Add(prgm1)
 		odd.Add(prgm2)
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*execPrgms))
 	})
@@ -338,10 +348,11 @@ func TestExecution_GetToday(t *testing.T) {
 		odd.Add(prgm1)
 		odd.Add(prgm2)
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 2, len(*execPrgms))
 	})
@@ -363,10 +374,11 @@ func TestExecution_GetToday(t *testing.T) {
 		odd.Add(prgm1)
 		odd.Add(prgm2)
 		even := Programs{}
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*execPrgms))
 		execPrgm := *execPrgms
@@ -389,10 +401,11 @@ func TestExecution_GetToday(t *testing.T) {
 		even := Programs{}
 		even.Add(prgm1)
 		even.Add(prgm2)
-		exec, err := New(&daily, &week, &odd, &even)
+		temp := TemperaturePrograms{}
+		exec, err := New(&daily, &week, &odd, &even, &temp)
 		assert.NoError(t, err)
 
-		execPrgms := exec.GetToday(today)
+		execPrgms := exec.GetToday(today, 25)
 
 		assert.Equal(t, 1, len(*execPrgms))
 	})

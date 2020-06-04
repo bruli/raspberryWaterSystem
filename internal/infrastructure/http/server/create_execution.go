@@ -1,11 +1,12 @@
 package server
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
 	"github.com/bruli/raspberryWaterSystem/internal/logger"
 	jsoniter "github.com/json-iterator/go"
-	"net/http"
-	"time"
 )
 
 type ExecutionBody struct {
@@ -13,6 +14,7 @@ type ExecutionBody struct {
 	Weekly *WeeklyPrograms
 	Odd    *Programs
 	Even   *Programs
+	Temp   *TempPrograms
 }
 
 func newExecutionBody() *ExecutionBody {
@@ -26,6 +28,17 @@ type Program struct {
 
 func NewProgram(seconds uint8, executions *ExecutionsData) *Program {
 	return &Program{Seconds: seconds, Executions: executions}
+}
+
+type TempProgram struct {
+	Program
+	Temperature float32
+}
+
+type TempPrograms []*TempProgram
+
+func (tp *TempPrograms) Add(p *TempProgram) {
+	*tp = append(*tp, p)
 }
 
 type Programs []*Program
@@ -126,8 +139,18 @@ func (c *createExecution) buildExecution(body *ExecutionBody) (execution.Executi
 			even.Add(buildProgram)
 		}
 	}
+	temp := execution.TemperaturePrograms{}
+	if body.Temp != nil {
+		for _, j := range *body.Temp {
+			buildTemperature, err := c.buildTemperature(j)
+			if err != nil {
+				return execution.Execution{}, err
+			}
+			temp.Add(buildTemperature)
+		}
+	}
 
-	ex, err := execution.New(&daily, &weekly, &odd, &even)
+	ex, err := execution.New(&daily, &weekly, &odd, &even, &temp)
 	if err != nil {
 		return execution.Execution{}, err
 	}
@@ -155,6 +178,10 @@ func (c *createExecution) buildWeekly(w *Weekly) (*execution.Weekly, error) {
 		execT.Add(buildProgram)
 	}
 	return execution.NewWeeklyByDay(&execT, w.Weekday), nil
+}
+
+func (c *createExecution) buildTemperature(tp *TempProgram) (*execution.TemperatureProgram, error) {
+	return execution.NewTemperatureProgram(tp.Temperature, tp.Seconds, tp.Executions.Hour, tp.Executions.Zones)
 }
 
 func newCreateExecution(create *execution.Creator, logger logger.Logger) *createExecution {

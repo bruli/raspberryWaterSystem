@@ -14,8 +14,22 @@ func NewLogsStub() (Logs, error) {
 func NewExecutionStub() Execution {
 	programs := ProgramsStub()
 	weeklyPrograms := WeeklyProgramsStub()
-	exec, _ := New(&programs, &weeklyPrograms, &programs, &programs)
+	tempPrograms := TempProgramsStub()
+	exec, _ := New(&programs, &weeklyPrograms, &programs, &programs, &tempPrograms)
 	return *exec
+}
+
+func TempProgramsStub() TemperaturePrograms {
+	t := TemperaturePrograms{}
+	p := temperatureProgramStub()
+	t.add(&p)
+	return t
+}
+
+func temperatureProgramStub() TemperatureProgram {
+	p := ProgramStub()
+	tp, _ := NewTemperatureProgram(25, 25, p.getHour(), p.Executions.Zones)
+	return *tp
 }
 
 func WeeklyProgramsStub() WeeklyPrograms {
