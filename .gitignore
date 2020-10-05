@@ -21,4 +21,8 @@
 !/test/acceptance/assets/.gitkeep
 /test/acceptance/server
 /cmd/server/server
-/raspberry-server.conf
+/deploy/config/raspberry-server.conf
+/deploy/password
+/config.yaml
+/deploy/assets/
+!/deploy/assets/.gitkeep

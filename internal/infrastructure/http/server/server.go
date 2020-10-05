@@ -2,6 +2,11 @@ package server
 
 import (
 	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/bruli/raspberryWaterSystem/internal/execution"
 	"github.com/bruli/raspberryWaterSystem/internal/infrastructure/disk/file"
 	"github.com/bruli/raspberryWaterSystem/internal/infrastructure/gpio/relay"
@@ -16,10 +21,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/status"
 	"github.com/bruli/raspberryWaterSystem/internal/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/zone"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 type Server struct {
@@ -80,7 +81,7 @@ func NewServer(conf *Config) *Server {
 		getRain)
 	executor := execution.NewExecutor(zoneRepository, relayManager, executionLogRepository, notificationSender)
 	executorInTime := execution.NewExecutorInTime(executionRepo, executor, st, notificationSender)
-	weatherStatusSet := weather.NewStatusSetter(st, weatherRepo, rainRead)
+	weatherStatusSet := weather.NewStatusSetter(st, weatherRepo, rainRead, log)
 	weatherWriteRepo := mysql.NewWeatherRepository(mysqlRepository)
 	writerWeath := weather.NewWriter(weatherRepo, weatherWriteRepo)
 	d := newDaemon(

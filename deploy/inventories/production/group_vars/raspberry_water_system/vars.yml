@@ -1,0 +1,6 @@
+---
+telegram_token: "{{ telegram_token_vault }}"
+telegram_chat_id: "{{ telegram_chat_id_vault }}"
+mysql_user: "{{ mysql_user_vault }}"
+mysql_pass: "{{ mysql_pass_vault }}"
+auth_token: "{{ auth_token_vault }}"
