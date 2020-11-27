@@ -21,6 +21,7 @@
       become: yes
     - name: Copy old binary file
       shell: cp {{ binary_path }} {{ binary_path }}_old
+      ignore_errors: true
     - name: Upload binary file
       copy:
         src: assets/server
