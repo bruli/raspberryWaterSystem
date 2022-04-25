@@ -27,3 +27,7 @@ docker-up:
 
 docker-down:
 	docker-compose down server
+
+lint:
+	golangci-lint run
+	go mod tidy -v && git --no-pager diff --quiet go.mod go.sum
