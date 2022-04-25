@@ -1,46 +1,29 @@
-args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
-prepare_docker:
-	@go build -o ./test/acceptance/server -i ./cmd/server/main.go
-	@bash -c "cd ./test/acceptance && docker-compose up -d --build"
+docker-logs:
+	docker logs -f water_system
 
-finish_docker:
-	@bash -c "cd ./test/acceptance && docker-compose stop"
+tools-local: tool-golangci-lint tool-moq tool-fumpt	 tool-jsonschema tool-json-lint
 
-acceptance:
-	@make finish_docker
-	@make prepare_docker
-	sleep 5
-	@make migration_migrate
-	@bash -c "GOTEST_PALETTE="red,blue" gotest ./test/acceptance -v"
-	@make finish_docker
+tool-golangci-lint:
+	devops/scripts/goget.sh github.com/golangci/golangci-lint/cmd/golangci-lint
 
-unit:
-	@bash -c "cd internal && GOTEST_PALETTE="red,blue" gotest ./..."
+tool-fumpt:
+	devops/scripts/goget.sh mvdan.cc/gofumpt
 
-coverage:
-	@bash -c "cd internal && GOTEST_PALETTE="red,blue" gotest -coverprofile=coverage.out ./..."
-	@bash -c "cd internal && go tool cover -html=coverage.out"
+tool-moq:
+	devops/scripts/goget.sh github.com/matryer/moq
 
-build:
-	@CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go build -o deploy/assets/server cmd/server/main.go
+tool-jsonschema:
+	devops/scripts/goget.sh github.com/atombender/go-jsonschema/...
+	devops/scripts/goget.sh github.com/atombender/go-jsonschema/cmd/gojsonschema
 
-deploys:
-	ansible-playbook -i deploy/inventories/production/hosts deploy/deploy.yml --vault-id raspberry_water_system@deploy/password
+tool-json-lint:
+	go get github.com/santhosh-tekuri/jsonschema/cmd/jv
 
-all_tests:
-	@echo "executing unit tests..."
-	@make unit
-	@echo "\n"
-	@echo "executing acceptance tests..."
-	@make acceptance
+test:
+	go test -race ./...
 
-migration_migrate:
-	@migrate -database "mysql://raspberry:raspberry@tcp(localhost:3306)/raspberryWaterSystem" -path ./internal/infrastructure/migrations up
+docker-up:
+	docker-compose up -d --build server
 
-migration_create:
-	@migrate create -ext sql -dir ./internal/infrastructure/migrations -seq $(call args,new_migration)
-
-encryptVault:
-	ansible-vault encrypt --vault-id raspberry_water_system@deploy/password deploy/inventories/production/group_vars/server/vault.yml
-decryptVault:
-	ansible-vault decrypt --vault-id raspberry_water_system@deploy/password deploy/inventories/production/group_vars/server/vault.yml
+docker-down:
+	docker-compose down server

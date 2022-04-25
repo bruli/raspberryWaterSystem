@@ -1,0 +1,21 @@
+version: "3.3"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    container_name: water_system
+    volumes:
+      - .:/app
+    environment:
+      WS_SERVER_URL: ${RS_SERVER_URL:-:8080}
+      WS_ENVIRONMENT: ${RS_ENVIRONMENT:-development}
+    ports:
+      - "8083:8080"
+  builder:
+    build:
+      context: .
+    container_name: water_system_builder
+    volumes:
+      - .:/app
