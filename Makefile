@@ -22,6 +22,8 @@ tool-json-lint:
 test:
 	go test -race ./...
 
+test-with-infra:
+	go test -tags infra -race ./internal/infrastructure/disk/... --count=1
 docker-up:
 	docker-compose up -d --build server
 
