@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/config"
 )
@@ -33,11 +35,9 @@ func handlersDefinition(log *log.Logger) (httpx.HandlersDefinition, error) {
 	//qhErrMdw := cqs.NewQueryHndErrorMiddleware(log)
 	return httpx.HandlersDefinition{
 		{
-			Endpoint: "/",
-			Method:   http.MethodGet,
-			HandlerFunc: func(writer http.ResponseWriter, request *http.Request) {
-				_, _ = writer.Write([]byte(`{"status": "OK"}`))
-			},
+			Endpoint:    "/",
+			Method:      http.MethodGet,
+			HandlerFunc: http2.Homepage(),
 		},
 	}, nil
 }

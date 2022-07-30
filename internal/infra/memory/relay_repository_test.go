@@ -6,7 +6,7 @@ import (
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
-	"github.com/bruli/raspberryWaterSystem/internal/infrastructure/memory"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
 	"github.com/stretchr/testify/require"
 )
 

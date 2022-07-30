@@ -14,7 +14,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
-	"github.com/bruli/raspberryWaterSystem/internal/infrastructure/disk"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
 	"github.com/stretchr/testify/require"
 )
 
