@@ -39,4 +39,8 @@ docker-ps:
 
 lint:
 	golangci-lint run
+	devops/scripts/json-lint.sh
 	go mod tidy -v && git --no-pager diff --quiet go.mod go.sum
+
+import-jsonschema:
+	devops/scripts/import_jsonschema.sh

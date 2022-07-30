@@ -14,7 +14,7 @@ then
   rm "$TARGET_DIRECTORY"/*_generated.go
 fi
 
-for req_file in internal/infra/http/schemas/*_response.json
+for req_file in internal/infra/http/schemas/*_request.json
 do
   file="$(basename "$req_file")"
   generated="${file%.json}"
