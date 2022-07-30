@@ -24,6 +24,10 @@ test:
 
 test-with-infra:
 	go test -tags infra -race ./internal/infrastructure/disk/... --count=1
+
+test-functional:
+	go test -tags functional -race ./functional_test/... --count=1
+
 docker-up:
 	docker-compose up -d --build server
 
