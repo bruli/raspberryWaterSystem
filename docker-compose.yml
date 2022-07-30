@@ -11,6 +11,7 @@ services:
     environment:
       WS_SERVER_URL: ${RS_SERVER_URL:-:8080}
       WS_ENVIRONMENT: ${RS_ENVIRONMENT:-development}
+      WS_ZONES_FILE: ${WS_ZONES_FILE:-/tmp/zones.yaml}
     ports:
       - "8083:8080"
   builder:

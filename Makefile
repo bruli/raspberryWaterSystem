@@ -32,10 +32,13 @@ docker-up:
 	docker-compose up -d --build server
 
 docker-down:
-	docker-compose down server
+	docker-compose down
 
 docker-ps:
 	docker-compose ps
+
+docker-exec:
+	docker exec -it water_system sh
 
 lint:
 	golangci-lint run

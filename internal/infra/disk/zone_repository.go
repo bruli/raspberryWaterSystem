@@ -23,11 +23,16 @@ type ZoneRepository struct {
 	filePath string
 }
 
+func (z ZoneRepository) Update(ctx context.Context, zo zone.Zone) error {
+	// TODO implement me
+	panic("implement me")
+}
+
 func NewZoneRepository(filePath string) ZoneRepository {
 	return ZoneRepository{filePath: filePath}
 }
 
-func (z ZoneRepository) FindByID(ctx context.Context, id string) (zone.Zone, error) {
+func (z ZoneRepository) FindByID(_ context.Context, id string) (zone.Zone, error) {
 	zones := make(zonesMap)
 	if err := readFile(z.filePath, &zones); err != nil {
 		return zone.Zone{}, err

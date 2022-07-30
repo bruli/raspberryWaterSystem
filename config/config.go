@@ -6,11 +6,17 @@ const (
 	ProjectPrefix = "WS_"
 	ServerURL     = ProjectPrefix + "SERVER_URL"
 	Environment   = ProjectPrefix + "ENVIRONMENT"
+	ZonesFile     = ProjectPrefix + "ZONES_FILE"
 )
 
 type Config struct {
 	serverURL   string
 	environment env.Environment
+	zonesFile   string
+}
+
+func (c Config) ZonesFile() string {
+	return c.zonesFile
 }
 
 func (c Config) ServerURL() string {
@@ -34,8 +40,13 @@ func NewConfig() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	zones, err := env.Value(ZonesFile)
+	if err != nil {
+		return Config{}, err
+	}
 	return Config{
 		serverURL:   url,
 		environment: environment,
+		zonesFile:   zones,
 	}, nil
 }

@@ -7,4 +7,5 @@ import "testing"
 
 func TestFunctional(t *testing.T) {
 	runHomepage(t)
+	runZones(t)
 }

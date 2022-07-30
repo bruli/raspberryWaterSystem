@@ -8,6 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
+
 	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
@@ -21,7 +25,7 @@ func main() {
 	}
 	ctx := context.Background()
 	logger := log.New(os.Stdout, config.ProjectPrefix, int(time.Now().Unix()))
-	definitions, err := handlersDefinition(logger)
+	definitions, err := handlersDefinition(logger, conf.ZonesFile())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -31,13 +35,21 @@ func main() {
 	}
 }
 
-func handlersDefinition(log *log.Logger) (httpx.HandlersDefinition, error) {
-	//qhErrMdw := cqs.NewQueryHndErrorMiddleware(log)
+func handlersDefinition(log *log.Logger, zonesFile string) (httpx.HandlersDefinition, error) {
+	zr := disk.NewZoneRepository(zonesFile)
+	logCHMdw := cqs.NewCommandHndErrorMiddleware(log)
+	chBus := app.NewCommandBus()
+	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
 	return httpx.HandlersDefinition{
 		{
 			Endpoint:    "/",
 			Method:      http.MethodGet,
 			HandlerFunc: http2.Homepage(),
+		},
+		{
+			Endpoint:    "/zones",
+			Method:      http.MethodPost,
+			HandlerFunc: http2.CreateZone(chBus),
 		},
 	}, nil
 }
