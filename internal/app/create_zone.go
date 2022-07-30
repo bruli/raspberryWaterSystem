@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
@@ -14,7 +15,7 @@ const CreateZoneCmdName = "createZone"
 
 type CreateZoneCmd struct {
 	ID, ZoneName string
-	Relays       []string
+	Relays       []int
 }
 
 func (c CreateZoneCmd) Name() string {
@@ -22,54 +23,41 @@ func (c CreateZoneCmd) Name() string {
 }
 
 type CreateZone struct {
-	rr RelayRepository
 	zr ZoneRepository
 }
 
-func NewCreateZone(rr RelayRepository, zr ZoneRepository) CreateZone {
-	return CreateZone{rr: rr, zr: zr}
+func NewCreateZone(zr ZoneRepository) CreateZone {
+	return CreateZone{zr: zr}
 }
 
 func (c CreateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, ok := cmd.(CreateZoneCmd)
-	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateZoneCmdName, cmd.Name())
+	co, _ := cmd.(CreateZoneCmd)
+	_, err := c.zr.FindByID(ctx, co.ID)
+	if err == nil {
+		return nil, CreateZoneError{msg: fmt.Sprintf("a zone with id %s, already exists", co.ID)}
 	}
-
-	if err := c.validateRelays(ctx, co.Relays); err != nil {
+	switch {
+	case errors.As(err, &vo.NotFoundError{}):
+		return nil, c.createZone(ctx, co)
+	default:
 		return nil, err
 	}
-	zo, err := c.zr.FindByID(ctx, co.ID)
-	if err != nil {
-		if !errors.As(err, &vo.NotFoundError{}) {
-			return nil, err
-		}
-		newZone, err := zone.New(co.ID, co.ZoneName, co.Relays)
-		if err != nil {
-			return nil, CreateZoneError{msg: err.Error()}
-		}
-		if err := c.zr.Save(ctx, newZone); err != nil {
-			return nil, err
-		}
-	}
-	zo.Update(co.ZoneName, co.Relays)
-	if err := c.zr.Update(ctx, zo); err != nil {
-		return nil, err
-	}
-	return nil, nil
 }
 
-func (c CreateZone) validateRelays(ctx context.Context, relays []string) error {
-	for _, rel := range relays {
-		_, err := c.rr.FindByKey(ctx, rel)
+func (c CreateZone) createZone(ctx context.Context, co CreateZoneCmd) error {
+	relays := make([]zone.Relay, len(co.Relays))
+	for i, re := range co.Relays {
+		r, err := zone.ParseRelay(re)
 		if err != nil {
-			if !errors.As(err, &vo.NotFoundError{}) {
-				return err
-			}
-			return CreateZoneError{msg: spew.Sprintf("invalid relay: %s", rel)}
+			return CreateZoneError{msg: err.Error()}
 		}
+		relays[i] = r
 	}
-	return nil
+	zo, err := zone.New(co.ID, co.ZoneName, relays)
+	if err != nil {
+		return CreateZoneError{msg: err.Error()}
+	}
+	return c.zr.Save(ctx, zo)
 }
 
 type CreateZoneError struct {

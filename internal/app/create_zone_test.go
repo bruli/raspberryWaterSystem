@@ -5,8 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bruli/raspberryWaterSystem/fixtures"
-
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
@@ -17,18 +15,12 @@ import (
 )
 
 func TestCreateZoneHandle(t *testing.T) {
-	err := errors.New("")
+	errTest := errors.New("")
 	cmd := app.CreateZoneCmd{
 		ID:       "id",
 		ZoneName: "name",
-		Relays:   []string{"1"},
+		Relays:   []int{1},
 	}
-	invalidCmd := app.CreateZoneCmd{
-		ID:       "",
-		ZoneName: "",
-		Relays:   nil,
-	}
-	zon := fixtures.ZoneBuilder{}.Build()
 	tests := []struct {
 		name string
 		cmd  cqs.Command
@@ -37,52 +29,43 @@ func TestCreateZoneHandle(t *testing.T) {
 		zone zone.Zone
 	}{
 		{
-			name:        "with an invalid command, then it returns and invalid command error",
-			cmd:         &invalidCommand{},
-			expectedErr: cqs.InvalidCommandError{},
-		},
-		{
-			name:        "with a valid command and find relay returns an error, then it returns same error",
-			cmd:         cmd,
-			expectedErr: err,
-			relayErr:    err,
-		},
-		{
-			name:        "with a valid command and find relay returns a not found, then it returns a create zone error",
+			name:        "and find returns nil error, then it returns a create zone error",
 			cmd:         cmd,
 			expectedErr: app.CreateZoneError{},
-			relayErr:    vo.NotFoundError{},
 		},
 		{
-			name:        "with a valid command and find zone returns an error, then it returns same error",
+			name:        "and find returns an error, then it returns same error",
 			cmd:         cmd,
-			expectedErr: err,
-			zoneErr:     err,
+			zoneErr:     errTest,
+			expectedErr: errTest,
 		},
 		{
-			name:        "with a valid command and new zone returns an error, then it returns a create zone error",
-			cmd:         invalidCmd,
+			name: "with invalid relays, then it returns a create zone error",
+			cmd: app.CreateZoneCmd{
+				Relays: []int{99},
+			},
+			zoneErr:     vo.NotFoundError{},
 			expectedErr: app.CreateZoneError{},
+		},
+		{
+			name: "with invalid id, then it returns a create zone error",
+			cmd: app.CreateZoneCmd{
+				Relays: []int{1},
+			},
 			zoneErr:     vo.NotFoundError{},
+			expectedErr: app.CreateZoneError{},
 		},
 		{
-			name:        "with a valid command and save zone returns an error, then it returns same error",
+			name:        "and save method returns an error, then it returns same error",
 			cmd:         cmd,
-			expectedErr: err,
 			zoneErr:     vo.NotFoundError{},
-			saveErr:     err,
+			saveErr:     errTest,
+			expectedErr: errTest,
 		},
 		{
-			name:        "with a valid command and update zone returns an error, then it returns same error",
-			cmd:         cmd,
-			expectedErr: err,
-			updateErr:   err,
-			zone:        zon,
-		},
-		{
-			name: "with a valid command, then it returns nil",
-			cmd:  cmd,
-			zone: zon,
+			name:    "then it returns return nil",
+			cmd:     cmd,
+			zoneErr: vo.NotFoundError{},
 		},
 	}
 	for _, tt := range tests {
@@ -90,11 +73,6 @@ func TestCreateZoneHandle(t *testing.T) {
 		t.Run(`Given a CreateZone command handler,
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
-			rr := &RelayRepositoryMock{
-				FindByKeyFunc: func(ctx context.Context, key string) (zone.Relay, error) {
-					return zone.Relay{}, tt.relayErr
-				},
-			}
 			zr := &ZoneRepositoryMock{
 				FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
 					return tt.zone, tt.zoneErr
@@ -102,19 +80,10 @@ func TestCreateZoneHandle(t *testing.T) {
 				SaveFunc: func(ctx context.Context, zo zone.Zone) error {
 					return tt.saveErr
 				},
-				UpdateFunc: func(ctx context.Context, zo zone.Zone) error {
-					return tt.updateErr
-				},
 			}
-			handler := app.NewCreateZone(rr, zr)
+			handler := app.NewCreateZone(zr)
 			_, errHand := handler.Handle(context.Background(), tt.cmd)
 			test.CheckErrorsType(t, tt.expectedErr, errHand)
 		})
 	}
-}
-
-type invalidCommand struct{}
-
-func (i invalidCommand) Name() string {
-	return "invalidCommand"
 }

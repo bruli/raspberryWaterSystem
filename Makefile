@@ -23,7 +23,7 @@ test:
 	go test -race ./...
 
 test-with-infra:
-	go test -tags infra -race ./internal/infrastructure/disk/... --count=1
+	go test -tags infra -race ./internal/infra/disk/... --count=1
 
 test-functional:
 	go test -tags functional -race ./functional_test/... --count=1

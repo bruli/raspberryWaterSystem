@@ -7,7 +7,7 @@ import (
 
 type ZoneBuilder struct {
 	ID, Name *string
-	Relays   []string
+	Relays   []zone.Relay
 }
 
 func (b ZoneBuilder) Build() zone.Zone {
@@ -20,9 +20,10 @@ func (b ZoneBuilder) Build() zone.Zone {
 	if b.Name != nil {
 		name = *b.Name
 	}
-	relays := []string{
-		"1",
-		"2",
+	relays := []zone.Relay{
+		RelayBuilder(1),
+		RelayBuilder(2),
+		RelayBuilder(3),
 	}
 	if b.Relays != nil {
 		relays = b.Relays
@@ -30,4 +31,9 @@ func (b ZoneBuilder) Build() zone.Zone {
 
 	z.Hydrate(id, name, relays)
 	return z
+}
+
+func RelayBuilder(i int) zone.Relay {
+	rel, _ := zone.ParseRelay(i)
+	return rel
 }

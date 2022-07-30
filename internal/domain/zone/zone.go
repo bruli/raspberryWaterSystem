@@ -1,6 +1,8 @@
 package zone
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrInvalidZoneID     = errors.New("zone id can not be empty")
@@ -10,7 +12,7 @@ var (
 
 type Zone struct {
 	id, name string
-	relays   []string
+	relays   []Relay
 }
 
 func (z Zone) Id() string {
@@ -21,11 +23,11 @@ func (z Zone) Name() string {
 	return z.name
 }
 
-func (z Zone) Relays() []string {
+func (z Zone) Relays() []Relay {
 	return z.relays
 }
 
-func New(id, name string, relays []string) (Zone, error) {
+func New(id, name string, relays []Relay) (Zone, error) {
 	z := Zone{id: id, name: name, relays: relays}
 	if err := z.validate(); err != nil {
 		return Zone{}, err
@@ -33,7 +35,7 @@ func New(id, name string, relays []string) (Zone, error) {
 	return z, nil
 }
 
-func (z *Zone) Hydrate(id, name string, relays []string) {
+func (z *Zone) Hydrate(id, name string, relays []Relay) {
 	z.id = id
 	z.name = name
 	z.relays = relays
@@ -50,9 +52,4 @@ func (z Zone) validate() error {
 		return ErrInvalidZoneRelays
 	}
 	return nil
-}
-
-func (z *Zone) Update(name string, relays []string) {
-	z.name = name
-	z.relays = relays
 }

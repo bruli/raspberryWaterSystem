@@ -8,9 +8,14 @@ import (
 )
 
 func TestNew(t *testing.T) {
+	rel1, err := zone.ParseRelay(zone.OneRelayID)
+	require.NoError(t, err)
+	relays := []zone.Relay{
+		rel1,
+	}
 	tests := []struct {
 		name, id, zoneName string
-		relays             []string
+		relays             []zone.Relay
 		expectedErr        error
 	}{
 		{
@@ -32,7 +37,7 @@ func TestNew(t *testing.T) {
 			name:     "with all values, then it return a valid zone",
 			id:       "id",
 			zoneName: "name",
-			relays:   []string{"1"},
+			relays:   relays,
 		},
 	}
 	for _, tt := range tests {

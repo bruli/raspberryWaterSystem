@@ -1,12 +1,12 @@
-//+build infra
+//go:build infra
+// +build infra
 
 package disk_test
 
 import (
 	"context"
+	"os"
 	"testing"
-
-	"github.com/davecgh/go-spew/spew"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/google/uuid"
@@ -21,7 +21,9 @@ import (
 func TestZoneRepository(t *testing.T) {
 	t.Run(`Given a ZoneRepository, `, func(t *testing.T) {
 		ctx := context.Background()
-		repo := disk.NewZoneRepository("/tmp/zones.yml")
+		path := "/tmp/zones.yml"
+		populateFile(t, path)
+		repo := disk.NewZoneRepository(path)
 		var savedZone *zone.Zone
 		_ = savedZone
 		t.Run(`when Save method is called,
@@ -31,43 +33,27 @@ func TestZoneRepository(t *testing.T) {
 			require.NoError(t, err)
 			savedZone = &zo
 		})
-		t.Run(`when Save method is called
-		with a duplicated zone,
-		then it return a duplicated error`, func(t *testing.T) {
-			err := repo.Save(ctx, *savedZone)
-			require.ErrorAs(t, err, &disk.DuplicatedZoneError{})
-		})
-		t.Run(`when FindByID method is called
-		with a valid id,
-		then it return a zone`, func(t *testing.T) {
-			id := savedZone.Id()
-			zo, err := repo.FindByID(ctx, id)
-			require.NoError(t, err)
-			require.Equal(t, *savedZone, zo)
-		})
-		t.Run(`when FindByID method is called
-		with an invalid id,
-		then it return a not found error`, func(t *testing.T) {
-			_, err := repo.FindByID(ctx, uuid.New().String())
-			require.ErrorAs(t, err, &vo.NotFoundError{})
-		})
-		t.Run(`when update method is called
-		with an invalid id,
-		then it return a not found error`, func(t *testing.T) {
-			zo := fixtures.ZoneBuilder{}.Build()
-			err := repo.Update(ctx, zo)
-			require.ErrorAs(t, err, &vo.NotFoundError{})
-		})
-		t.Run(`when update method is called,
-		then it update zone`, func(t *testing.T) {
-			updated := *savedZone
-			updated.Update(spew.Sprintf("pepito%s", uuid.New().String()), savedZone.Relays())
-			err := repo.Update(ctx, updated)
-			require.NoError(t, err)
-
-			updatedZone, err := repo.FindByID(ctx, updated.Id())
-			require.NoError(t, err)
-			require.Equal(t, updated, updatedZone)
+		t.Run(`when FindByID method is called,`, func(t *testing.T) {
+			t.Run(`with an invalid id,
+			then it returns a not found error`, func(t *testing.T) {
+				_, err := repo.FindByID(ctx, uuid.New().String())
+				require.ErrorAs(t, err, &vo.NotFoundError{})
+			})
+			t.Run(`with a valid id,
+			then it returns the zone`, func(t *testing.T) {
+				zo, err := repo.FindByID(ctx, savedZone.Id())
+				require.NoError(t, err)
+				require.Equal(t, *savedZone, zo)
+			})
 		})
 	})
+}
+
+func populateFile(t *testing.T, path string) {
+	if _, err := os.Stat(path); err == nil {
+		if !os.IsNotExist(err) {
+			err := os.Remove(path)
+			require.NoError(t, err)
+		}
+	}
 }
