@@ -1,0 +1,76 @@
+package http_test
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	http2 "net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
+)
+
+func TestFindStatus(t *testing.T) {
+	tests := []struct {
+		name         string
+		expectedCode int
+		result       cqs.QueryResult
+		qhErr        error
+	}{
+		{
+			name:         "and query handler returns a not found error, then it returns a not found",
+			qhErr:        vo.NotFoundError{},
+			expectedCode: http2.StatusNotFound,
+		},
+		{
+			name:         "and query handler returns an error, then it returns an internal server error",
+			qhErr:        errors.New(""),
+			expectedCode: http2.StatusInternalServerError,
+		},
+		{
+			name:         "and query handler returns an result, then it returns a valid response",
+			result:       fixtures.StatusBuilder{}.Build(),
+			expectedCode: http2.StatusOK,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(`Given a FindStatus query handler,
+		when a request is sent `+tt.name, func(t *testing.T) {
+			t.Parallel()
+			qh := &QueryHandlerMock{
+				HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+					return tt.result, tt.qhErr
+				},
+			}
+			handler := http.FindStatus(qh)
+			req := httptest.NewRequest(http2.MethodGet, "/status", nil)
+			writer := httptest.NewRecorder()
+			handler.ServeHTTP(writer, req)
+			resp := writer.Result()
+			require.Equal(t, tt.expectedCode, resp.StatusCode)
+			if resp.StatusCode == http2.StatusOK {
+				var schema http.StatusResponseJson
+				readResponse(t, resp, &schema)
+			}
+		})
+	}
+}
+
+func readResponse(t *testing.T, resp *http2.Response, schema interface{}) {
+	body := resp.Body
+	defer func() { _ = body.Close() }()
+	respBody, err := ioutil.ReadAll(body)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(respBody, &schema))
+}

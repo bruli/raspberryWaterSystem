@@ -21,4 +21,11 @@ do
   gojsonschema  -p http -o "$TARGET_DIRECTORY"/"$generated"_generated.go "$req_file"
 done
 
+for resp_file in internal/infra/http/schemas/*_response.json
+do
+  file="$(basename "$resp_file")"
+  generated="${file%.json}"
+  gojsonschema  -p http -o "$TARGET_DIRECTORY"/"$generated"_generated.go "$resp_file"
+done
+
 rm -rf "$TMP_DIR"

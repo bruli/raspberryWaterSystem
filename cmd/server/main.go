@@ -34,13 +34,16 @@ func main() {
 	tr := temperatureRepository()
 	rr := rainRepository()
 	sr := memory.StatusRepository{}
+	zr := disk.NewZoneRepository(conf.ZonesFile())
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
+	qhBus.Subscribe(app.FindStatusQueryName, logQHMdw(app.NewFindStatus(sr)))
 
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
+	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.Fatalln(err)
@@ -48,7 +51,7 @@ func main() {
 
 	go updateStatusWorker(ctx, qhBus, chBus)
 
-	definitions, err := handlersDefinition(chBus, logCHMdw, conf.ZonesFile(), conf.AuthToken())
+	definitions, err := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -95,9 +98,7 @@ func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler)
 	return err
 }
 
-func handlersDefinition(chBus app.CommandBus, chMddw cqs.CommandHandlerMiddleware, zonesFile, authToken string) (httpx.HandlersDefinition, error) {
-	zr := disk.NewZoneRepository(zonesFile)
-	chBus.Subscribe(app.CreateZoneCmdName, chMddw(app.NewCreateZone(zr)))
+func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string) (httpx.HandlersDefinition, error) {
 	authMdw := http2.AuthMiddleware(authToken)
 	return httpx.HandlersDefinition{
 		{
@@ -109,6 +110,11 @@ func handlersDefinition(chBus app.CommandBus, chMddw cqs.CommandHandlerMiddlewar
 			Endpoint:    "/zones",
 			Method:      http.MethodPost,
 			HandlerFunc: authMdw(http2.CreateZone(chBus)),
+		},
+		{
+			Endpoint:    "/status",
+			Method:      http.MethodGet,
+			HandlerFunc: authMdw(http2.FindStatus(qhBus)),
 		},
 	}, nil
 }
