@@ -8,14 +8,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
+
+	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryWaterSystem/internal/app"
-	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
-
-	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
-
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/config"
+	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
+	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 )
 
 func main() {
@@ -25,7 +27,23 @@ func main() {
 	}
 	ctx := context.Background()
 	logger := log.New(os.Stdout, config.ProjectPrefix, int(time.Now().Unix()))
-	definitions, err := handlersDefinition(logger, conf.ZonesFile(), conf.AuthToken())
+
+	logCHMdw := cqs.NewCommandHndErrorMiddleware(logger)
+	logQHMdw := cqs.NewQueryHndErrorMiddleware(logger)
+
+	tr := temperatureRepository()
+	rr := rainRepository()
+	sr := memory.StatusRepository{}
+
+	qhBus := app.NewQueryBus()
+	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
+	chBus := app.NewCommandBus()
+	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
+
+	if err = initStatus(ctx, chBus, qhBus); err != nil {
+		log.Fatalln(err)
+	}
+	definitions, err := handlersDefinition(logger, chBus, logCHMdw, conf.ZonesFile(), conf.AuthToken())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -35,11 +53,22 @@ func main() {
 	}
 }
 
-func handlersDefinition(log *log.Logger, zonesFile, authToken string) (httpx.HandlersDefinition, error) {
+func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler) error {
+	result, err := qh.Handle(ctx, app.FindWeatherQuery{})
+	if err != nil {
+		return err
+	}
+	weath, _ := result.(weather.Weather)
+	_, err = ch.Handle(ctx, app.CreateStatusCmd{
+		StartedAt: time.Now(),
+		Weather:   weath,
+	})
+	return err
+}
+
+func handlersDefinition(log *log.Logger, chBus app.CommandBus, chMddw cqs.CommandHandlerMiddleware, zonesFile, authToken string) (httpx.HandlersDefinition, error) {
 	zr := disk.NewZoneRepository(zonesFile)
-	logCHMdw := cqs.NewCommandHndErrorMiddleware(log)
-	chBus := app.NewCommandBus()
-	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
+	chBus.Subscribe(app.CreateZoneCmdName, chMddw(app.NewCreateZone(zr)))
 	authMdw := http2.AuthMiddleware(authToken)
 	return httpx.HandlersDefinition{
 		{

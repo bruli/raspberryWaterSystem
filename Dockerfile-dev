@@ -3,7 +3,7 @@ FROM golang:1.17.9-alpine
 RUN mkdir /app
 WORKDIR /app
 
-RUN apk add --update --no-cache make git
+RUN apk add --update --no-cache make git gcc
 
 RUN go install -v github.com/cespare/reflex@latest
 EXPOSE 8080
