@@ -29,3 +29,10 @@ func buildRequestAndSend(ctx context.Context, requestBody interface{}, headers m
 	}
 	return cl.Do(req)
 }
+
+func authorizationHeader() map[string]string {
+	const token = "WT7*P6Yn^2-Y*V*C-h&K6*b!@=HCzhd+"
+	return map[string]string{
+		"Authorization": token,
+	}
+}

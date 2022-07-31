@@ -25,7 +25,7 @@ func main() {
 	}
 	ctx := context.Background()
 	logger := log.New(os.Stdout, config.ProjectPrefix, int(time.Now().Unix()))
-	definitions, err := handlersDefinition(logger, conf.ZonesFile())
+	definitions, err := handlersDefinition(logger, conf.ZonesFile(), conf.AuthToken())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -35,11 +35,12 @@ func main() {
 	}
 }
 
-func handlersDefinition(log *log.Logger, zonesFile string) (httpx.HandlersDefinition, error) {
+func handlersDefinition(log *log.Logger, zonesFile, authToken string) (httpx.HandlersDefinition, error) {
 	zr := disk.NewZoneRepository(zonesFile)
 	logCHMdw := cqs.NewCommandHndErrorMiddleware(log)
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
+	authMdw := http2.AuthMiddleware(authToken)
 	return httpx.HandlersDefinition{
 		{
 			Endpoint:    "/",
@@ -49,7 +50,7 @@ func handlersDefinition(log *log.Logger, zonesFile string) (httpx.HandlersDefini
 		{
 			Endpoint:    "/zones",
 			Method:      http.MethodPost,
-			HandlerFunc: http2.CreateZone(chBus),
+			HandlerFunc: authMdw(http2.CreateZone(chBus)),
 		},
 	}, nil
 }
