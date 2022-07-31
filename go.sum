@@ -1,5 +1,3 @@
-github.com/bruli/raspberryRainSensor v0.0.0-20220730162017-a064c262f951 h1:gRVhwway8I/2wJ0NWse3mSEBDVPtDaigsS48Z0ry4gg=
-github.com/bruli/raspberryRainSensor v0.0.0-20220730162017-a064c262f951/go.mod h1:L+paoHa5gohG/VrQ17yyHa1agiSY6ojx8q6NLdN4dno=
 github.com/bruli/raspberryRainSensor v0.0.0-20220730181738-f737d8d9110e h1:nTLo6HlyYWlgef9t89WNzbRbAzmqUBpeIF/XX0oJywk=
 github.com/bruli/raspberryRainSensor v0.0.0-20220730181738-f737d8d9110e/go.mod h1:L+paoHa5gohG/VrQ17yyHa1agiSY6ojx8q6NLdN4dno=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=

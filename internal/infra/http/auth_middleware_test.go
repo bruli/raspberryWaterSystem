@@ -52,6 +52,5 @@ func TestAuthMiddleware(t *testing.T) {
 func nextHandler() http2.HandlerFunc {
 	return func(w http2.ResponseWriter, r *http2.Request) {
 		httpx.WriteResponse(w, http2.StatusOK, nil)
-		return
 	}
 }

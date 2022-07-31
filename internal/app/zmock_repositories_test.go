@@ -178,3 +178,133 @@ func (mock *ZoneRepositoryMock) UpdateCalls() []struct {
 	mock.lockUpdate.RUnlock()
 	return calls
 }
+
+// Ensure, that TemperatureRepositoryMock does implement app.TemperatureRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.TemperatureRepository = &TemperatureRepositoryMock{}
+
+// TemperatureRepositoryMock is a mock implementation of app.TemperatureRepository.
+//
+// 	func TestSomethingThatUsesTemperatureRepository(t *testing.T) {
+//
+// 		// make and configure a mocked app.TemperatureRepository
+// 		mockedTemperatureRepository := &TemperatureRepositoryMock{
+// 			FindFunc: func(ctx context.Context) (float32, float32, error) {
+// 				panic("mock out the Find method")
+// 			},
+// 		}
+//
+// 		// use mockedTemperatureRepository in code that requires app.TemperatureRepository
+// 		// and then make assertions.
+//
+// 	}
+type TemperatureRepositoryMock struct {
+	// FindFunc mocks the Find method.
+	FindFunc func(ctx context.Context) (float32, float32, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Find holds details about calls to the Find method.
+		Find []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
+	}
+	lockFind sync.RWMutex
+}
+
+// Find calls FindFunc.
+func (mock *TemperatureRepositoryMock) Find(ctx context.Context) (float32, float32, error) {
+	if mock.FindFunc == nil {
+		panic("TemperatureRepositoryMock.FindFunc: method is nil but TemperatureRepository.Find was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFind.Lock()
+	mock.calls.Find = append(mock.calls.Find, callInfo)
+	mock.lockFind.Unlock()
+	return mock.FindFunc(ctx)
+}
+
+// FindCalls gets all the calls that were made to Find.
+// Check the length with:
+//     len(mockedTemperatureRepository.FindCalls())
+func (mock *TemperatureRepositoryMock) FindCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFind.RLock()
+	calls = mock.calls.Find
+	mock.lockFind.RUnlock()
+	return calls
+}
+
+// Ensure, that RainRepositoryMock does implement app.RainRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.RainRepository = &RainRepositoryMock{}
+
+// RainRepositoryMock is a mock implementation of app.RainRepository.
+//
+// 	func TestSomethingThatUsesRainRepository(t *testing.T) {
+//
+// 		// make and configure a mocked app.RainRepository
+// 		mockedRainRepository := &RainRepositoryMock{
+// 			FindFunc: func(ctx context.Context) (bool, error) {
+// 				panic("mock out the Find method")
+// 			},
+// 		}
+//
+// 		// use mockedRainRepository in code that requires app.RainRepository
+// 		// and then make assertions.
+//
+// 	}
+type RainRepositoryMock struct {
+	// FindFunc mocks the Find method.
+	FindFunc func(ctx context.Context) (bool, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Find holds details about calls to the Find method.
+		Find []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
+	}
+	lockFind sync.RWMutex
+}
+
+// Find calls FindFunc.
+func (mock *RainRepositoryMock) Find(ctx context.Context) (bool, error) {
+	if mock.FindFunc == nil {
+		panic("RainRepositoryMock.FindFunc: method is nil but RainRepository.Find was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFind.Lock()
+	mock.calls.Find = append(mock.calls.Find, callInfo)
+	mock.lockFind.Unlock()
+	return mock.FindFunc(ctx)
+}
+
+// FindCalls gets all the calls that were made to Find.
+// Check the length with:
+//     len(mockedRainRepository.FindCalls())
+func (mock *RainRepositoryMock) FindCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFind.RLock()
+	calls = mock.calls.Find
+	mock.lockFind.RUnlock()
+	return calls
+}
