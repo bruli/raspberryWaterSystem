@@ -26,4 +26,6 @@ type RainRepository interface {
 
 type StatusRepository interface {
 	Save(ctx context.Context, st status.Status) error
+	Find(ctx context.Context) (status.Status, error)
+	Update(ctx context.Context, st status.Status) error
 }

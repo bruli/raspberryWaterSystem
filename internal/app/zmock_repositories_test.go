@@ -320,8 +320,14 @@ var _ app.StatusRepository = &StatusRepositoryMock{}
 //
 // 		// make and configure a mocked app.StatusRepository
 // 		mockedStatusRepository := &StatusRepositoryMock{
+// 			FindFunc: func(ctx context.Context) (status.Status, error) {
+// 				panic("mock out the Find method")
+// 			},
 // 			SaveFunc: func(ctx context.Context, st status.Status) error {
 // 				panic("mock out the Save method")
+// 			},
+// 			UpdateFunc: func(ctx context.Context, st status.Status) error {
+// 				panic("mock out the Update method")
 // 			},
 // 		}
 //
@@ -330,11 +336,22 @@ var _ app.StatusRepository = &StatusRepositoryMock{}
 //
 // 	}
 type StatusRepositoryMock struct {
+	// FindFunc mocks the Find method.
+	FindFunc func(ctx context.Context) (status.Status, error)
+
 	// SaveFunc mocks the Save method.
 	SaveFunc func(ctx context.Context, st status.Status) error
 
+	// UpdateFunc mocks the Update method.
+	UpdateFunc func(ctx context.Context, st status.Status) error
+
 	// calls tracks calls to the methods.
 	calls struct {
+		// Find holds details about calls to the Find method.
+		Find []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
 		// Save holds details about calls to the Save method.
 		Save []struct {
 			// Ctx is the ctx argument value.
@@ -342,8 +359,48 @@ type StatusRepositoryMock struct {
 			// St is the st argument value.
 			St status.Status
 		}
+		// Update holds details about calls to the Update method.
+		Update []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// St is the st argument value.
+			St status.Status
+		}
 	}
-	lockSave sync.RWMutex
+	lockFind   sync.RWMutex
+	lockSave   sync.RWMutex
+	lockUpdate sync.RWMutex
+}
+
+// Find calls FindFunc.
+func (mock *StatusRepositoryMock) Find(ctx context.Context) (status.Status, error) {
+	if mock.FindFunc == nil {
+		panic("StatusRepositoryMock.FindFunc: method is nil but StatusRepository.Find was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFind.Lock()
+	mock.calls.Find = append(mock.calls.Find, callInfo)
+	mock.lockFind.Unlock()
+	return mock.FindFunc(ctx)
+}
+
+// FindCalls gets all the calls that were made to Find.
+// Check the length with:
+//     len(mockedStatusRepository.FindCalls())
+func (mock *StatusRepositoryMock) FindCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFind.RLock()
+	calls = mock.calls.Find
+	mock.lockFind.RUnlock()
+	return calls
 }
 
 // Save calls SaveFunc.
@@ -378,5 +435,40 @@ func (mock *StatusRepositoryMock) SaveCalls() []struct {
 	mock.lockSave.RLock()
 	calls = mock.calls.Save
 	mock.lockSave.RUnlock()
+	return calls
+}
+
+// Update calls UpdateFunc.
+func (mock *StatusRepositoryMock) Update(ctx context.Context, st status.Status) error {
+	if mock.UpdateFunc == nil {
+		panic("StatusRepositoryMock.UpdateFunc: method is nil but StatusRepository.Update was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		St  status.Status
+	}{
+		Ctx: ctx,
+		St:  st,
+	}
+	mock.lockUpdate.Lock()
+	mock.calls.Update = append(mock.calls.Update, callInfo)
+	mock.lockUpdate.Unlock()
+	return mock.UpdateFunc(ctx, st)
+}
+
+// UpdateCalls gets all the calls that were made to Update.
+// Check the length with:
+//     len(mockedStatusRepository.UpdateCalls())
+func (mock *StatusRepositoryMock) UpdateCalls() []struct {
+	Ctx context.Context
+	St  status.Status
+} {
+	var calls []struct {
+		Ctx context.Context
+		St  status.Status
+	}
+	mock.lockUpdate.RLock()
+	calls = mock.calls.Update
+	mock.lockUpdate.RUnlock()
 	return calls
 }
