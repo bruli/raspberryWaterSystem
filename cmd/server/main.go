@@ -116,5 +116,10 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(http2.FindStatus(qhBus)),
 		},
+		{
+			Endpoint:    "/weather",
+			Method:      http.MethodGet,
+			HandlerFunc: authMdw(http2.FindWeather(qhBus)),
+		},
 	}, nil
 }
