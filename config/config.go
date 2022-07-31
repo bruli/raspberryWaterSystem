@@ -1,6 +1,10 @@
 package config
 
-import "github.com/bruli/raspberryRainSensor/pkg/common/env"
+import (
+	"net/url"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/env"
+)
 
 const (
 	ProjectPrefix = "WS_"
@@ -8,13 +12,15 @@ const (
 	Environment   = ProjectPrefix + "ENVIRONMENT"
 	ZonesFile     = ProjectPrefix + "ZONES_FILE"
 	AuthToken     = ProjectPrefix + "AUTH_TOKEN"
+	RainServerURL = ProjectPrefix + "RAIN_SERVER_URL"
 )
 
 type Config struct {
-	serverURL   string
-	environment env.Environment
-	zonesFile   string
-	authToken   string
+	serverURL     string
+	environment   env.Environment
+	zonesFile     string
+	authToken     string
+	rainServerURL url.URL
 }
 
 func (c Config) AuthToken() string {
@@ -34,7 +40,7 @@ func (c Config) Environment() env.Environment {
 }
 
 func NewConfig() (Config, error) {
-	url, err := env.Value(ServerURL)
+	servUrl, err := env.Value(ServerURL)
 	if err != nil {
 		return Config{}, err
 	}
@@ -54,10 +60,19 @@ func NewConfig() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	rain, err := env.Value(RainServerURL)
+	if err != nil {
+		return Config{}, err
+	}
+	rainUrl, err := url.Parse(rain)
+	if err != nil {
+		return Config{}, nil
+	}
 	return Config{
-		serverURL:   url,
-		environment: environment,
-		zonesFile:   zones,
-		authToken:   auth,
+		serverURL:     servUrl,
+		environment:   environment,
+		zonesFile:     zones,
+		authToken:     auth,
+		rainServerURL: *rainUrl,
 	}, nil
 }

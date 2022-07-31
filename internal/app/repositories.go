@@ -3,10 +3,12 @@ package app
 import (
 	"context"
 
+	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 )
 
-//go:generate moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository
+//go:generate moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository StatusRepository
 
 type ZoneRepository interface {
 	FindByID(ctx context.Context, id string) (zone.Zone, error)
@@ -20,4 +22,8 @@ type TemperatureRepository interface {
 
 type RainRepository interface {
 	Find(ctx context.Context) (bool, error)
+}
+
+type StatusRepository interface {
+	Save(ctx context.Context, st status.Status) error
 }

@@ -6,6 +6,7 @@ package app_test
 import (
 	"context"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"sync"
 )
@@ -306,5 +307,76 @@ func (mock *RainRepositoryMock) FindCalls() []struct {
 	mock.lockFind.RLock()
 	calls = mock.calls.Find
 	mock.lockFind.RUnlock()
+	return calls
+}
+
+// Ensure, that StatusRepositoryMock does implement app.StatusRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.StatusRepository = &StatusRepositoryMock{}
+
+// StatusRepositoryMock is a mock implementation of app.StatusRepository.
+//
+// 	func TestSomethingThatUsesStatusRepository(t *testing.T) {
+//
+// 		// make and configure a mocked app.StatusRepository
+// 		mockedStatusRepository := &StatusRepositoryMock{
+// 			SaveFunc: func(ctx context.Context, st status.Status) error {
+// 				panic("mock out the Save method")
+// 			},
+// 		}
+//
+// 		// use mockedStatusRepository in code that requires app.StatusRepository
+// 		// and then make assertions.
+//
+// 	}
+type StatusRepositoryMock struct {
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, st status.Status) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Save holds details about calls to the Save method.
+		Save []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// St is the st argument value.
+			St status.Status
+		}
+	}
+	lockSave sync.RWMutex
+}
+
+// Save calls SaveFunc.
+func (mock *StatusRepositoryMock) Save(ctx context.Context, st status.Status) error {
+	if mock.SaveFunc == nil {
+		panic("StatusRepositoryMock.SaveFunc: method is nil but StatusRepository.Save was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		St  status.Status
+	}{
+		Ctx: ctx,
+		St:  st,
+	}
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, st)
+}
+
+// SaveCalls gets all the calls that were made to Save.
+// Check the length with:
+//     len(mockedStatusRepository.SaveCalls())
+func (mock *StatusRepositoryMock) SaveCalls() []struct {
+	Ctx context.Context
+	St  status.Status
+} {
+	var calls []struct {
+		Ctx context.Context
+		St  status.Status
+	}
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
 	return calls
 }

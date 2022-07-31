@@ -13,6 +13,7 @@ services:
       WS_ENVIRONMENT: ${RS_ENVIRONMENT:-development}
       WS_ZONES_FILE: ${WS_ZONES_FILE:-/tmp/zones.yaml}
       WS_AUTH_TOKEN: ${WS_AUTH_TOKEN:-WT7*P6Yn^2-Y*V*C-h&K6*b!@=HCzhd+}
+      WS_RAIN_SERVER_URL: ${WS_RAIN_SERVER_URL:-http://192.168.1.11}
     ports:
       - "8083:8080"
   builder:
