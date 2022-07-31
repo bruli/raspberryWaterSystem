@@ -2,12 +2,17 @@ package app
 
 import (
 	"context"
+	"errors"
 	"time"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 )
+
+var ErrStatusAlreadyExist = errors.New("status already exist")
 
 const CreateStatusCmdName = "createStatus"
 
@@ -30,6 +35,15 @@ func NewCreateStatus(sr StatusRepository) CreateStatus {
 
 func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
 	co, _ := cmd.(CreateStatusCmd)
-	st := status.New(co.StartedAt, co.Weather)
-	return nil, c.sr.Save(ctx, st)
+	_, err := c.sr.Find(ctx)
+	if err == nil {
+		return nil, ErrStatusAlreadyExist
+	}
+	switch {
+	case errors.As(err, &vo.NotFoundError{}):
+		st := status.New(co.StartedAt, co.Weather)
+		return nil, c.sr.Save(ctx, st)
+	default:
+		return nil, err
+	}
 }
