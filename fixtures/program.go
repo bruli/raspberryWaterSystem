@@ -41,3 +41,23 @@ func (b DailyProgramBuilder) Build() program.Daily {
 	pr.Hydrate(seconds, hour, b.Zones)
 	return pr
 }
+
+type OddProgramBuilder struct {
+	Seconds *program.Seconds
+	Hour    *program.Hour
+	Zones   []string
+}
+
+func (b OddProgramBuilder) Build() program.Odd {
+	var pr program.Odd
+	seconds, _ := program.ParseSeconds(20)
+	if b.Seconds != nil {
+		seconds = *b.Seconds
+	}
+	hour, _ := program.ParseHour("15:10")
+	if b.Hour != nil {
+		hour = *b.Hour
+	}
+	pr.Hydrate(seconds, hour, b.Zones)
+	return pr
+}
