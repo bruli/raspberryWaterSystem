@@ -68,6 +68,12 @@ func NewDaily(seconds Seconds, hour Hour, zones []string) (Daily, error) {
 	return Daily{Program: pr}, nil
 }
 
+func (d *Daily) Hydrate(seconds Seconds, hour Hour, zones []string) {
+	d.hour = hour
+	d.seconds = seconds
+	d.zones = zones
+}
+
 type Odd struct {
 	Program
 }
