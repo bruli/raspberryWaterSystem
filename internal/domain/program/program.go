@@ -1,64 +1,113 @@
 package program
 
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrEmptyWeeklyPrograms = errors.New("empty weekly programs")
+	ErrEmptyExecutionZones = errors.New("empty execution zones")
+)
+
 type Program struct {
-	seconds   Seconds
-	execution Execution
+	seconds Seconds
+	hour    Hour
+	zones   []string
+}
+
+func (p Program) Hour() Hour {
+	return p.hour
+}
+
+func (p Program) Zones() []string {
+	return p.zones
 }
 
 func (p Program) Seconds() Seconds {
 	return p.seconds
 }
 
-func (p Program) Execution() Execution {
-	return p.execution
-}
-
-func new(seconds Seconds, hour Hour, zones []string) (Program, error) {
-	exec, err := NewExecution(hour, zones)
-	if err != nil {
+func program(seconds Seconds, hour Hour, zones []string) (Program, error) {
+	pr := Program{
+		seconds: seconds,
+		hour:    hour,
+		zones:   zones,
+	}
+	if err := pr.validate(); err != nil {
 		return Program{}, err
 	}
-	if _, err = ParseSeconds(seconds.Int()); err != nil {
-		return Program{}, err
-	}
-	return Program{
-		seconds:   seconds,
-		execution: exec,
-	}, nil
+	return pr, nil
 }
 
-type DailyProgram struct {
+func (p *Program) Hydrate(seconds Seconds, hour Hour, zones []string) {
+	p.seconds = seconds
+	p.hour = hour
+	p.zones = zones
+}
+
+func (p Program) validate() error {
+	if len(p.zones) == 0 {
+		return ErrEmptyExecutionZones
+	}
+	if _, err := ParseSeconds(p.seconds.Int()); err != nil {
+		return err
+	}
+	return nil
+}
+
+type Daily struct {
 	Program
 }
 
-func NewDaily(seconds Seconds, hour Hour, zones []string) (DailyProgram, error) {
-	pr, err := new(seconds, hour, zones)
+func NewDaily(seconds Seconds, hour Hour, zones []string) (Daily, error) {
+	pr, err := program(seconds, hour, zones)
 	if err != nil {
-		return DailyProgram{}, err
+		return Daily{}, err
 	}
-	return DailyProgram{Program: pr}, nil
+	return Daily{Program: pr}, nil
 }
 
-type OddProgram struct {
+type Odd struct {
 	Program
 }
 
-func NewOdd(seconds Seconds, hour Hour, zones []string) (OddProgram, error) {
-	pr, err := new(seconds, hour, zones)
+func NewOdd(seconds Seconds, hour Hour, zones []string) (Odd, error) {
+	pr, err := program(seconds, hour, zones)
 	if err != nil {
-		return OddProgram{}, err
+		return Odd{}, err
 	}
-	return OddProgram{Program: pr}, nil
+	return Odd{Program: pr}, nil
 }
 
-type EvenProgram struct {
+type Even struct {
 	Program
 }
 
-func NewEven(seconds Seconds, hour Hour, zones []string) (EvenProgram, error) {
-	pr, err := new(seconds, hour, zones)
+func NewEven(seconds Seconds, hour Hour, zones []string) (Even, error) {
+	pr, err := program(seconds, hour, zones)
 	if err != nil {
-		return EvenProgram{}, err
+		return Even{}, err
 	}
-	return EvenProgram{Program: pr}, nil
+	return Even{Program: pr}, nil
+}
+
+type Weekly struct {
+	weekDay  time.Weekday
+	programs []Program
+}
+
+func (w Weekly) WeekDay() time.Weekday {
+	return w.weekDay
+}
+
+func (w Weekly) Programs() []Program {
+	return w.programs
+}
+
+func NewWeekly(weekDay time.Weekday, programs []Program) (Weekly, error) {
+	if len(programs) == 0 {
+		return Weekly{}, ErrEmptyWeeklyPrograms
+	}
+	return Weekly{weekDay: weekDay, programs: programs}, nil
 }

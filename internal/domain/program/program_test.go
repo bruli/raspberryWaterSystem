@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/stretchr/testify/require"
@@ -45,7 +47,7 @@ func TestNewDaily(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(`Given a Program struct,
-		when new function is called `+tt.name, func(t *testing.T) {
+		when program function is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			prg, err := program.NewDaily(tt.seconds, tt.hour, tt.zones)
 			if err != nil {
@@ -53,9 +55,9 @@ func TestNewDaily(t *testing.T) {
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)
-			require.Equal(t, tt.hour, prg.Execution().Hour())
+			require.Equal(t, tt.hour, prg.Hour())
 			require.Equal(t, tt.seconds, prg.Seconds())
-			require.Equal(t, tt.zones, prg.Execution().Zones())
+			require.Equal(t, tt.zones, prg.Zones())
 		})
 	}
 }
@@ -96,7 +98,7 @@ func TestNewODD(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(`Given a Program struct,
-		when new function is called `+tt.name, func(t *testing.T) {
+		when program function is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			prg, err := program.NewOdd(tt.seconds, tt.hour, tt.zones)
 			if err != nil {
@@ -104,9 +106,9 @@ func TestNewODD(t *testing.T) {
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)
-			require.Equal(t, tt.hour, prg.Execution().Hour())
+			require.Equal(t, tt.hour, prg.Hour())
 			require.Equal(t, tt.seconds, prg.Seconds())
-			require.Equal(t, tt.zones, prg.Execution().Zones())
+			require.Equal(t, tt.zones, prg.Zones())
 		})
 	}
 }
@@ -147,7 +149,7 @@ func TestNewEven(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(`Given a Program struct,
-		when new function is called `+tt.name, func(t *testing.T) {
+		when program function is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			prg, err := program.NewEven(tt.seconds, tt.hour, tt.zones)
 			if err != nil {
@@ -155,9 +157,42 @@ func TestNewEven(t *testing.T) {
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)
-			require.Equal(t, tt.hour, prg.Execution().Hour())
+			require.Equal(t, tt.hour, prg.Hour())
 			require.Equal(t, tt.seconds, prg.Seconds())
-			require.Equal(t, tt.zones, prg.Execution().Zones())
+			require.Equal(t, tt.zones, prg.Zones())
+		})
+	}
+}
+
+func TestNewWeekly(t *testing.T) {
+	tests := []struct {
+		name        string
+		programs    []program.Program
+		expectedErr error
+	}{
+		{
+			name:        "with empty programs, then it returns an empty weekly programs error",
+			expectedErr: program.ErrEmptyWeeklyPrograms,
+		},
+		{
+			name: "with programs, then it returns an valid weekly",
+			programs: []program.Program{
+				fixtures.ProgramBuilder{}.Build(),
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(`Given a Weekly struct,
+		when NewWeekly function is called, `+tt.name, func(t *testing.T) {
+			t.Parallel()
+			week, err := program.NewWeekly(time.Friday, tt.programs)
+			if err != nil {
+				test.CheckErrorsType(t, tt.expectedErr, err)
+				return
+			}
+			require.Equal(t, time.Friday, week.WeekDay())
+			require.Equal(t, tt.programs, week.Programs())
 		})
 	}
 }
