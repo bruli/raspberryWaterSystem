@@ -1,0 +1,21 @@
+name: "Test with infra"
+on: [push]
+
+jobs:
+  lint:
+    name: test-with-infra
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up Go 1.17
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: Cache Dependencies
+        uses: actions/cache@v2.1.3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Lint tests
+        run: make test-with-infra
