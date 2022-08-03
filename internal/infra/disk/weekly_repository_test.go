@@ -23,7 +23,7 @@ func TestWeeklyRepository(t *testing.T) {
 		populateFile(t, path)
 		repo := disk.NewWeeklyRepository(path)
 		t.Run(`when Save method is called,
-		then it save a weekly program`, func(t *testing.T) {
+		then it save weekly programs`, func(t *testing.T) {
 			monday := program.WeekDay(time.Monday)
 			tuesday := program.WeekDay(time.Tuesday)
 			hour, err := program.ParseHour("20:12")

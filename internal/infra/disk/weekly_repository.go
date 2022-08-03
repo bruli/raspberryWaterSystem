@@ -8,9 +8,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
 
-type (
-	weeklyMap = map[string]programMap
-)
+type weeklyMap = map[string]programMap
 
 type WeeklyRepository struct {
 	path string

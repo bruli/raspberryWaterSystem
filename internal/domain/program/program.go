@@ -5,9 +5,8 @@ import (
 )
 
 var (
-	ErrEmptyPrograms          = errors.New("empty programs")
-	ErrEmptyExecutionZones    = errors.New("empty execution zones")
-	ErrEmptyProgramExecutions = errors.New("empty program executions")
+	ErrEmptyPrograms       = errors.New("empty programs")
+	ErrEmptyExecutionZones = errors.New("empty execution zones")
 )
 
 type Program struct {
@@ -25,7 +24,7 @@ func (p Program) Executions() []Execution {
 
 func (p Program) validate() error {
 	if len(p.executions) == 0 {
-		return ErrEmptyProgramExecutions
+		return ErrEmptyPrograms
 	}
 	return nil
 }
@@ -66,4 +65,37 @@ func NewWeekly(weekDay WeekDay, programs []Program) (Weekly, error) {
 func (w *Weekly) Hydrate(weekDay WeekDay, programs []Program) {
 	w.weekDay = weekDay
 	w.programs = programs
+}
+
+type Temperature struct {
+	temperature float32
+	programs    []Program
+}
+
+func (t Temperature) Temperature() float32 {
+	return t.temperature
+}
+
+func (t Temperature) Programs() []Program {
+	return t.programs
+}
+
+func (t Temperature) validate() error {
+	if len(t.programs) == 0 {
+		return ErrEmptyPrograms
+	}
+	return nil
+}
+
+func NewTemperature(temperature float32, programs []Program) (Temperature, error) {
+	temp := Temperature{temperature: temperature, programs: programs}
+	if err := temp.validate(); err != nil {
+		return Temperature{}, err
+	}
+	return temp, nil
+}
+
+func (t *Temperature) Hydrate(temperature float32, programs []Program) {
+	t.temperature = temperature
+	t.programs = programs
 }

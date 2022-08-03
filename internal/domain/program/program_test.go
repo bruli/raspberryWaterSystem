@@ -21,9 +21,9 @@ func TestNew(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			name:        "with empty executions, then it returns an empty program executions error",
+			name:        "with empty executions, then it returns an empty programs error",
 			hour:        hour,
-			expectedErr: program.ErrEmptyProgramExecutions,
+			expectedErr: program.ErrEmptyPrograms,
 		},
 		{
 			name: "with all values, then it returns a valid struct",
@@ -79,6 +79,38 @@ func TestNewWeekly(t *testing.T) {
 			}
 			require.Equal(t, program.WeekDay(time.Friday), week.WeekDay())
 			require.Equal(t, tt.programs, week.Programs())
+		})
+	}
+}
+
+func TestNewTemperature(t *testing.T) {
+	tests := []struct {
+		name     string
+		programs []program.Program
+	}{
+		{
+			name: "with any programs, then it returns an empty programs error",
+		},
+		{
+			name: "with programs, then it returns a valid struct",
+			programs: []program.Program{
+				fixtures.ProgramBuilder{}.Build(),
+			},
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(`Given a Temperature struct,
+		when NewTemperature method is called `+tt.name, func(t *testing.T) {
+			t.Parallel()
+			tempValue := float32(20.5)
+			temp, err := program.NewTemperature(tempValue, tt.programs)
+			if err != nil {
+				require.ErrorIs(t, err, program.ErrEmptyPrograms)
+				return
+			}
+			require.Equal(t, tempValue, temp.Temperature())
+			require.Equal(t, tt.programs, temp.Programs())
 		})
 	}
 }

@@ -68,3 +68,24 @@ func (b ExecutionBuilder) Build() program.Execution {
 	ex.Hydrate(sec, zones)
 	return ex
 }
+
+type TemperatureBuilder struct {
+	Temperature *float32
+	Programs    []program.Program
+}
+
+func (b TemperatureBuilder) Build() program.Temperature {
+	var temp program.Temperature
+	temperature := float32(28.3)
+	if b.Temperature != nil {
+		temperature = *b.Temperature
+	}
+	programs := []program.Program{
+		ProgramBuilder{}.Build(),
+	}
+	if b.Programs != nil {
+		programs = b.Programs
+	}
+	temp.Hydrate(temperature, programs)
+	return temp
+}

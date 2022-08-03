@@ -805,3 +805,172 @@ func (mock *WeeklyProgramRepositoryMock) SaveCalls() []struct {
 	mock.lockSave.RUnlock()
 	return calls
 }
+
+// Ensure, that TemperatureProgramRepositoryMock does implement app.TemperatureProgramRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.TemperatureProgramRepository = &TemperatureProgramRepositoryMock{}
+
+// TemperatureProgramRepositoryMock is a mock implementation of app.TemperatureProgramRepository.
+//
+// 	func TestSomethingThatUsesTemperatureProgramRepository(t *testing.T) {
+//
+// 		// make and configure a mocked app.TemperatureProgramRepository
+// 		mockedTemperatureProgramRepository := &TemperatureProgramRepositoryMock{
+// 			FindAllFunc: func(ctx context.Context) ([]program.Temperature, error) {
+// 				panic("mock out the FindAll method")
+// 			},
+// 			FindByTemperatureAndHourFunc: func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
+// 				panic("mock out the FindByTemperatureAndHour method")
+// 			},
+// 			SaveFunc: func(ctx context.Context, programs []program.Temperature) error {
+// 				panic("mock out the Save method")
+// 			},
+// 		}
+//
+// 		// use mockedTemperatureProgramRepository in code that requires app.TemperatureProgramRepository
+// 		// and then make assertions.
+//
+// 	}
+type TemperatureProgramRepositoryMock struct {
+	// FindAllFunc mocks the FindAll method.
+	FindAllFunc func(ctx context.Context) ([]program.Temperature, error)
+
+	// FindByTemperatureAndHourFunc mocks the FindByTemperatureAndHour method.
+	FindByTemperatureAndHourFunc func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error)
+
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, programs []program.Temperature) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// FindAll holds details about calls to the FindAll method.
+		FindAll []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
+		// FindByTemperatureAndHour holds details about calls to the FindByTemperatureAndHour method.
+		FindByTemperatureAndHour []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Temperature is the temperature argument value.
+			Temperature float32
+			// Hour is the hour argument value.
+			Hour program.Hour
+		}
+		// Save holds details about calls to the Save method.
+		Save []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Programs is the programs argument value.
+			Programs []program.Temperature
+		}
+	}
+	lockFindAll                  sync.RWMutex
+	lockFindByTemperatureAndHour sync.RWMutex
+	lockSave                     sync.RWMutex
+}
+
+// FindAll calls FindAllFunc.
+func (mock *TemperatureProgramRepositoryMock) FindAll(ctx context.Context) ([]program.Temperature, error) {
+	if mock.FindAllFunc == nil {
+		panic("TemperatureProgramRepositoryMock.FindAllFunc: method is nil but TemperatureProgramRepository.FindAll was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFindAll.Lock()
+	mock.calls.FindAll = append(mock.calls.FindAll, callInfo)
+	mock.lockFindAll.Unlock()
+	return mock.FindAllFunc(ctx)
+}
+
+// FindAllCalls gets all the calls that were made to FindAll.
+// Check the length with:
+//     len(mockedTemperatureProgramRepository.FindAllCalls())
+func (mock *TemperatureProgramRepositoryMock) FindAllCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFindAll.RLock()
+	calls = mock.calls.FindAll
+	mock.lockFindAll.RUnlock()
+	return calls
+}
+
+// FindByTemperatureAndHour calls FindByTemperatureAndHourFunc.
+func (mock *TemperatureProgramRepositoryMock) FindByTemperatureAndHour(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
+	if mock.FindByTemperatureAndHourFunc == nil {
+		panic("TemperatureProgramRepositoryMock.FindByTemperatureAndHourFunc: method is nil but TemperatureProgramRepository.FindByTemperatureAndHour was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		Temperature float32
+		Hour        program.Hour
+	}{
+		Ctx:         ctx,
+		Temperature: temperature,
+		Hour:        hour,
+	}
+	mock.lockFindByTemperatureAndHour.Lock()
+	mock.calls.FindByTemperatureAndHour = append(mock.calls.FindByTemperatureAndHour, callInfo)
+	mock.lockFindByTemperatureAndHour.Unlock()
+	return mock.FindByTemperatureAndHourFunc(ctx, temperature, hour)
+}
+
+// FindByTemperatureAndHourCalls gets all the calls that were made to FindByTemperatureAndHour.
+// Check the length with:
+//     len(mockedTemperatureProgramRepository.FindByTemperatureAndHourCalls())
+func (mock *TemperatureProgramRepositoryMock) FindByTemperatureAndHourCalls() []struct {
+	Ctx         context.Context
+	Temperature float32
+	Hour        program.Hour
+} {
+	var calls []struct {
+		Ctx         context.Context
+		Temperature float32
+		Hour        program.Hour
+	}
+	mock.lockFindByTemperatureAndHour.RLock()
+	calls = mock.calls.FindByTemperatureAndHour
+	mock.lockFindByTemperatureAndHour.RUnlock()
+	return calls
+}
+
+// Save calls SaveFunc.
+func (mock *TemperatureProgramRepositoryMock) Save(ctx context.Context, programs []program.Temperature) error {
+	if mock.SaveFunc == nil {
+		panic("TemperatureProgramRepositoryMock.SaveFunc: method is nil but TemperatureProgramRepository.Save was just called")
+	}
+	callInfo := struct {
+		Ctx      context.Context
+		Programs []program.Temperature
+	}{
+		Ctx:      ctx,
+		Programs: programs,
+	}
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, programs)
+}
+
+// SaveCalls gets all the calls that were made to Save.
+// Check the length with:
+//     len(mockedTemperatureProgramRepository.SaveCalls())
+func (mock *TemperatureProgramRepositoryMock) SaveCalls() []struct {
+	Ctx      context.Context
+	Programs []program.Temperature
+} {
+	var calls []struct {
+		Ctx      context.Context
+		Programs []program.Temperature
+	}
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
+	return calls
+}
