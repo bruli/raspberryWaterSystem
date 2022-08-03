@@ -10,7 +10,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 )
 
-//go:generate moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository StatusRepository DailyProgramRepository
+//go:generate moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository StatusRepository ProgramRepository WeeklyProgramRepository
 
 type ZoneRepository interface {
 	FindByID(ctx context.Context, id string) (zone.Zone, error)
@@ -32,8 +32,14 @@ type StatusRepository interface {
 	Update(ctx context.Context, st status.Status) error
 }
 
-type DailyProgramRepository interface {
-	Save(ctx context.Context, programs []program.Daily) error
-	FindAll(ctx context.Context) ([]program.Daily, error)
-	FindByHour(ctx context.Context, hour program.Hour) (program.Daily, error)
+type ProgramRepository interface {
+	Save(ctx context.Context, programs []program.Program) error
+	FindAll(ctx context.Context) ([]program.Program, error)
+	FindByHour(ctx context.Context, hour program.Hour) (program.Program, error)
+}
+
+type WeeklyProgramRepository interface {
+	Save(ctx context.Context, programs []program.Weekly) error
+	FindAll(ctx context.Context) ([]program.Weekly, error)
+	FindByDayAndHour(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error)
 }

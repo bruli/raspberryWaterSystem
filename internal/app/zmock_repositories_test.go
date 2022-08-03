@@ -474,40 +474,40 @@ func (mock *StatusRepositoryMock) UpdateCalls() []struct {
 	return calls
 }
 
-// Ensure, that DailyProgramRepositoryMock does implement app.DailyProgramRepository.
+// Ensure, that ProgramRepositoryMock does implement app.ProgramRepository.
 // If this is not the case, regenerate this file with moq.
-var _ app.DailyProgramRepository = &DailyProgramRepositoryMock{}
+var _ app.ProgramRepository = &ProgramRepositoryMock{}
 
-// DailyProgramRepositoryMock is a mock implementation of app.DailyProgramRepository.
+// ProgramRepositoryMock is a mock implementation of app.ProgramRepository.
 //
-// 	func TestSomethingThatUsesDailyProgramRepository(t *testing.T) {
+// 	func TestSomethingThatUsesProgramRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.DailyProgramRepository
-// 		mockedDailyProgramRepository := &DailyProgramRepositoryMock{
-// 			FindAllFunc: func(ctx context.Context) ([]program.Daily, error) {
+// 		// make and configure a mocked app.ProgramRepository
+// 		mockedProgramRepository := &ProgramRepositoryMock{
+// 			FindAllFunc: func(ctx context.Context) ([]program.Program, error) {
 // 				panic("mock out the FindAll method")
 // 			},
-// 			FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Daily, error) {
+// 			FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Program, error) {
 // 				panic("mock out the FindByHour method")
 // 			},
-// 			SaveFunc: func(ctx context.Context, programs []program.Daily) error {
+// 			SaveFunc: func(ctx context.Context, programs []program.Program) error {
 // 				panic("mock out the Save method")
 // 			},
 // 		}
 //
-// 		// use mockedDailyProgramRepository in code that requires app.DailyProgramRepository
+// 		// use mockedProgramRepository in code that requires app.ProgramRepository
 // 		// and then make assertions.
 //
 // 	}
-type DailyProgramRepositoryMock struct {
+type ProgramRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
-	FindAllFunc func(ctx context.Context) ([]program.Daily, error)
+	FindAllFunc func(ctx context.Context) ([]program.Program, error)
 
 	// FindByHourFunc mocks the FindByHour method.
-	FindByHourFunc func(ctx context.Context, hour program.Hour) (program.Daily, error)
+	FindByHourFunc func(ctx context.Context, hour program.Hour) (program.Program, error)
 
 	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, programs []program.Daily) error
+	SaveFunc func(ctx context.Context, programs []program.Program) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -528,7 +528,7 @@ type DailyProgramRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Programs is the programs argument value.
-			Programs []program.Daily
+			Programs []program.Program
 		}
 	}
 	lockFindAll    sync.RWMutex
@@ -537,9 +537,9 @@ type DailyProgramRepositoryMock struct {
 }
 
 // FindAll calls FindAllFunc.
-func (mock *DailyProgramRepositoryMock) FindAll(ctx context.Context) ([]program.Daily, error) {
+func (mock *ProgramRepositoryMock) FindAll(ctx context.Context) ([]program.Program, error) {
 	if mock.FindAllFunc == nil {
-		panic("DailyProgramRepositoryMock.FindAllFunc: method is nil but DailyProgramRepository.FindAll was just called")
+		panic("ProgramRepositoryMock.FindAllFunc: method is nil but ProgramRepository.FindAll was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
@@ -554,8 +554,8 @@ func (mock *DailyProgramRepositoryMock) FindAll(ctx context.Context) ([]program.
 
 // FindAllCalls gets all the calls that were made to FindAll.
 // Check the length with:
-//     len(mockedDailyProgramRepository.FindAllCalls())
-func (mock *DailyProgramRepositoryMock) FindAllCalls() []struct {
+//     len(mockedProgramRepository.FindAllCalls())
+func (mock *ProgramRepositoryMock) FindAllCalls() []struct {
 	Ctx context.Context
 } {
 	var calls []struct {
@@ -568,9 +568,9 @@ func (mock *DailyProgramRepositoryMock) FindAllCalls() []struct {
 }
 
 // FindByHour calls FindByHourFunc.
-func (mock *DailyProgramRepositoryMock) FindByHour(ctx context.Context, hour program.Hour) (program.Daily, error) {
+func (mock *ProgramRepositoryMock) FindByHour(ctx context.Context, hour program.Hour) (program.Program, error) {
 	if mock.FindByHourFunc == nil {
-		panic("DailyProgramRepositoryMock.FindByHourFunc: method is nil but DailyProgramRepository.FindByHour was just called")
+		panic("ProgramRepositoryMock.FindByHourFunc: method is nil but ProgramRepository.FindByHour was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
@@ -587,8 +587,8 @@ func (mock *DailyProgramRepositoryMock) FindByHour(ctx context.Context, hour pro
 
 // FindByHourCalls gets all the calls that were made to FindByHour.
 // Check the length with:
-//     len(mockedDailyProgramRepository.FindByHourCalls())
-func (mock *DailyProgramRepositoryMock) FindByHourCalls() []struct {
+//     len(mockedProgramRepository.FindByHourCalls())
+func (mock *ProgramRepositoryMock) FindByHourCalls() []struct {
 	Ctx  context.Context
 	Hour program.Hour
 } {
@@ -603,13 +603,13 @@ func (mock *DailyProgramRepositoryMock) FindByHourCalls() []struct {
 }
 
 // Save calls SaveFunc.
-func (mock *DailyProgramRepositoryMock) Save(ctx context.Context, programs []program.Daily) error {
+func (mock *ProgramRepositoryMock) Save(ctx context.Context, programs []program.Program) error {
 	if mock.SaveFunc == nil {
-		panic("DailyProgramRepositoryMock.SaveFunc: method is nil but DailyProgramRepository.Save was just called")
+		panic("ProgramRepositoryMock.SaveFunc: method is nil but ProgramRepository.Save was just called")
 	}
 	callInfo := struct {
 		Ctx      context.Context
-		Programs []program.Daily
+		Programs []program.Program
 	}{
 		Ctx:      ctx,
 		Programs: programs,
@@ -622,14 +622,183 @@ func (mock *DailyProgramRepositoryMock) Save(ctx context.Context, programs []pro
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedDailyProgramRepository.SaveCalls())
-func (mock *DailyProgramRepositoryMock) SaveCalls() []struct {
+//     len(mockedProgramRepository.SaveCalls())
+func (mock *ProgramRepositoryMock) SaveCalls() []struct {
 	Ctx      context.Context
-	Programs []program.Daily
+	Programs []program.Program
 } {
 	var calls []struct {
 		Ctx      context.Context
-		Programs []program.Daily
+		Programs []program.Program
+	}
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
+	return calls
+}
+
+// Ensure, that WeeklyProgramRepositoryMock does implement app.WeeklyProgramRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.WeeklyProgramRepository = &WeeklyProgramRepositoryMock{}
+
+// WeeklyProgramRepositoryMock is a mock implementation of app.WeeklyProgramRepository.
+//
+// 	func TestSomethingThatUsesWeeklyProgramRepository(t *testing.T) {
+//
+// 		// make and configure a mocked app.WeeklyProgramRepository
+// 		mockedWeeklyProgramRepository := &WeeklyProgramRepositoryMock{
+// 			FindAllFunc: func(ctx context.Context) ([]program.Weekly, error) {
+// 				panic("mock out the FindAll method")
+// 			},
+// 			FindByDayAndHourFunc: func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
+// 				panic("mock out the FindByDayAndHour method")
+// 			},
+// 			SaveFunc: func(ctx context.Context, programs []program.Weekly) error {
+// 				panic("mock out the Save method")
+// 			},
+// 		}
+//
+// 		// use mockedWeeklyProgramRepository in code that requires app.WeeklyProgramRepository
+// 		// and then make assertions.
+//
+// 	}
+type WeeklyProgramRepositoryMock struct {
+	// FindAllFunc mocks the FindAll method.
+	FindAllFunc func(ctx context.Context) ([]program.Weekly, error)
+
+	// FindByDayAndHourFunc mocks the FindByDayAndHour method.
+	FindByDayAndHourFunc func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error)
+
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, programs []program.Weekly) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// FindAll holds details about calls to the FindAll method.
+		FindAll []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
+		// FindByDayAndHour holds details about calls to the FindByDayAndHour method.
+		FindByDayAndHour []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Day is the day argument value.
+			Day program.WeekDay
+			// Hour is the hour argument value.
+			Hour program.Hour
+		}
+		// Save holds details about calls to the Save method.
+		Save []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Programs is the programs argument value.
+			Programs []program.Weekly
+		}
+	}
+	lockFindAll          sync.RWMutex
+	lockFindByDayAndHour sync.RWMutex
+	lockSave             sync.RWMutex
+}
+
+// FindAll calls FindAllFunc.
+func (mock *WeeklyProgramRepositoryMock) FindAll(ctx context.Context) ([]program.Weekly, error) {
+	if mock.FindAllFunc == nil {
+		panic("WeeklyProgramRepositoryMock.FindAllFunc: method is nil but WeeklyProgramRepository.FindAll was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFindAll.Lock()
+	mock.calls.FindAll = append(mock.calls.FindAll, callInfo)
+	mock.lockFindAll.Unlock()
+	return mock.FindAllFunc(ctx)
+}
+
+// FindAllCalls gets all the calls that were made to FindAll.
+// Check the length with:
+//     len(mockedWeeklyProgramRepository.FindAllCalls())
+func (mock *WeeklyProgramRepositoryMock) FindAllCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFindAll.RLock()
+	calls = mock.calls.FindAll
+	mock.lockFindAll.RUnlock()
+	return calls
+}
+
+// FindByDayAndHour calls FindByDayAndHourFunc.
+func (mock *WeeklyProgramRepositoryMock) FindByDayAndHour(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
+	if mock.FindByDayAndHourFunc == nil {
+		panic("WeeklyProgramRepositoryMock.FindByDayAndHourFunc: method is nil but WeeklyProgramRepository.FindByDayAndHour was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		Day  program.WeekDay
+		Hour program.Hour
+	}{
+		Ctx:  ctx,
+		Day:  day,
+		Hour: hour,
+	}
+	mock.lockFindByDayAndHour.Lock()
+	mock.calls.FindByDayAndHour = append(mock.calls.FindByDayAndHour, callInfo)
+	mock.lockFindByDayAndHour.Unlock()
+	return mock.FindByDayAndHourFunc(ctx, day, hour)
+}
+
+// FindByDayAndHourCalls gets all the calls that were made to FindByDayAndHour.
+// Check the length with:
+//     len(mockedWeeklyProgramRepository.FindByDayAndHourCalls())
+func (mock *WeeklyProgramRepositoryMock) FindByDayAndHourCalls() []struct {
+	Ctx  context.Context
+	Day  program.WeekDay
+	Hour program.Hour
+} {
+	var calls []struct {
+		Ctx  context.Context
+		Day  program.WeekDay
+		Hour program.Hour
+	}
+	mock.lockFindByDayAndHour.RLock()
+	calls = mock.calls.FindByDayAndHour
+	mock.lockFindByDayAndHour.RUnlock()
+	return calls
+}
+
+// Save calls SaveFunc.
+func (mock *WeeklyProgramRepositoryMock) Save(ctx context.Context, programs []program.Weekly) error {
+	if mock.SaveFunc == nil {
+		panic("WeeklyProgramRepositoryMock.SaveFunc: method is nil but WeeklyProgramRepository.Save was just called")
+	}
+	callInfo := struct {
+		Ctx      context.Context
+		Programs []program.Weekly
+	}{
+		Ctx:      ctx,
+		Programs: programs,
+	}
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, programs)
+}
+
+// SaveCalls gets all the calls that were made to Save.
+// Check the length with:
+//     len(mockedWeeklyProgramRepository.SaveCalls())
+func (mock *WeeklyProgramRepositoryMock) SaveCalls() []struct {
+	Ctx      context.Context
+	Programs []program.Weekly
+} {
+	var calls []struct {
+		Ctx      context.Context
+		Programs []program.Weekly
 	}
 	mock.lockSave.RLock()
 	calls = mock.calls.Save

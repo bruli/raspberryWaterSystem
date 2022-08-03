@@ -1,83 +1,70 @@
 package fixtures
 
-import "github.com/bruli/raspberryWaterSystem/internal/domain/program"
+import (
+	"time"
+
+	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+)
 
 type ProgramBuilder struct {
-	Seconds *program.Seconds
-	Hour    *program.Hour
-	Zones   []string
+	Hour       *program.Hour
+	Executions []program.Execution
 }
 
 func (b ProgramBuilder) Build() program.Program {
 	var pr program.Program
-	seconds, _ := program.ParseSeconds(20)
-	if b.Seconds != nil {
-		seconds = *b.Seconds
-	}
 	hour, _ := program.ParseHour("15:10")
 	if b.Hour != nil {
 		hour = *b.Hour
 	}
-	pr.Hydrate(seconds, hour, b.Zones)
+	executions := []program.Execution{
+		ExecutionBuilder{}.Build(),
+	}
+	if b.Executions != nil {
+		executions = b.Executions
+	}
+	pr.Hydrate(hour, executions)
 	return pr
 }
 
-type DailyProgramBuilder struct {
+type WeeklyBuilder struct {
+	WeekDay  *program.WeekDay
+	Programs []program.Program
+}
+
+func (b WeeklyBuilder) Build() program.Weekly {
+	var week program.Weekly
+	day := program.WeekDay(time.Friday)
+	if b.WeekDay != nil {
+		day = *b.WeekDay
+	}
+	programs := []program.Program{
+		ProgramBuilder{}.Build(),
+	}
+	if b.Programs != nil {
+		programs = b.Programs
+	}
+	week.Hydrate(day, programs)
+	return week
+}
+
+type ExecutionBuilder struct {
 	Seconds *program.Seconds
-	Hour    *program.Hour
 	Zones   []string
 }
 
-func (b DailyProgramBuilder) Build() program.Daily {
-	var pr program.Daily
-	seconds, _ := program.ParseSeconds(20)
+func (b ExecutionBuilder) Build() program.Execution {
+	var ex program.Execution
+	sec, _ := program.ParseSeconds(20)
 	if b.Seconds != nil {
-		seconds = *b.Seconds
+		sec = *b.Seconds
 	}
-	hour, _ := program.ParseHour("15:10")
-	if b.Hour != nil {
-		hour = *b.Hour
+	zones := []string{
+		"1",
 	}
-	pr.Hydrate(seconds, hour, b.Zones)
-	return pr
-}
-
-type OddProgramBuilder struct {
-	Seconds *program.Seconds
-	Hour    *program.Hour
-	Zones   []string
-}
-
-func (b OddProgramBuilder) Build() program.Odd {
-	var pr program.Odd
-	seconds, _ := program.ParseSeconds(20)
-	if b.Seconds != nil {
-		seconds = *b.Seconds
+	if b.Zones != nil {
+		zones = b.Zones
 	}
-	hour, _ := program.ParseHour("15:10")
-	if b.Hour != nil {
-		hour = *b.Hour
-	}
-	pr.Hydrate(seconds, hour, b.Zones)
-	return pr
-}
-
-type EvenProgramBuilder struct {
-	Seconds *program.Seconds
-	Hour    *program.Hour
-	Zones   []string
-}
-
-func (b EvenProgramBuilder) Build() program.Even {
-	var pr program.Even
-	seconds, _ := program.ParseSeconds(20)
-	if b.Seconds != nil {
-		seconds = *b.Seconds
-	}
-	hour, _ := program.ParseHour("15:10")
-	if b.Hour != nil {
-		hour = *b.Hour
-	}
-	pr.Hydrate(seconds, hour, b.Zones)
-	return pr
+	ex.Hydrate(sec, zones)
+	return ex
 }
