@@ -35,10 +35,16 @@ func main() {
 	rr := rainRepository()
 	sr := memory.StatusRepository{}
 	zr := disk.NewZoneRepository(conf.ZonesFile())
+	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile())
+	oddRepo := disk.NewProgramRepository(conf.OddProgramsFile())
+	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile())
+	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile())
+	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
 	qhBus.Subscribe(app.FindStatusQueryName, logQHMdw(app.NewFindStatus(sr)))
+	qhBus.Subscribe(app.FindAllProgramsQueryName, logQHMdw(app.NewFindAllPrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
@@ -120,6 +126,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/weather",
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(http2.FindWeather(qhBus)),
+		},
+		{
+			Endpoint:    "/programs",
+			Method:      http.MethodGet,
+			HandlerFunc: authMdw(http2.FindAllPrograms(qhBus)),
 		},
 	}, nil
 }

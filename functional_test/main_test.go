@@ -10,4 +10,5 @@ func TestFunctional(t *testing.T) {
 	runZones(t)
 	runStatus(t)
 	runWeather(t)
+	runPrograms(t)
 }

@@ -20,7 +20,7 @@ func TestProgramRepository(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/programs.yml"
 		populateFile(t, path)
-		repo := disk.NewDailyProgramRepository(path)
+		repo := disk.NewProgramRepository(path)
 		t.Run(`when Save method is called,
 		then it save programs`, func(t *testing.T) {
 			hour, err := program.ParseHour("12:15")

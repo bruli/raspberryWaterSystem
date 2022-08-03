@@ -10,11 +10,11 @@ import (
 
 type temperatureMap = map[float32]programMap
 
-type TemperatureRepository struct {
+type TemperatureProgramRepository struct {
 	path string
 }
 
-func (t TemperatureRepository) Save(ctx context.Context, programs []program.Temperature) error {
+func (t TemperatureProgramRepository) Save(ctx context.Context, programs []program.Temperature) error {
 	temp := make(temperatureMap)
 	for _, pr := range programs {
 		temp[pr.Temperature()] = buildProgramMap(pr.Programs())
@@ -22,7 +22,7 @@ func (t TemperatureRepository) Save(ctx context.Context, programs []program.Temp
 	return writeFile(t.path, temp)
 }
 
-func (t TemperatureRepository) FindAll(ctx context.Context) ([]program.Temperature, error) {
+func (t TemperatureProgramRepository) FindAll(ctx context.Context) ([]program.Temperature, error) {
 	temperature := make(temperatureMap)
 	if err := readFile(t.path, &temperature); err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func buildTemperaturePrograms(temperature temperatureMap) []program.Temperature 
 	return prgms
 }
 
-func (t TemperatureRepository) FindByTemperatureAndHour(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
+func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
 	temp := make(temperatureMap)
 	if err := readFile(t.path, &temp); err != nil {
 		return program.Temperature{}, err
@@ -73,6 +73,6 @@ func buildProgramTemperature(temperature float32, hour program.Hour, prgms []pro
 	return temp
 }
 
-func NewTemperatureRepository(path string) TemperatureRepository {
-	return TemperatureRepository{path: path}
+func NewTemperatureProgramRepository(path string) TemperatureProgramRepository {
+	return TemperatureProgramRepository{path: path}
 }

@@ -82,6 +82,6 @@ func buildProgram(pgr []programData, hour string) program.Program {
 	return prog
 }
 
-func NewDailyProgramRepository(filePath string) ProgramRepository {
+func NewProgramRepository(filePath string) ProgramRepository {
 	return ProgramRepository{filePath: filePath}
 }

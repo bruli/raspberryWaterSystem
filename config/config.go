@@ -7,12 +7,17 @@ import (
 )
 
 const (
-	ProjectPrefix = "WS_"
-	ServerURL     = ProjectPrefix + "SERVER_URL"
-	Environment   = ProjectPrefix + "ENVIRONMENT"
-	ZonesFile     = ProjectPrefix + "ZONES_FILE"
-	AuthToken     = ProjectPrefix + "AUTH_TOKEN"
-	RainServerURL = ProjectPrefix + "RAIN_SERVER_URL"
+	ProjectPrefix           = "WS_"
+	ServerURL               = ProjectPrefix + "SERVER_URL"
+	Environment             = ProjectPrefix + "ENVIRONMENT"
+	ZonesFile               = ProjectPrefix + "ZONES_FILE"
+	AuthToken               = ProjectPrefix + "AUTH_TOKEN"
+	RainServerURL           = ProjectPrefix + "RAIN_SERVER_URL"
+	DailyProgramsFile       = ProjectPrefix + "DAILY_PROGRAMS_FILE"
+	OddProgramsFile         = ProjectPrefix + "ODD_PROGRAMS_FILE"
+	EvenProgramsFile        = ProjectPrefix + "EVEN_PROGRAMS_FILE"
+	WeeklyProgramsFile      = ProjectPrefix + "WEEKLY_PROGRAMS_FILE"
+	TemperatureProgramsFile = ProjectPrefix + "TEMPERATURE_PROGRAMS_FILE"
 )
 
 type Config struct {
@@ -21,6 +26,29 @@ type Config struct {
 	zonesFile     string
 	authToken     string
 	rainServerURL url.URL
+	dailyProgramsFile, oddProgramsFile,
+	evenProgramsFile, weeklyProgramsFile,
+	temperatureProgramsFile string
+}
+
+func (c Config) DailyProgramsFile() string {
+	return c.dailyProgramsFile
+}
+
+func (c Config) OddProgramsFile() string {
+	return c.oddProgramsFile
+}
+
+func (c Config) EvenProgramsFile() string {
+	return c.evenProgramsFile
+}
+
+func (c Config) WeeklyProgramsFile() string {
+	return c.weeklyProgramsFile
+}
+
+func (c Config) TemperatureProgramsFile() string {
+	return c.temperatureProgramsFile
 }
 
 func (c Config) AuthToken() string {
@@ -68,11 +96,44 @@ func NewConfig() (Config, error) {
 	if err != nil {
 		return Config{}, nil
 	}
+	daily, odd, even, weekly, temp, err := programsFiles()
+	if err != nil {
+		return Config{}, err
+	}
 	return Config{
-		serverURL:     servUrl,
-		environment:   environment,
-		zonesFile:     zones,
-		authToken:     auth,
-		rainServerURL: *rainUrl,
+		serverURL:               servUrl,
+		environment:             environment,
+		zonesFile:               zones,
+		authToken:               auth,
+		rainServerURL:           *rainUrl,
+		dailyProgramsFile:       daily,
+		oddProgramsFile:         odd,
+		evenProgramsFile:        even,
+		weeklyProgramsFile:      weekly,
+		temperatureProgramsFile: temp,
 	}, nil
+}
+
+func programsFiles() (string, string, string, string, string, error) {
+	daily, err := env.Value(DailyProgramsFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	odd, err := env.Value(OddProgramsFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	even, err := env.Value(EvenProgramsFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	weekly, err := env.Value(WeeklyProgramsFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	temp, err := env.Value(TemperatureProgramsFile)
+	if err != nil {
+		return "", "", "", "", "", err
+	}
+	return daily, odd, even, weekly, temp, nil
 }
