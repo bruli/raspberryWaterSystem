@@ -53,6 +53,7 @@ func main() {
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
+	chBus.Subscribe(app.CreateProgramsCmdName, logCHMdw(app.NewCreatePrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.Fatalln(err)
@@ -143,6 +144,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/programs",
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(http2.FindAllPrograms(qhBus)),
+		},
+		{
+			Endpoint:    "/programs",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(http2.CreatePrograms(chBus)),
 		},
 	}, nil
 }
