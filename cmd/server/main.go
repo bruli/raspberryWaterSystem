@@ -43,6 +43,7 @@ func main() {
 	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile())
 	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile())
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
+	pe := fake.NewPinsExecutor(logger)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
@@ -54,6 +55,8 @@ func main() {
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
 	chBus.Subscribe(app.CreateProgramsCmdName, logCHMdw(app.NewCreatePrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
+	chBus.Subscribe(app.ExecuteZoneCmdName, logCHMdw(app.NewExecuteZone(zr)))
+	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.Fatalln(err)
