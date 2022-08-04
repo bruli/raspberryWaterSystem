@@ -31,7 +31,11 @@ func main() {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, config.ProjectPrefix, int(time.Now().Unix()))
 
+	eventsCh := make(chan cqs.Event)
+
 	logCHMdw := cqs.NewCommandHndErrorMiddleware(logger)
+	eventsCHMdw := app.NewEventMiddleware(eventsCh)
+	eventsMultiCHMdw := cqs.CommandHandlerMultiMiddleware(logCHMdw, eventsCHMdw)
 	logQHMdw := cqs.NewQueryHndErrorMiddleware(logger)
 
 	tr := temperatureRepository()
@@ -55,7 +59,7 @@ func main() {
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
 	chBus.Subscribe(app.CreateProgramsCmdName, logCHMdw(app.NewCreatePrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
-	chBus.Subscribe(app.ExecuteZoneCmdName, logCHMdw(app.NewExecuteZone(zr)))
+	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
@@ -63,6 +67,7 @@ func main() {
 	}
 
 	go updateStatusWorker(ctx, qhBus, chBus)
+	go eventsWorker(ctx, eventsCh, logger)
 
 	definitions, err := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	if err != nil {
@@ -71,6 +76,17 @@ func main() {
 	httpHandlers := httpx.NewHandler(definitions)
 	if err := httpx.RunServer(ctx, conf.ServerURL(), httpHandlers, &httpx.CORSOpt{}); err != nil {
 		log.Fatalln(fmt.Errorf("system error: %w", err))
+	}
+}
+
+func eventsWorker(ctx context.Context, ch <-chan cqs.Event, logger *log.Logger) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case event := <-ch:
+			logger.Printf("event dispatched %#v", event)
+		}
 	}
 }
 
