@@ -3,6 +3,8 @@ package zone_test
 import (
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/stretchr/testify/require"
 )
@@ -53,6 +55,46 @@ func TestNew(t *testing.T) {
 			require.Equal(t, zo.Id(), tt.id)
 			require.Equal(t, zo.Name(), tt.zoneName)
 			require.Equal(t, zo.Relays(), tt.relays)
+		})
+	}
+}
+
+func TestZoneExecute(t *testing.T) {
+	relays := []zone.Relay{
+		fixtures.RelayBuilder(1),
+		fixtures.RelayBuilder(2),
+	}
+	tests := []struct {
+		name    string
+		relay   []zone.Relay
+		seconds uint
+	}{
+		{
+			name:    "with invalid seconds, then it returns an invalid seconds execution zone error",
+			seconds: 505,
+		},
+		{
+			name:    "with valid seconds, then it returns a valid event",
+			seconds: 200,
+			relay:   relays,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(`Given a built zone struct,
+		when Execute method is called `+tt.name, func(t *testing.T) {
+			t.Parallel()
+			var zo zone.Zone
+			zo.Hydrate("bbf", "Bonsai", tt.relay)
+			err := zo.Execute(tt.seconds)
+			if err != nil {
+				require.ErrorIs(t, err, zone.ErrInvalidSecondsExecutionZone)
+				return
+			}
+			ev := zo.Events()[0]
+			execEv, _ := ev.(zone.Executed)
+			require.Equal(t, []string{"18", "24"}, execEv.RelayPins)
+			require.Equal(t, uint(200), execEv.Seconds)
 		})
 	}
 }

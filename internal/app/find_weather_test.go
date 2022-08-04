@@ -3,8 +3,9 @@ package app_test
 import (
 	"context"
 	"errors"
-	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"testing"
+
+	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"

@@ -2,9 +2,10 @@ package disk
 
 import (
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 func readFile(path string, data interface{}) error {

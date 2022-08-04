@@ -3,12 +3,13 @@ package http_test
 import (
 	"context"
 	"errors"
-	"github.com/bruli/raspberryWaterSystem/fixtures"
-	"github.com/bruli/raspberryWaterSystem/internal/app"
-	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	http2 "net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
