@@ -43,7 +43,7 @@ func main() {
 	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile())
 	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile())
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
-	pe := fake.NewPinsExecutor(logger)
+	pe := pinsExecutor(logger)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
