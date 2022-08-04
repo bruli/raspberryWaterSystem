@@ -11,7 +11,3 @@ import (
 func temperatureRepository() app.TemperatureRepository {
 	return fake.TemperatureRepository{}
 }
-
-func rainRepository() app.RainRepository {
-	return fake.RainRepository{}
-}

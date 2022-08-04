@@ -8,6 +8,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/fake"
+
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
@@ -32,7 +35,7 @@ func main() {
 	logQHMdw := cqs.NewQueryHndErrorMiddleware(logger)
 
 	tr := temperatureRepository()
-	rr := rainRepository()
+	rr := rainRepository(conf)
 	sr := memory.StatusRepository{}
 	zr := disk.NewZoneRepository(conf.ZonesFile())
 	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile())
@@ -65,6 +68,15 @@ func main() {
 	if err := httpx.RunServer(ctx, conf.ServerURL(), httpHandlers, &httpx.CORSOpt{}); err != nil {
 		log.Fatalln(fmt.Errorf("system error: %w", err))
 	}
+}
+
+func rainRepository(conf config.Config) app.RainRepository {
+	var rr app.RainRepository
+	rr = fake.RainRepository{}
+	if conf.Environment().IsProduction() {
+		rr = api.RainRepository{}
+	}
+	return rr
 }
 
 func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler) {

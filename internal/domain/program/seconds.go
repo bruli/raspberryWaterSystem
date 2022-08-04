@@ -14,7 +14,7 @@ func (s Seconds) Int() int {
 }
 
 func ParseSeconds(i int) (Seconds, error) {
-	if i == 0 {
+	if i < 0 {
 		return 0, ErrZeroProgramSeconds
 	}
 	return Seconds(time.Duration(i) * time.Second), nil

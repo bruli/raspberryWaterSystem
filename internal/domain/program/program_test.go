@@ -84,18 +84,34 @@ func TestNewWeekly(t *testing.T) {
 }
 
 func TestNewTemperature(t *testing.T) {
+	programs := []program.Program{
+		fixtures.ProgramBuilder{}.Build(),
+	}
 	tests := []struct {
-		name     string
-		programs []program.Program
+		name        string
+		temp        float32
+		programs    []program.Program
+		expectedErr error
 	}{
 		{
-			name: "with any programs, then it returns an empty programs error",
+			name:        "with any programs, then it returns an empty programs error",
+			expectedErr: program.ErrEmptyPrograms,
 		},
 		{
-			name: "with programs, then it returns a valid struct",
-			programs: []program.Program{
-				fixtures.ProgramBuilder{}.Build(),
-			},
+			name:        "with under zero temp, then it returns an invalid temperature error",
+			temp:        float32(-5),
+			programs:    programs,
+			expectedErr: program.ErrInvalidTemperature,
+		},
+		{
+			name:        "with over 50 temp, then it returns an invalid temperature error",
+			temp:        float32(55),
+			programs:    programs,
+			expectedErr: program.ErrInvalidTemperature,
+		},
+		{
+			name:     "with programs, then it returns a valid struct",
+			programs: programs,
 		},
 	}
 	for _, tt := range tests {
@@ -103,13 +119,13 @@ func TestNewTemperature(t *testing.T) {
 		t.Run(`Given a Temperature struct,
 		when NewTemperature method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
-			tempValue := float32(20.5)
-			temp, err := program.NewTemperature(tempValue, tt.programs)
+			temp, err := program.NewTemperature(tt.temp, tt.programs)
 			if err != nil {
-				require.ErrorIs(t, err, program.ErrEmptyPrograms)
+				require.ErrorIs(t, err, tt.expectedErr)
 				return
 			}
-			require.Equal(t, tempValue, temp.Temperature())
+			require.Equal(t, tt.expectedErr, err)
+			require.Equal(t, tt.temp, temp.Temperature())
 			require.Equal(t, tt.programs, temp.Programs())
 		})
 	}

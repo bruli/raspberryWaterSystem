@@ -20,40 +20,40 @@ func FindAllPrograms(qh cqs.QueryHandler) http.HandlerFunc {
 		}
 		programs, _ := result.(app.AllPrograms)
 		resp := ProgramsResponseJson{
-			Daily:       buildPrograms(programs.Daily),
-			Even:        buildPrograms(programs.Even),
-			Odd:         buildPrograms(programs.Odd),
-			Temperature: buildTemperaturePrograms(programs.Temperature),
-			Weekly:      buildWeeklyPrograms(programs.Weekly),
+			Daily:       buildProgramsResponse(programs.Daily),
+			Even:        buildProgramsResponse(programs.Even),
+			Odd:         buildProgramsResponse(programs.Odd),
+			Temperature: buildTemperatureProgramsResponse(programs.Temperature),
+			Weekly:      buildWeeklyProgramsResponse(programs.Weekly),
 		}
 		data, _ := json.Marshal(resp)
 		httpx.WriteResponse(w, http.StatusOK, data)
 	}
 }
 
-func buildWeeklyPrograms(weekly []program.Weekly) []WeeklyItemResponse {
+func buildWeeklyProgramsResponse(weekly []program.Weekly) []WeeklyItemResponse {
 	itemResponse := make([]WeeklyItemResponse, len(weekly))
 	for i, we := range weekly {
 		itemResponse[i] = WeeklyItemResponse{
-			Programs: buildPrograms(we.Programs()),
+			Programs: buildProgramsResponse(we.Programs()),
 			WeekDay:  we.WeekDay().String(),
 		}
 	}
 	return itemResponse
 }
 
-func buildTemperaturePrograms(temperature []program.Temperature) []TemperatureItemResponse {
+func buildTemperatureProgramsResponse(temperature []program.Temperature) []TemperatureItemResponse {
 	itemResponse := make([]TemperatureItemResponse, len(temperature))
 	for i, temp := range temperature {
 		itemResponse[i] = TemperatureItemResponse{
-			Programs:    buildPrograms(temp.Programs()),
+			Programs:    buildProgramsResponse(temp.Programs()),
 			Temperature: float64(temp.Temperature()),
 		}
 	}
 	return itemResponse
 }
 
-func buildPrograms(programs []program.Program) []ProgramItemResponse {
+func buildProgramsResponse(programs []program.Program) []ProgramItemResponse {
 	programItemResponses := make([]ProgramItemResponse, len(programs))
 	for i, d := range programs {
 		exec := make([]ExecutionItemResponse, len(d.Executions()))

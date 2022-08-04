@@ -7,6 +7,7 @@ import (
 var (
 	ErrEmptyPrograms       = errors.New("empty programs")
 	ErrEmptyExecutionZones = errors.New("empty execution zones")
+	ErrInvalidTemperature  = errors.New("invalid temperature")
 )
 
 type Program struct {
@@ -83,6 +84,9 @@ func (t Temperature) Programs() []Program {
 func (t Temperature) validate() error {
 	if len(t.programs) == 0 {
 		return ErrEmptyPrograms
+	}
+	if 0 > t.temperature || 50 < t.temperature {
+		return ErrInvalidTemperature
 	}
 	return nil
 }

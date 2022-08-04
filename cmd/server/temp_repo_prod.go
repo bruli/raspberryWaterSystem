@@ -11,7 +11,3 @@ import (
 func temperatureRepository() app.TemperatureRepository {
 	return gpio.TemperatureRepository{}
 }
-
-func rainRepository() app.RainRepository {
-	return gpio.RainRepository{}
-}
