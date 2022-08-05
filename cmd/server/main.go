@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
+
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
@@ -58,6 +60,7 @@ func main() {
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
 	qhBus.Subscribe(app.FindStatusQueryName, logQHMdw(app.NewFindStatus(sr)))
 	qhBus.Subscribe(app.FindAllProgramsQueryName, logQHMdw(app.NewFindAllPrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
+	qhBus.Subscribe(app.FindProgramsInTimeQueryName, logQHMdw(app.NewFindProgramsInTime(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
@@ -78,6 +81,7 @@ func main() {
 
 	go updateStatusWorker(ctx, qhBus, chBus)
 	go eventsWorker(ctx, eventsCh, eventBus, logger)
+	go executionInTimeWorker(ctx, qhBus, chBus, logger)
 
 	definitions, err := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	if err != nil {
@@ -86,6 +90,21 @@ func main() {
 	httpHandlers := httpx.NewHandler(definitions)
 	if err := httpx.RunServer(ctx, conf.ServerURL(), httpHandlers, &httpx.CORSOpt{}); err != nil {
 		log.Fatalln(fmt.Errorf("system error: %w", err))
+	}
+}
+
+func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *log.Logger) {
+	ticker := time.NewTicker(time.Minute)
+	for {
+		select {
+		case <-ctx.Done():
+			logger.Println("execution in time worker context done")
+			return
+		case <-ticker.C:
+			if err := worker.ExecutionInTime(ctx, qh, ch, time.Now()); err != nil {
+				log.Printf("failed execution in time worker: %s", err.Error())
+			}
+		}
 	}
 }
 

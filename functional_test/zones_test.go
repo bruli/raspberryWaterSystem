@@ -61,7 +61,7 @@ func runZones(t *testing.T) {
 		t.Run(`with authorization,
 		then it returns an ok`, func(t *testing.T) {
 			url := fmt.Sprintf("/zones/%s/execute", savedZone.Id())
-			req := http.ExecuteZoneRequestJson{Seconds: 40}
+			req := http.ExecuteZoneRequestJson{Seconds: 5}
 			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, url, cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)

@@ -29,10 +29,10 @@ func runPrograms(t *testing.T) {
 						Executions: []http2.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{"1"},
+								Zones:   []string{"d8aa59a8-6ce2-4cdd-95e5-ca03adfaec67", "dafc349a-a5bf-413f-a59a-0a6a71f095d9"},
 							},
 						},
-						Hour: "15:10",
+						Hour: "08:07",
 					},
 				},
 				Odd: []http2.ProgramItemRequest{

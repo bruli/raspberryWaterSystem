@@ -5,9 +5,10 @@ package functional_test
 
 import (
 	"context"
-	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"net/http"
 	"time"
+
+	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 )
 
 const serverURL = "http://localhost:8083"
