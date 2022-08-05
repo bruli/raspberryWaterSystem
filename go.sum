@@ -1,5 +1,5 @@
-github.com/bruli/raspberryRainSensor v0.0.0-20220804192158-8a529a8c0956 h1:DPMd4FWWrYcsYTX8GxY7rO3R7Uai+NfEXaRJABgPAww=
-github.com/bruli/raspberryRainSensor v0.0.0-20220804192158-8a529a8c0956/go.mod h1:n9nXHmSSa8vqqn2pf7TZZV+PT7FamUGRkxKX47wXYRw=
+github.com/bruli/raspberryRainSensor v0.0.0-20220805060926-995ff1b60caf h1:/sZaT9qcGTSeXtXPJyBkq6016ZiVjChtHF58ImZvyrw=
+github.com/bruli/raspberryRainSensor v0.0.0-20220805060926-995ff1b60caf/go.mod h1:n9nXHmSSa8vqqn2pf7TZZV+PT7FamUGRkxKX47wXYRw=
 github.com/d2r2/go-dht v0.0.0-20200119175940-4ba96621a218 h1:z3u7ZAkBvqHD2zaECn0qd1BwMCTiAYcQjFdU8vflVHo=
 github.com/d2r2/go-dht v0.0.0-20200119175940-4ba96621a218/go.mod h1:AzSqP4S4/6pINOKg3VC79WC7YY3zskQcrXMFzphCry0=
 github.com/d2r2/go-logger v0.0.0-20210606094344-60e9d1233e22 h1:nO+SY4KOMsF/LsZ5EtbSKhiT3M6sv/igo2PEru/xEHI=

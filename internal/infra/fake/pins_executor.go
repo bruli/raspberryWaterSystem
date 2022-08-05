@@ -14,6 +14,6 @@ func NewPinsExecutor(log *log.Logger) PinsExecutor {
 }
 
 func (p PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string) error {
-	p.log.Printf("pins executed %v seconds", seconds)
+	p.log.Printf("pins %s executed %v seconds", pins, seconds)
 	return nil
 }

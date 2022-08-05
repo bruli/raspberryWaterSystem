@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
@@ -65,12 +67,17 @@ func main() {
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 
+	eventBus := cqs.NewEventBus()
+	eventBus.Subscribe(zone.Executed{
+		BasicEvent: cqs.BasicEvent{NameAttr: zone.ExecutedEventName},
+	}, listener.NewExecutePinsOnExecuteZone(chBus))
+
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.Fatalln(err)
 	}
 
 	go updateStatusWorker(ctx, qhBus, chBus)
-	go eventsWorker(ctx, eventsCh, logger)
+	go eventsWorker(ctx, eventsCh, eventBus, logger)
 
 	definitions, err := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	if err != nil {
@@ -82,16 +89,15 @@ func main() {
 	}
 }
 
-func eventsWorker(ctx context.Context, ch <-chan cqs.Event, logger *log.Logger) {
+func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, logger *log.Logger) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case event := <-ch:
-			logger.Printf("event dispatched %#v", event)
-			ev, _ := event.(zone.Executed)
-			logger.Printf("Seconds: %v", ev.Seconds)
-			logger.Printf("Pins: %s", ev.RelayPins)
+			if err := evBus.Dispatch(ctx, event); err != nil {
+				logger.Printf("failed dispatching %s: %s", event.EventName(), err.Error())
+			}
 		}
 	}
 }
