@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+
 	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/fake"
 
@@ -32,6 +34,7 @@ func main() {
 	logger := log.New(os.Stdout, config.ProjectPrefix, int(time.Now().Unix()))
 
 	eventsCh := make(chan cqs.Event)
+	defer close(eventsCh)
 
 	logCHMdw := cqs.NewCommandHndErrorMiddleware(logger)
 	eventsCHMdw := app.NewEventMiddleware(eventsCh)
@@ -86,6 +89,9 @@ func eventsWorker(ctx context.Context, ch <-chan cqs.Event, logger *log.Logger) 
 			return
 		case event := <-ch:
 			logger.Printf("event dispatched %#v", event)
+			ev, _ := event.(zone.Executed)
+			logger.Printf("Seconds: %v", ev.Seconds)
+			logger.Printf("Pins: %s", ev.RelayPins)
 		}
 	}
 }
@@ -148,6 +154,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/zones",
 			Method:      http.MethodPost,
 			HandlerFunc: authMdw(http2.CreateZone(chBus)),
+		},
+		{
+			Endpoint:    "/zones/{id}/execute",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(http2.ExecuteZone(chBus)),
 		},
 		{
 			Endpoint:    "/status",
