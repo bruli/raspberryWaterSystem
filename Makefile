@@ -25,6 +25,9 @@ test:
 test-with-infra:
 	go test -tags infra -race ./internal/infra/disk/... --count=1
 
+test-integration:
+	go test -tags integration -race ./internal/infra/telegram/... --count=1
+
 test-functional:
 	go test -tags functional -race ./functional_test/... --count=1
 
@@ -47,3 +50,8 @@ lint:
 
 import-jsonschema:
 	devops/scripts/import_jsonschema.sh
+
+encryptVault:
+	ansible-vault encrypt --vault-id raspberry_water_system@deploy/password deploy/inventories/production/group_vars/raspberry_water_system/vault.yml
+decryptVault:
+	ansible-vault decrypt --vault-id raspberry_water_system@deploy/password deploy/inventories/production/group_vars/raspberry_water_system/vault.yml

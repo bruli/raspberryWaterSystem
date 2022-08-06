@@ -2,6 +2,7 @@ package config
 
 import (
 	"net/url"
+	"strconv"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/env"
 )
@@ -19,6 +20,8 @@ const (
 	WeeklyProgramsFile      = ProjectPrefix + "WEEKLY_PROGRAMS_FILE"
 	TemperatureProgramsFile = ProjectPrefix + "TEMPERATURE_PROGRAMS_FILE"
 	ExecutionLogsFile       = ProjectPrefix + "EXECUTION_LOGS_FILE"
+	TelegramToken           = ProjectPrefix + "TELEGRAM_TOKEN"
+	TelegramChatID          = ProjectPrefix + "TELEGRAM_CHAT_ID"
 )
 
 type Config struct {
@@ -31,6 +34,20 @@ type Config struct {
 	evenProgramsFile, weeklyProgramsFile,
 	temperatureProgramsFile string
 	executionLogsFile string
+	telegramToken     string
+	telegramChatID    int
+}
+
+func (c Config) RainServerURL() url.URL {
+	return c.rainServerURL
+}
+
+func (c Config) TelegramToken() string {
+	return c.telegramToken
+}
+
+func (c Config) TelegramChatID() int {
+	return c.telegramChatID
 }
 
 func (c Config) ExecutionLogsFile() string {
@@ -78,11 +95,7 @@ func NewConfig() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	envStr, err := env.Value(Environment)
-	if err != nil {
-		return Config{}, err
-	}
-	environment, err := env.ParseEnvironment(envStr)
+	environ, err := environment()
 	if err != nil {
 		return Config{}, err
 	}
@@ -110,9 +123,13 @@ func NewConfig() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	telegramToken, telegramChatID, err := telegram()
+	if err != nil {
+		return Config{}, err
+	}
 	return Config{
 		serverURL:               servUrl,
-		environment:             environment,
+		environment:             environ,
 		zonesFile:               zones,
 		authToken:               auth,
 		rainServerURL:           *rainUrl,
@@ -122,7 +139,37 @@ func NewConfig() (Config, error) {
 		weeklyProgramsFile:      weekly,
 		temperatureProgramsFile: temp,
 		executionLogsFile:       execLogs,
+		telegramToken:           telegramToken,
+		telegramChatID:          telegramChatID,
 	}, nil
+}
+
+func environment() (env.Environment, error) {
+	envStr, err := env.Value(Environment)
+	if err != nil {
+		return 0, err
+	}
+	environ, err := env.ParseEnvironment(envStr)
+	if err != nil {
+		return 0, err
+	}
+	return environ, nil
+}
+
+func telegram() (string, int, error) {
+	token, err := env.Value(TelegramToken)
+	if err != nil {
+		return "", 0, err
+	}
+	chatIDStr, err := env.Value(TelegramChatID)
+	if err != nil {
+		return "", 0, err
+	}
+	chatID, err := strconv.Atoi(chatIDStr)
+	if err != nil {
+		return "", 0, err
+	}
+	return token, chatID, nil
 }
 
 func programsFiles() (string, string, string, string, string, error) {

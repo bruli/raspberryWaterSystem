@@ -20,6 +20,8 @@ services:
       WS_WEEKLY_PROGRAMS_FILE: ${WS_WEEKLY_PROGRAMS_FILE:-/tmp/weekly_programs.yml}
       WS_TEMPERATURE_PROGRAMS_FILE: ${WS_TEMPERATURE_PROGRAMS_FILE:-/tmp/temperature_programs.yml}
       WS_EXECUTION_LOGS_FILE: ${WS_EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
+      WS_TELEGRAM_TOKEN: ${WS_TELEGRAM_TOKEN:-token}
+      WS_TELEGRAM_CHAT_ID: ${WS_TELEGRAM_CHAT_ID:-12345}
     ports:
       - "8083:8080"
   builder:

@@ -25,7 +25,14 @@ func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) erro
 		return err
 	}
 	sec, _ := program.ParseSeconds(int(event.Seconds))
-	_, err := e.ch.Handle(ctx, app.SaveExecutionLogCmd{
+	if _, err := e.ch.Handle(ctx, app.SaveExecutionLogCmd{
+		ZoneName:   event.ZoneName,
+		Seconds:    sec,
+		ExecutedAt: now,
+	}); err != nil {
+		return err
+	}
+	_, err := e.ch.Handle(ctx, app.PublishExecutionLogCmd{
 		ZoneName:   event.ZoneName,
 		Seconds:    sec,
 		ExecutedAt: now,

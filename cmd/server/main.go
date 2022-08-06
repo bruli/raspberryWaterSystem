@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
+
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
@@ -56,6 +58,7 @@ func main() {
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
 	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile())
 	pe := pinsExecutor(logger)
+	execLogPub := telegram.NewExecutionLogPublisher(conf.TelegramToken(), conf.TelegramChatID())
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
@@ -71,6 +74,7 @@ func main() {
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 	chBus.Subscribe(app.SaveExecutionLogCmdName, logCHMdw(app.NewSaveExecutionLog(execLogRepo)))
+	chBus.Subscribe(app.PublishExecutionLogCmdName, logCHMdw(app.NewPublishExecutionLog(execLogPub)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{

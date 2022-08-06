@@ -19,6 +19,8 @@ require (
 	github.com/d2r2/go-logger v0.0.0-20210606094344-60e9d1233e22 // indirect
 	github.com/d2r2/go-shell v0.0.0-20211022052110-f591c27e3e2e // indirect
 	github.com/go-chi/chi v1.5.4
+	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/stretchr/testify v1.7.1
+	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 )
