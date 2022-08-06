@@ -89,3 +89,27 @@ func (b TemperatureBuilder) Build() program.Temperature {
 	temp.Hydrate(temperature, programs)
 	return temp
 }
+
+type ExecutionLogBuilder struct {
+	Seconds    *program.Seconds
+	ZoneName   *string
+	ExecutedAt *time.Time
+}
+
+func (b ExecutionLogBuilder) Build() program.ExecutionLog {
+	var exec program.ExecutionLog
+	seconds := program.Seconds(20 * time.Second)
+	if b.Seconds != nil {
+		seconds = *b.Seconds
+	}
+	zoneName := "zone test"
+	if b.ZoneName != nil {
+		zoneName = *b.ZoneName
+	}
+	executedAt := time.Now()
+	if b.ExecutedAt != nil {
+		executedAt = *b.ExecutedAt
+	}
+	exec.Hydrate(seconds, zoneName, executedAt)
+	return exec
+}

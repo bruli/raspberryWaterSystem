@@ -974,3 +974,117 @@ func (mock *TemperatureProgramRepositoryMock) SaveCalls() []struct {
 	mock.lockSave.RUnlock()
 	return calls
 }
+
+// Ensure, that ExecutionLogRepositoryMock does implement app.ExecutionLogRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.ExecutionLogRepository = &ExecutionLogRepositoryMock{}
+
+// ExecutionLogRepositoryMock is a mock implementation of app.ExecutionLogRepository.
+//
+// 	func TestSomethingThatUsesExecutionLogRepository(t *testing.T) {
+//
+// 		// make and configure a mocked app.ExecutionLogRepository
+// 		mockedExecutionLogRepository := &ExecutionLogRepositoryMock{
+// 			FindAllFunc: func(ctx context.Context) ([]program.ExecutionLog, error) {
+// 				panic("mock out the FindAll method")
+// 			},
+// 			SaveFunc: func(ctx context.Context, logs []program.ExecutionLog) error {
+// 				panic("mock out the Save method")
+// 			},
+// 		}
+//
+// 		// use mockedExecutionLogRepository in code that requires app.ExecutionLogRepository
+// 		// and then make assertions.
+//
+// 	}
+type ExecutionLogRepositoryMock struct {
+	// FindAllFunc mocks the FindAll method.
+	FindAllFunc func(ctx context.Context) ([]program.ExecutionLog, error)
+
+	// SaveFunc mocks the Save method.
+	SaveFunc func(ctx context.Context, logs []program.ExecutionLog) error
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// FindAll holds details about calls to the FindAll method.
+		FindAll []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
+		// Save holds details about calls to the Save method.
+		Save []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Logs is the logs argument value.
+			Logs []program.ExecutionLog
+		}
+	}
+	lockFindAll sync.RWMutex
+	lockSave    sync.RWMutex
+}
+
+// FindAll calls FindAllFunc.
+func (mock *ExecutionLogRepositoryMock) FindAll(ctx context.Context) ([]program.ExecutionLog, error) {
+	if mock.FindAllFunc == nil {
+		panic("ExecutionLogRepositoryMock.FindAllFunc: method is nil but ExecutionLogRepository.FindAll was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFindAll.Lock()
+	mock.calls.FindAll = append(mock.calls.FindAll, callInfo)
+	mock.lockFindAll.Unlock()
+	return mock.FindAllFunc(ctx)
+}
+
+// FindAllCalls gets all the calls that were made to FindAll.
+// Check the length with:
+//     len(mockedExecutionLogRepository.FindAllCalls())
+func (mock *ExecutionLogRepositoryMock) FindAllCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFindAll.RLock()
+	calls = mock.calls.FindAll
+	mock.lockFindAll.RUnlock()
+	return calls
+}
+
+// Save calls SaveFunc.
+func (mock *ExecutionLogRepositoryMock) Save(ctx context.Context, logs []program.ExecutionLog) error {
+	if mock.SaveFunc == nil {
+		panic("ExecutionLogRepositoryMock.SaveFunc: method is nil but ExecutionLogRepository.Save was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		Logs []program.ExecutionLog
+	}{
+		Ctx:  ctx,
+		Logs: logs,
+	}
+	mock.lockSave.Lock()
+	mock.calls.Save = append(mock.calls.Save, callInfo)
+	mock.lockSave.Unlock()
+	return mock.SaveFunc(ctx, logs)
+}
+
+// SaveCalls gets all the calls that were made to Save.
+// Check the length with:
+//     len(mockedExecutionLogRepository.SaveCalls())
+func (mock *ExecutionLogRepositoryMock) SaveCalls() []struct {
+	Ctx  context.Context
+	Logs []program.ExecutionLog
+} {
+	var calls []struct {
+		Ctx  context.Context
+		Logs []program.ExecutionLog
+	}
+	mock.lockSave.RLock()
+	calls = mock.calls.Save
+	mock.lockSave.RUnlock()
+	return calls
+}
