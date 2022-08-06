@@ -1,6 +1,7 @@
 package disk
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -8,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func readFile(path string, data interface{}) error {
+func readYamlFile(path string, data interface{}) error {
 	if err := checkFile(path); err != nil {
 		return fmt.Errorf("failed to check %s file", path)
 	}
@@ -17,6 +18,20 @@ func readFile(path string, data interface{}) error {
 		return fmt.Errorf("failed to read file %s: %w", path, err)
 	}
 	if err = yaml.Unmarshal(fileData, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func readJsonFile(path string, data interface{}) error {
+	if err := checkFile(path); err != nil {
+		return fmt.Errorf("failed to check %s file", path)
+	}
+	fileData, err := ioutil.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", path, err)
+	}
+	if err = json.Unmarshal(fileData, data); err != nil {
 		return err
 	}
 	return nil
@@ -34,8 +49,16 @@ func checkFile(path string) error {
 	return nil
 }
 
-func writeFile(path string, data interface{}) error {
+func writeYamlFile(path string, data interface{}) error {
 	dataFile, err := yaml.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to write file: %w", err)
+	}
+	return ioutil.WriteFile(path, dataFile, 0o755)
+}
+
+func writeJsonFile(path string, data interface{}) error {
+	dataFile, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}

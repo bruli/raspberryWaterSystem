@@ -22,7 +22,7 @@ type ProgramRepository struct {
 
 func (d ProgramRepository) Save(ctx context.Context, programs []program.Program) error {
 	dailyPrgms := buildProgramMap(programs)
-	return writeFile(d.filePath, dailyPrgms)
+	return writeYamlFile(d.filePath, dailyPrgms)
 }
 
 func buildProgramMap(programs []program.Program) programMap {
@@ -42,7 +42,7 @@ func buildProgramMap(programs []program.Program) programMap {
 
 func (d ProgramRepository) FindAll(ctx context.Context) ([]program.Program, error) {
 	dailyPgrms := make(programMap)
-	if err := readFile(d.filePath, &dailyPgrms); err != nil {
+	if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
 		return nil, err
 	}
 	return buildDailyPrograms(dailyPgrms), nil
@@ -58,7 +58,7 @@ func buildDailyPrograms(pr programMap) []program.Program {
 
 func (d ProgramRepository) FindByHour(ctx context.Context, hour program.Hour) (program.Program, error) {
 	dailyPgrms := make(programMap)
-	if err := readFile(d.filePath, &dailyPgrms); err != nil {
+	if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
 		return program.Program{}, err
 	}
 	pgr, ok := dailyPgrms[hour.String()]

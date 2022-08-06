@@ -16,7 +16,7 @@ type WeeklyRepository struct {
 
 func (w WeeklyRepository) FindByDayAndHour(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
 	weekly := make(weeklyMap)
-	if err := readFile(w.path, &weekly); err != nil {
+	if err := readYamlFile(w.path, &weekly); err != nil {
 		return program.Weekly{}, err
 	}
 	byDay, ok := weekly[day.String()]
@@ -52,12 +52,12 @@ func (w WeeklyRepository) Save(ctx context.Context, programs []program.Weekly) e
 	for _, pr := range programs {
 		weekly[pr.WeekDay().String()] = buildProgramMap(pr.Programs())
 	}
-	return writeFile(w.path, weekly)
+	return writeYamlFile(w.path, weekly)
 }
 
 func (w WeeklyRepository) FindAll(ctx context.Context) ([]program.Weekly, error) {
 	weekly := make(weeklyMap)
-	if err := readFile(w.path, &weekly); err != nil {
+	if err := readYamlFile(w.path, &weekly); err != nil {
 		return nil, err
 	}
 	return buildWeeklyPrograms(weekly), nil

@@ -19,12 +19,12 @@ func (t TemperatureProgramRepository) Save(ctx context.Context, programs []progr
 	for _, pr := range programs {
 		temp[pr.Temperature()] = buildProgramMap(pr.Programs())
 	}
-	return writeFile(t.path, temp)
+	return writeYamlFile(t.path, temp)
 }
 
 func (t TemperatureProgramRepository) FindAll(ctx context.Context) ([]program.Temperature, error) {
 	temperature := make(temperatureMap)
-	if err := readFile(t.path, &temperature); err != nil {
+	if err := readYamlFile(t.path, &temperature); err != nil {
 		return nil, err
 	}
 	return buildTemperaturePrograms(temperature), nil
@@ -42,7 +42,7 @@ func buildTemperaturePrograms(temperature temperatureMap) []program.Temperature 
 
 func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
 	temp := make(temperatureMap)
-	if err := readFile(t.path, &temp); err != nil {
+	if err := readYamlFile(t.path, &temp); err != nil {
 		return program.Temperature{}, err
 	}
 	byTemp, ok := temp[temperature]

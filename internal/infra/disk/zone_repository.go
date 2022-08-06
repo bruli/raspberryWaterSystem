@@ -30,7 +30,7 @@ func NewZoneRepository(filePath string) ZoneRepository {
 
 func (z ZoneRepository) FindByID(_ context.Context, id string) (zone.Zone, error) {
 	zones := make(zonesMap)
-	if err := readFile(z.filePath, &zones); err != nil {
+	if err := readYamlFile(z.filePath, &zones); err != nil {
 		return zone.Zone{}, err
 	}
 	zo, ok := zones[id]
@@ -57,7 +57,7 @@ func buildRelays(relays []int) []zone.Relay {
 
 func (z ZoneRepository) Save(_ context.Context, zo zone.Zone) error {
 	zones := make(zonesMap)
-	if err := readFile(z.filePath, &zones); err != nil {
+	if err := readYamlFile(z.filePath, &zones); err != nil {
 		return err
 	}
 	relays := make([]int, len(zo.Relays()))
@@ -68,5 +68,5 @@ func (z ZoneRepository) Save(_ context.Context, zo zone.Zone) error {
 		Name:   zo.Name(),
 		Relays: relays,
 	}
-	return writeFile(z.filePath, zones)
+	return writeYamlFile(z.filePath, zones)
 }
