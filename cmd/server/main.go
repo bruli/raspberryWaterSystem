@@ -54,6 +54,7 @@ func main() {
 	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile())
 	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile())
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
+	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile())
 	pe := pinsExecutor(logger)
 
 	qhBus := app.NewQueryBus()
@@ -69,6 +70,7 @@ func main() {
 	chBus.Subscribe(app.CreateProgramsCmdName, logCHMdw(app.NewCreatePrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
+	chBus.Subscribe(app.SaveExecutionLogCmdName, logCHMdw(app.NewSaveExecutionLog(execLogRepo)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{

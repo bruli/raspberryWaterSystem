@@ -18,6 +18,7 @@ const (
 	EvenProgramsFile        = ProjectPrefix + "EVEN_PROGRAMS_FILE"
 	WeeklyProgramsFile      = ProjectPrefix + "WEEKLY_PROGRAMS_FILE"
 	TemperatureProgramsFile = ProjectPrefix + "TEMPERATURE_PROGRAMS_FILE"
+	ExecutionLogsFile       = ProjectPrefix + "EXECUTION_LOGS_FILE"
 )
 
 type Config struct {
@@ -29,6 +30,11 @@ type Config struct {
 	dailyProgramsFile, oddProgramsFile,
 	evenProgramsFile, weeklyProgramsFile,
 	temperatureProgramsFile string
+	executionLogsFile string
+}
+
+func (c Config) ExecutionLogsFile() string {
+	return c.executionLogsFile
 }
 
 func (c Config) DailyProgramsFile() string {
@@ -100,6 +106,10 @@ func NewConfig() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	execLogs, err := env.Value(ExecutionLogsFile)
+	if err != nil {
+		return Config{}, err
+	}
 	return Config{
 		serverURL:               servUrl,
 		environment:             environment,
@@ -111,6 +121,7 @@ func NewConfig() (Config, error) {
 		evenProgramsFile:        even,
 		weeklyProgramsFile:      weekly,
 		temperatureProgramsFile: temp,
+		executionLogsFile:       execLogs,
 	}, nil
 }
 
