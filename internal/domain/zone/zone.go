@@ -77,6 +77,7 @@ func (z *Zone) Execute(seconds uint) error {
 	}
 	z.Record(Executed{
 		BasicEvent: cqs.NewBasicEvent(ExecutedEventName, uuid.New(), z.name),
+		ZoneName:   z.name,
 		Seconds:    seconds,
 		RelayPins:  pins,
 	})

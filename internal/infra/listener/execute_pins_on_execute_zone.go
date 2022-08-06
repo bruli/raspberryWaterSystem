@@ -2,6 +2,9 @@ package listener
 
 import (
 	"context"
+	"time"
+
+	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
@@ -13,10 +16,19 @@ type ExecutePinsOnExecuteZone struct {
 }
 
 func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
+	now := time.Now()
 	event, _ := ev.(zone.Executed)
-	_, err := e.ch.Handle(ctx, app.ExecutePinsCmd{
+	if _, err := e.ch.Handle(ctx, app.ExecutePinsCmd{
 		Seconds: event.Seconds,
 		Pins:    event.RelayPins,
+	}); err != nil {
+		return err
+	}
+	sec, _ := program.ParseSeconds(int(event.Seconds))
+	_, err := e.ch.Handle(ctx, app.SaveExecutionLogCmd{
+		ZoneName:   event.ZoneName,
+		Seconds:    sec,
+		ExecutedAt: now,
 	})
 	return err
 }

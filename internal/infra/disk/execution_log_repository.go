@@ -37,7 +37,7 @@ func buildLogs(execLogs []program.ExecutionLog) []log {
 func (e ExecutionLogRepository) FindAll(ctx context.Context) ([]program.ExecutionLog, error) {
 	var logs []log
 	if err := readJsonFile(e.path, &logs); err != nil {
-		return nil, err
+		return []program.ExecutionLog{}, nil
 	}
 	return buildExecutionLogs(logs), nil
 }
