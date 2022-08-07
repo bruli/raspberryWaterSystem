@@ -12,7 +12,7 @@ import (
 
 const SaveExecutionLogCmdName = "saveExecutionLog"
 
-const maxLogs = 20
+const maxExecutionLogs = 20
 
 type SaveExecutionLogCmd struct {
 	ZoneName   string
@@ -35,8 +35,8 @@ func (s SaveExecutionLog) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Ev
 		return nil, err
 	}
 	readedLogs := logs
-	if len(logs) >= maxLogs {
-		readedLogs = logs[len(logs)-maxLogs:]
+	if len(logs) >= maxExecutionLogs {
+		readedLogs = logs[len(logs)-maxExecutionLogs:]
 	}
 	log, err := program.NewExecutionLog(co.Seconds, co.ZoneName, co.ExecutedAt)
 	if err != nil {
