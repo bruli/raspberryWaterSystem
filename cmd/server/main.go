@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/fake"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
@@ -19,7 +21,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
-	"github.com/bruli/raspberryWaterSystem/internal/infra/fake"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
 
@@ -134,7 +135,7 @@ func rainRepository(conf config.Config) app.RainRepository {
 	var rr app.RainRepository
 	rr = fake.RainRepository{}
 	if conf.Environment().IsProduction() {
-		rr = api.RainRepository{}
+		rr = api.NewRainRepository(conf.RainServerURL())
 	}
 	return rr
 }

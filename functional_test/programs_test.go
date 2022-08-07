@@ -29,7 +29,7 @@ func runPrograms(t *testing.T) {
 						Executions: []http2.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{"f70ac0ed-e4bd-42ac-aa2b-3d91e1ec6908", "ee832e18-12fe-4724-850e-7be8e10f8eaf"},
+								Zones:   []string{savedZone.Id()},
 							},
 						},
 						Hour: "16:13",
@@ -40,7 +40,7 @@ func runPrograms(t *testing.T) {
 						Executions: []http2.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{"1"},
+								Zones:   []string{savedZone.Id()},
 							},
 						},
 						Hour: "15:10",
@@ -51,7 +51,7 @@ func runPrograms(t *testing.T) {
 						Executions: []http2.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{"1"},
+								Zones:   []string{savedZone.Id()},
 							},
 						},
 						Hour: "15:10",
@@ -64,7 +64,7 @@ func runPrograms(t *testing.T) {
 								Executions: []http2.ExecutionItemRequest{
 									{
 										Seconds: 15,
-										Zones:   []string{"1", "2"},
+										Zones:   []string{savedZone.Id()},
 									},
 								},
 								Hour: "08:00",
@@ -80,7 +80,7 @@ func runPrograms(t *testing.T) {
 								Executions: []http2.ExecutionItemRequest{
 									{
 										Seconds: 15,
-										Zones:   []string{"1", "2"},
+										Zones:   []string{savedZone.Id()},
 									},
 								},
 								Hour: "08:00",

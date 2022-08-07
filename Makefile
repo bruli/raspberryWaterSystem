@@ -32,7 +32,7 @@ test-functional:
 	go test -tags functional -race ./functional_test/... --count=1
 
 docker-up:
-	docker-compose up -d --build server
+	docker-compose up -d --build water_system
 
 docker-down:
 	docker-compose down
