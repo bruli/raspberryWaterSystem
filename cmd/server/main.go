@@ -67,6 +67,7 @@ func main() {
 	qhBus.Subscribe(app.FindStatusQueryName, logQHMdw(app.NewFindStatus(sr)))
 	qhBus.Subscribe(app.FindAllProgramsQueryName, logQHMdw(app.NewFindAllPrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	qhBus.Subscribe(app.FindProgramsInTimeQueryName, logQHMdw(app.NewFindProgramsInTime(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
+	qhBus.Subscribe(app.FindExecutionLogsQueryName, logQHMdw(app.NewFindExecutionLogs(execLogRepo)))
 
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
@@ -212,6 +213,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/programs",
 			Method:      http.MethodPost,
 			HandlerFunc: authMdw(http2.CreatePrograms(chBus)),
+		},
+		{
+			Endpoint:    "/logs",
+			Method:      http.MethodGet,
+			HandlerFunc: authMdw(http2.FindExecutionLogs(qhBus)),
 		},
 	}, nil
 }

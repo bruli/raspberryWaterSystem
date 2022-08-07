@@ -11,4 +11,5 @@ func TestFunctional(t *testing.T) {
 	runStatus(t)
 	runWeather(t)
 	runPrograms(t)
+	runExecutionLogs(t)
 }

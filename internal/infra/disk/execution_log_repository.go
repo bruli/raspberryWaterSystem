@@ -2,15 +2,16 @@ package disk
 
 import (
 	"context"
+	"time"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
 
 type log struct {
-	Seconds    int     `json:"seconds"`
-	ZoneName   string  `json:"zone_name"`
-	ExecutedAt vo.Time `json:"executed_at"`
+	Seconds    int       `json:"seconds"`
+	ZoneName   string    `json:"zone_name"`
+	ExecutedAt time.Time `json:"executed_at"`
 }
 
 type ExecutionLogRepository struct {
@@ -28,7 +29,7 @@ func buildLogs(execLogs []program.ExecutionLog) []log {
 		logs[i] = log{
 			Seconds:    l.Seconds().Int(),
 			ZoneName:   l.ZoneName(),
-			ExecutedAt: l.ExecutedAt(),
+			ExecutedAt: time.Time(l.ExecutedAt()),
 		}
 	}
 	return logs
@@ -47,7 +48,8 @@ func buildExecutionLogs(logs []log) []program.ExecutionLog {
 	for i, l := range logs {
 		var el program.ExecutionLog
 		sec, _ := program.ParseSeconds(l.Seconds)
-		el.Hydrate(sec, l.ZoneName, l.ExecutedAt)
+		execAt, _ := vo.ParseFromTime(l.ExecutedAt)
+		el.Hydrate(sec, l.ZoneName, execAt)
 		execLogs[i] = el
 	}
 	return execLogs
