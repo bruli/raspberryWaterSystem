@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
@@ -17,7 +16,7 @@ var ErrStatusAlreadyExist = errors.New("status already exist")
 const CreateStatusCmdName = "createStatus"
 
 type CreateStatusCmd struct {
-	StartedAt time.Time
+	StartedAt vo.Time
 	Weather   weather.Weather
 }
 

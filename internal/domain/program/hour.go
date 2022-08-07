@@ -3,11 +3,13 @@ package program
 import (
 	"errors"
 	"time"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 )
 
 var ErrInvalidExecutionHour = errors.New("invalid execution hour")
 
-type Hour time.Time
+type Hour vo.Time
 
 func (h Hour) String() string {
 	return time.Time(h).Format("15:04")

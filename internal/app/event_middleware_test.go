@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/google/uuid"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
@@ -23,7 +25,7 @@ func TestNewEventMiddleware(t *testing.T) {
 		event1 := Event{
 			ID:        uuid.New(),
 			Name:      "eventito 1",
-			At:        time.Now(),
+			At:        vo.TimeNow(),
 			AggRootID: "dkdkdkd",
 		}
 		eventCh := make(chan cqs.Event)
@@ -54,7 +56,7 @@ func TestNewEventMiddleware(t *testing.T) {
 type Event struct {
 	ID        uuid.UUID
 	Name      string
-	At        time.Time
+	At        vo.Time
 	AggRootID string
 }
 
@@ -66,7 +68,7 @@ func (e Event) EventName() string {
 	return e.Name
 }
 
-func (e Event) EventAt() time.Time {
+func (e Event) EventAt() vo.Time {
 	return e.At
 }
 

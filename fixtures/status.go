@@ -3,19 +3,21 @@ package fixtures
 import (
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 )
 
 type StatusBuilder struct {
-	SystemStartedAt *time.Time
+	SystemStartedAt *vo.Time
 	Weather         *weather.Weather
-	UpdatedAt       *time.Time
+	UpdatedAt       *vo.Time
 }
 
 func (b StatusBuilder) Build() status.Status {
 	var st status.Status
-	start := time.Now()
+	start := vo.TimeNow()
 	if b.SystemStartedAt != nil {
 		start = *b.SystemStartedAt
 	}

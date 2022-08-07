@@ -3,6 +3,8 @@ package fixtures
 import (
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
 
@@ -93,7 +95,7 @@ func (b TemperatureBuilder) Build() program.Temperature {
 type ExecutionLogBuilder struct {
 	Seconds    *program.Seconds
 	ZoneName   *string
-	ExecutedAt *time.Time
+	ExecutedAt *vo.Time
 }
 
 func (b ExecutionLogBuilder) Build() program.ExecutionLog {
@@ -106,7 +108,7 @@ func (b ExecutionLogBuilder) Build() program.ExecutionLog {
 	if b.ZoneName != nil {
 		zoneName = *b.ZoneName
 	}
-	executedAt := time.Now()
+	executedAt := vo.TimeNow()
 	if b.ExecutedAt != nil {
 		executedAt = *b.ExecutedAt
 	}

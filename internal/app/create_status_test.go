@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
@@ -60,7 +59,7 @@ func TestCreateStatusHandle(t *testing.T) {
 			}
 			handler := app.NewCreateStatus(sr)
 			events, err := handler.Handle(context.Background(), app.CreateStatusCmd{
-				StartedAt: time.Now(),
+				StartedAt: vo.TimeNow(),
 				Weather:   weather.New(20, 40, false),
 			})
 			if err != nil {

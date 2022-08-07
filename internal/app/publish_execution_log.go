@@ -3,9 +3,9 @@ package app
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -15,7 +15,7 @@ const PublishExecutionLogCmdName = "publishExecutionLog"
 type PublishExecutionLogCmd struct {
 	ZoneName   string
 	Seconds    program.Seconds
-	ExecutedAt time.Time
+	ExecutedAt vo.Time
 }
 
 func (p PublishExecutionLogCmd) Name() string {

@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +17,7 @@ func TestNewExecutionLog(t *testing.T) {
 		name        string
 		seconds     program.Seconds
 		zoneName    string
-		executedAt  time.Time
+		executedAt  vo.Time
 		expectedErr error
 	}{
 		{
@@ -33,14 +35,14 @@ func TestNewExecutionLog(t *testing.T) {
 			name:        "with invalid executed at, then it returns a invalid executed at error",
 			seconds:     seconds,
 			zoneName:    zone,
-			executedAt:  time.Time{},
+			executedAt:  vo.Time{},
 			expectedErr: program.ErrInvalidExecutedAt,
 		},
 		{
 			name:       "with all values, then it returns a valid struct",
 			seconds:    seconds,
 			zoneName:   zone,
-			executedAt: time.Now(),
+			executedAt: vo.TimeNow(),
 		},
 	}
 	for _, tt := range tests {

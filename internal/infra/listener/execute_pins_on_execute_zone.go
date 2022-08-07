@@ -2,8 +2,8 @@ package listener
 
 import (
 	"context"
-	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
@@ -16,7 +16,7 @@ type ExecutePinsOnExecuteZone struct {
 }
 
 func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
-	now := time.Now()
+	now := vo.TimeNow()
 	event, _ := ev.(zone.Executed)
 	if _, err := e.ch.Handle(ctx, app.ExecutePinsCmd{
 		Seconds: event.Seconds,

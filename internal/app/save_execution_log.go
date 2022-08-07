@@ -3,9 +3,9 @@ package app
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -17,7 +17,7 @@ const maxExecutionLogs = 20
 type SaveExecutionLogCmd struct {
 	ZoneName   string
 	Seconds    program.Seconds
-	ExecutedAt time.Time
+	ExecutedAt vo.Time
 }
 
 func (s SaveExecutionLogCmd) Name() string {

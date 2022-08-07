@@ -2,7 +2,8 @@ package program
 
 import (
 	"errors"
-	"time"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 )
 
 var (
@@ -13,7 +14,7 @@ var (
 type ExecutionLog struct {
 	seconds    Seconds
 	zoneName   string
-	executedAt time.Time
+	executedAt vo.Time
 }
 
 func (e ExecutionLog) Seconds() Seconds {
@@ -24,7 +25,7 @@ func (e ExecutionLog) ZoneName() string {
 	return e.zoneName
 }
 
-func (e ExecutionLog) ExecutedAt() time.Time {
+func (e ExecutionLog) ExecutedAt() vo.Time {
 	return e.executedAt
 }
 
@@ -41,7 +42,7 @@ func (e ExecutionLog) validate() error {
 	return nil
 }
 
-func NewExecutionLog(seconds Seconds, zoneName string, executedAt time.Time) (ExecutionLog, error) {
+func NewExecutionLog(seconds Seconds, zoneName string, executedAt vo.Time) (ExecutionLog, error) {
 	exec := ExecutionLog{seconds: seconds, zoneName: zoneName, executedAt: executedAt}
 	if err := exec.validate(); err != nil {
 		return ExecutionLog{}, err
@@ -49,7 +50,7 @@ func NewExecutionLog(seconds Seconds, zoneName string, executedAt time.Time) (Ex
 	return exec, nil
 }
 
-func (e *ExecutionLog) Hydrate(seconds Seconds, zoneName string, executedAt time.Time) {
+func (e *ExecutionLog) Hydrate(seconds Seconds, zoneName string, executedAt vo.Time) {
 	e.seconds = seconds
 	e.zoneName = zoneName
 	e.executedAt = executedAt

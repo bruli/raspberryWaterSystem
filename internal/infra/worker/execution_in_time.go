@@ -4,13 +4,15 @@ import (
 	"context"
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 )
 
-func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, now time.Time) error {
+func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, now vo.Time) error {
 	st, err := readingCurrentStatus(ctx, qh)
 	if err != nil {
 		return err
@@ -38,7 +40,7 @@ func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHan
 	return nil
 }
 
-func findingPrograms(ctx context.Context, qh cqs.QueryHandler, now time.Time, temp float32) (app.ProgramsInTime, error) {
+func findingPrograms(ctx context.Context, qh cqs.QueryHandler, now vo.Time, temp float32) (app.ProgramsInTime, error) {
 	resultPrmgs, err := qh.Handle(ctx, app.FindProgramsInTimeQuery{
 		On:          now,
 		Temperature: temp,
@@ -59,7 +61,7 @@ func readingCurrentStatus(ctx context.Context, qh cqs.QueryHandler) (status.Stat
 	return st, nil
 }
 
-func executeTemperature(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now time.Time, currentTemp float32) error {
+func executeTemperature(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now vo.Time, currentTemp float32) error {
 	if prgms.Temperature != nil {
 		if currentTemp >= prgms.Temperature.Temperature() {
 			for _, pr := range prgms.Temperature.Programs() {
@@ -72,9 +74,9 @@ func executeTemperature(ctx context.Context, prgms app.ProgramsInTime, ch cqs.Co
 	return nil
 }
 
-func executeWeekly(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now time.Time) error {
+func executeWeekly(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now vo.Time) error {
 	if prgms.Weekly != nil {
-		if now.Weekday().String() == prgms.Weekly.WeekDay().String() {
+		if time.Time(now).Weekday().String() == prgms.Weekly.WeekDay().String() {
 			for _, pr := range prgms.Weekly.Programs() {
 				if err := executeProgram(ctx, ch, pr, now); err != nil {
 					return ExecuteWeeklyError{err: err}
@@ -85,9 +87,9 @@ func executeWeekly(ctx context.Context, prgms app.ProgramsInTime, ch cqs.Command
 	return nil
 }
 
-func executeOddEven(ctx context.Context, now time.Time, prgms app.ProgramsInTime, ch cqs.CommandHandler) error {
+func executeOddEven(ctx context.Context, now vo.Time, prgms app.ProgramsInTime, ch cqs.CommandHandler) error {
 	var oddEvenPrgms *program.Program
-	if isEven(now) {
+	if isEven(time.Time(now)) {
 		if prgms.Even != nil {
 			oddEvenPrgms = prgms.Even
 		}
@@ -102,7 +104,7 @@ func executeOddEven(ctx context.Context, now time.Time, prgms app.ProgramsInTime
 	return nil
 }
 
-func executeDaily(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now time.Time) error {
+func executeDaily(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now vo.Time) error {
 	if prgms.Daily != nil {
 		if err := executeProgram(ctx, ch, *prgms.Daily, now); err != nil {
 			return ExecuteDailyError{err: err}
@@ -117,8 +119,8 @@ func isEven(now time.Time) bool {
 	return rest == 0
 }
 
-func executeProgram(ctx context.Context, ch cqs.CommandHandler, prg program.Program, now time.Time) error {
-	nowHour := now.Format("15:04")
+func executeProgram(ctx context.Context, ch cqs.CommandHandler, prg program.Program, now vo.Time) error {
+	nowHour := now.HourStr()
 	if nowHour == prg.Hour().String() {
 		for _, exec := range prg.Executions() {
 			for _, zo := range exec.Zones() {

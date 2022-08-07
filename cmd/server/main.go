@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
@@ -107,7 +109,7 @@ func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.Comm
 			logger.Println("execution in time worker context done")
 			return
 		case <-ticker.C:
-			if err := worker.ExecutionInTime(ctx, qh, ch, time.Now()); err != nil {
+			if err := worker.ExecutionInTime(ctx, qh, ch, vo.TimeNow()); err != nil {
 				log.Printf("failed execution in time worker: %s", err.Error())
 			}
 		}
@@ -167,7 +169,7 @@ func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler)
 	}
 	weath, _ := result.(weather.Weather)
 	_, err = ch.Handle(ctx, app.CreateStatusCmd{
-		StartedAt: time.Now(),
+		StartedAt: vo.TimeNow(),
 		Weather:   weath,
 	})
 	return err

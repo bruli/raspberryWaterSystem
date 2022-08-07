@@ -2,15 +2,15 @@ package disk
 
 import (
 	"context"
-	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
 
 type log struct {
-	Seconds    int       `json:"seconds"`
-	ZoneName   string    `json:"zone_name"`
-	ExecutedAt time.Time `json:"executed_at"`
+	Seconds    int     `json:"seconds"`
+	ZoneName   string  `json:"zone_name"`
+	ExecutedAt vo.Time `json:"executed_at"`
 }
 
 type ExecutionLogRepository struct {

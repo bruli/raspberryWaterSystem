@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
@@ -18,7 +20,7 @@ func TestPublishExecutionLogHandle(t *testing.T) {
 	cmd := app.PublishExecutionLogCmd{
 		ZoneName:   "zone",
 		Seconds:    program.Seconds(time.Second),
-		ExecutedAt: time.Now(),
+		ExecutedAt: vo.TimeNow(),
 	}
 	tests := []struct {
 		name                    string

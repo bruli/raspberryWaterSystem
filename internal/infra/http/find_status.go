@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
@@ -28,13 +27,12 @@ func FindStatus(qh cqs.QueryHandler) http.HandlerFunc {
 		currenSt, _ := result.(status.Status)
 		var updated *string
 		if currenSt.UpdatedAt() != nil {
-			str := strconv.Itoa(int(currenSt.UpdatedAt().Unix()))
-			updated = &str
+			updated = vo.StringPtr(currenSt.UpdatedAt().EpochString())
 		}
 		resp := StatusResponseJson{
 			Humidity:        float64(currenSt.Weather().Humidity()),
 			IsRaining:       currenSt.Weather().IsRaining(),
-			SystemStartedAt: strconv.Itoa(int(currenSt.SystemStartedAt().Unix())),
+			SystemStartedAt: currenSt.SystemStartedAt().EpochString(),
 			Temperature:     float64(currenSt.Weather().Temp()),
 			UpdatedAt:       updated,
 		}

@@ -23,7 +23,7 @@ func TestSaveExecutionLogHandle(t *testing.T) {
 	cmd := app.SaveExecutionLogCmd{
 		ZoneName:   "zone new",
 		Seconds:    program.Seconds(20 * time.Second),
-		ExecutedAt: time.Now(),
+		ExecutedAt: vo.TimeNow(),
 	}
 	logs := make([]program.ExecutionLog, 25)
 	for i := 0; 25 > i; i++ {
