@@ -48,7 +48,8 @@ func (mock *CommandHandlerMock) Handle(ctx context.Context, cmd cqs.Command) ([]
 
 // HandleCalls gets all the calls that were made to Handle.
 // Check the length with:
-//     len(mockedCommandHandler.HandleCalls())
+//
+//	len(mockedCommandHandler.HandleCalls())
 func (mock *CommandHandlerMock) HandleCalls() []struct {
 	Ctx context.Context
 	Cmd cqs.Command
@@ -93,7 +94,8 @@ func (mock *CommandMock) Name() string {
 
 // NameCalls gets all the calls that were made to Name.
 // Check the length with:
-//     len(mockedCommand.NameCalls())
+//
+//	len(mockedCommand.NameCalls())
 func (mock *CommandMock) NameCalls() []struct{} {
 	var calls []struct{}
 	mock.lockName.RLock()

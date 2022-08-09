@@ -1,6 +1,6 @@
 module github.com/bruli/raspberryWaterSystem
 
-go 1.17
+go 1.19
 
 require (
 	github.com/bruli/raspberryRainSensor v0.0.0-20220807151108-fd46e5f7af2e
@@ -13,6 +13,8 @@ require (
 )
 
 require github.com/google/uuid v1.3.0
+
+require github.com/santhosh-tekuri/jsonschema v1.2.4 // indirect
 
 require (
 	github.com/d2r2/go-dht v0.0.0-20200119175940-4ba96621a218

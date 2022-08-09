@@ -13,19 +13,19 @@ var _ cqs.Query = &QueryMock{}
 
 // QueryMock is a mock implementation of cqs.Query.
 //
-// 	func TestSomethingThatUsesQuery(t *testing.T) {
+//	func TestSomethingThatUsesQuery(t *testing.T) {
 //
-// 		// make and configure a mocked cqs.Query
-// 		mockedQuery := &QueryMock{
-// 			NameFunc: func() string {
-// 				panic("mock out the Name method")
-// 			},
-// 		}
+//		// make and configure a mocked cqs.Query
+//		mockedQuery := &QueryMock{
+//			NameFunc: func() string {
+//				panic("mock out the Name method")
+//			},
+//		}
 //
-// 		// use mockedQuery in code that requires cqs.Query
-// 		// and then make assertions.
+//		// use mockedQuery in code that requires cqs.Query
+//		// and then make assertions.
 //
-// 	}
+//	}
 type QueryMock struct {
 	// NameFunc mocks the Name method.
 	NameFunc func() string
@@ -52,7 +52,8 @@ func (mock *QueryMock) Name() string {
 
 // NameCalls gets all the calls that were made to Name.
 // Check the length with:
-//     len(mockedQuery.NameCalls())
+//
+//	len(mockedQuery.NameCalls())
 func (mock *QueryMock) NameCalls() []struct{} {
 	var calls []struct{}
 	mock.lockName.RLock()
@@ -67,19 +68,19 @@ var _ cqs.QueryHandler = &QueryHandlerMock{}
 
 // QueryHandlerMock is a mock implementation of cqs.QueryHandler.
 //
-// 	func TestSomethingThatUsesQueryHandler(t *testing.T) {
+//	func TestSomethingThatUsesQueryHandler(t *testing.T) {
 //
-// 		// make and configure a mocked cqs.QueryHandler
-// 		mockedQueryHandler := &QueryHandlerMock{
-// 			HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
-// 				panic("mock out the Handle method")
-// 			},
-// 		}
+//		// make and configure a mocked cqs.QueryHandler
+//		mockedQueryHandler := &QueryHandlerMock{
+//			HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+//				panic("mock out the Handle method")
+//			},
+//		}
 //
-// 		// use mockedQueryHandler in code that requires cqs.QueryHandler
-// 		// and then make assertions.
+//		// use mockedQueryHandler in code that requires cqs.QueryHandler
+//		// and then make assertions.
 //
-// 	}
+//	}
 type QueryHandlerMock struct {
 	// HandleFunc mocks the Handle method.
 	HandleFunc func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error)
@@ -117,7 +118,8 @@ func (mock *QueryHandlerMock) Handle(ctx context.Context, query cqs.Query) (cqs.
 
 // HandleCalls gets all the calls that were made to Handle.
 // Check the length with:
-//     len(mockedQueryHandler.HandleCalls())
+//
+//	len(mockedQueryHandler.HandleCalls())
 func (mock *QueryHandlerMock) HandleCalls() []struct {
 	Ctx   context.Context
 	Query cqs.Query
