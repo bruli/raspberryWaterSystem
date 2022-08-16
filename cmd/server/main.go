@@ -187,7 +187,7 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		},
 		{
 			Endpoint:    "/zones",
-			Method:      http.MethodPost,
+			Method:      http.MethodPut,
 			HandlerFunc: authMdw(http2.CreateZone(chBus)),
 		},
 		{
@@ -212,7 +212,7 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		},
 		{
 			Endpoint:    "/programs",
-			Method:      http.MethodPost,
+			Method:      http.MethodPut,
 			HandlerFunc: authMdw(http2.CreatePrograms(chBus)),
 		},
 		{

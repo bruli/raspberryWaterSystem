@@ -17,7 +17,7 @@ func runPrograms(t *testing.T) {
 	when a request is sent`, func(t *testing.T) {
 		t.Run(`without authorization,
 		then it returns unauthorized`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, nil, http.MethodPost, "/programs", cl)
+			resp, err := buildRequestAndSend(ctx, nil, nil, http.MethodPut, "/programs", cl)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 		})
@@ -90,7 +90,7 @@ func runPrograms(t *testing.T) {
 					},
 				},
 			}
-			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http.MethodPost, "/programs", cl)
+			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http.MethodPut, "/programs", cl)
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, resp.StatusCode)
 		})

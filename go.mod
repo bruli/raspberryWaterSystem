@@ -14,8 +14,6 @@ require (
 
 require github.com/google/uuid v1.3.0
 
-require github.com/santhosh-tekuri/jsonschema v1.2.4 // indirect
-
 require (
 	github.com/d2r2/go-dht v0.0.0-20200119175940-4ba96621a218
 	github.com/d2r2/go-logger v0.0.0-20210606094344-60e9d1233e22 // indirect

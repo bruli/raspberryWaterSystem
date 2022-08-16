@@ -27,7 +27,7 @@ func runZones(t *testing.T) {
 				Name:   zo.Name(),
 				Relays: relays,
 			}
-			resp, err := buildRequestAndSend(ctx, req, nil, http2.MethodPost, "/zones", cl)
+			resp, err := buildRequestAndSend(ctx, req, nil, http2.MethodPut, "/zones", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
@@ -43,7 +43,7 @@ func runZones(t *testing.T) {
 				Name:   zo.Name(),
 				Relays: relays,
 			}
-			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, "/zones", cl)
+			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/zones", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 			savedZone = &zo
