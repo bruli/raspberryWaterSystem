@@ -18,34 +18,34 @@ var _ app.ZoneRepository = &ZoneRepositoryMock{}
 
 // ZoneRepositoryMock is a mock implementation of app.ZoneRepository.
 //
-// 	func TestSomethingThatUsesZoneRepository(t *testing.T) {
+//	func TestSomethingThatUsesZoneRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.ZoneRepository
-// 		mockedZoneRepository := &ZoneRepositoryMock{
-// 			FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
-// 				panic("mock out the FindByID method")
-// 			},
-// 			SaveFunc: func(ctx context.Context, zo zone.Zone) error {
-// 				panic("mock out the Save method")
-// 			},
-// 			UpdateFunc: func(ctx context.Context, zo zone.Zone) error {
-// 				panic("mock out the Update method")
-// 			},
-// 		}
+//		// make and configure a mocked app.ZoneRepository
+//		mockedZoneRepository := &ZoneRepositoryMock{
+//			FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
+//				panic("mock out the FindByID method")
+//			},
+//			RemoveFunc: func(ctx context.Context, zo zone.Zone) error {
+//				panic("mock out the Remove method")
+//			},
+//			SaveFunc: func(ctx context.Context, zo zone.Zone) error {
+//				panic("mock out the Save method")
+//			},
+//		}
 //
-// 		// use mockedZoneRepository in code that requires app.ZoneRepository
-// 		// and then make assertions.
+//		// use mockedZoneRepository in code that requires app.ZoneRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ZoneRepositoryMock struct {
 	// FindByIDFunc mocks the FindByID method.
 	FindByIDFunc func(ctx context.Context, id string) (zone.Zone, error)
 
+	// RemoveFunc mocks the Remove method.
+	RemoveFunc func(ctx context.Context, zo zone.Zone) error
+
 	// SaveFunc mocks the Save method.
 	SaveFunc func(ctx context.Context, zo zone.Zone) error
-
-	// UpdateFunc mocks the Update method.
-	UpdateFunc func(ctx context.Context, zo zone.Zone) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -56,6 +56,13 @@ type ZoneRepositoryMock struct {
 			// ID is the id argument value.
 			ID string
 		}
+		// Remove holds details about calls to the Remove method.
+		Remove []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Zo is the zo argument value.
+			Zo zone.Zone
+		}
 		// Save holds details about calls to the Save method.
 		Save []struct {
 			// Ctx is the ctx argument value.
@@ -63,17 +70,10 @@ type ZoneRepositoryMock struct {
 			// Zo is the zo argument value.
 			Zo zone.Zone
 		}
-		// Update holds details about calls to the Update method.
-		Update []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// Zo is the zo argument value.
-			Zo zone.Zone
-		}
 	}
 	lockFindByID sync.RWMutex
+	lockRemove   sync.RWMutex
 	lockSave     sync.RWMutex
-	lockUpdate   sync.RWMutex
 }
 
 // FindByID calls FindByIDFunc.
@@ -96,7 +96,8 @@ func (mock *ZoneRepositoryMock) FindByID(ctx context.Context, id string) (zone.Z
 
 // FindByIDCalls gets all the calls that were made to FindByID.
 // Check the length with:
-//     len(mockedZoneRepository.FindByIDCalls())
+//
+//	len(mockedZoneRepository.FindByIDCalls())
 func (mock *ZoneRepositoryMock) FindByIDCalls() []struct {
 	Ctx context.Context
 	ID  string
@@ -108,6 +109,42 @@ func (mock *ZoneRepositoryMock) FindByIDCalls() []struct {
 	mock.lockFindByID.RLock()
 	calls = mock.calls.FindByID
 	mock.lockFindByID.RUnlock()
+	return calls
+}
+
+// Remove calls RemoveFunc.
+func (mock *ZoneRepositoryMock) Remove(ctx context.Context, zo zone.Zone) error {
+	if mock.RemoveFunc == nil {
+		panic("ZoneRepositoryMock.RemoveFunc: method is nil but ZoneRepository.Remove was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Zo  zone.Zone
+	}{
+		Ctx: ctx,
+		Zo:  zo,
+	}
+	mock.lockRemove.Lock()
+	mock.calls.Remove = append(mock.calls.Remove, callInfo)
+	mock.lockRemove.Unlock()
+	return mock.RemoveFunc(ctx, zo)
+}
+
+// RemoveCalls gets all the calls that were made to Remove.
+// Check the length with:
+//
+//	len(mockedZoneRepository.RemoveCalls())
+func (mock *ZoneRepositoryMock) RemoveCalls() []struct {
+	Ctx context.Context
+	Zo  zone.Zone
+} {
+	var calls []struct {
+		Ctx context.Context
+		Zo  zone.Zone
+	}
+	mock.lockRemove.RLock()
+	calls = mock.calls.Remove
+	mock.lockRemove.RUnlock()
 	return calls
 }
 
@@ -131,7 +168,8 @@ func (mock *ZoneRepositoryMock) Save(ctx context.Context, zo zone.Zone) error {
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedZoneRepository.SaveCalls())
+//
+//	len(mockedZoneRepository.SaveCalls())
 func (mock *ZoneRepositoryMock) SaveCalls() []struct {
 	Ctx context.Context
 	Zo  zone.Zone
@@ -146,60 +184,25 @@ func (mock *ZoneRepositoryMock) SaveCalls() []struct {
 	return calls
 }
 
-// Update calls UpdateFunc.
-func (mock *ZoneRepositoryMock) Update(ctx context.Context, zo zone.Zone) error {
-	if mock.UpdateFunc == nil {
-		panic("ZoneRepositoryMock.UpdateFunc: method is nil but ZoneRepository.Update was just called")
-	}
-	callInfo := struct {
-		Ctx context.Context
-		Zo  zone.Zone
-	}{
-		Ctx: ctx,
-		Zo:  zo,
-	}
-	mock.lockUpdate.Lock()
-	mock.calls.Update = append(mock.calls.Update, callInfo)
-	mock.lockUpdate.Unlock()
-	return mock.UpdateFunc(ctx, zo)
-}
-
-// UpdateCalls gets all the calls that were made to Update.
-// Check the length with:
-//     len(mockedZoneRepository.UpdateCalls())
-func (mock *ZoneRepositoryMock) UpdateCalls() []struct {
-	Ctx context.Context
-	Zo  zone.Zone
-} {
-	var calls []struct {
-		Ctx context.Context
-		Zo  zone.Zone
-	}
-	mock.lockUpdate.RLock()
-	calls = mock.calls.Update
-	mock.lockUpdate.RUnlock()
-	return calls
-}
-
 // Ensure, that TemperatureRepositoryMock does implement app.TemperatureRepository.
 // If this is not the case, regenerate this file with moq.
 var _ app.TemperatureRepository = &TemperatureRepositoryMock{}
 
 // TemperatureRepositoryMock is a mock implementation of app.TemperatureRepository.
 //
-// 	func TestSomethingThatUsesTemperatureRepository(t *testing.T) {
+//	func TestSomethingThatUsesTemperatureRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.TemperatureRepository
-// 		mockedTemperatureRepository := &TemperatureRepositoryMock{
-// 			FindFunc: func(ctx context.Context) (float32, float32, error) {
-// 				panic("mock out the Find method")
-// 			},
-// 		}
+//		// make and configure a mocked app.TemperatureRepository
+//		mockedTemperatureRepository := &TemperatureRepositoryMock{
+//			FindFunc: func(ctx context.Context) (float32, float32, error) {
+//				panic("mock out the Find method")
+//			},
+//		}
 //
-// 		// use mockedTemperatureRepository in code that requires app.TemperatureRepository
-// 		// and then make assertions.
+//		// use mockedTemperatureRepository in code that requires app.TemperatureRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type TemperatureRepositoryMock struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context) (float32, float32, error)
@@ -233,7 +236,8 @@ func (mock *TemperatureRepositoryMock) Find(ctx context.Context) (float32, float
 
 // FindCalls gets all the calls that were made to Find.
 // Check the length with:
-//     len(mockedTemperatureRepository.FindCalls())
+//
+//	len(mockedTemperatureRepository.FindCalls())
 func (mock *TemperatureRepositoryMock) FindCalls() []struct {
 	Ctx context.Context
 } {
@@ -252,19 +256,19 @@ var _ app.RainRepository = &RainRepositoryMock{}
 
 // RainRepositoryMock is a mock implementation of app.RainRepository.
 //
-// 	func TestSomethingThatUsesRainRepository(t *testing.T) {
+//	func TestSomethingThatUsesRainRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.RainRepository
-// 		mockedRainRepository := &RainRepositoryMock{
-// 			FindFunc: func(ctx context.Context) (bool, error) {
-// 				panic("mock out the Find method")
-// 			},
-// 		}
+//		// make and configure a mocked app.RainRepository
+//		mockedRainRepository := &RainRepositoryMock{
+//			FindFunc: func(ctx context.Context) (bool, error) {
+//				panic("mock out the Find method")
+//			},
+//		}
 //
-// 		// use mockedRainRepository in code that requires app.RainRepository
-// 		// and then make assertions.
+//		// use mockedRainRepository in code that requires app.RainRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type RainRepositoryMock struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context) (bool, error)
@@ -298,7 +302,8 @@ func (mock *RainRepositoryMock) Find(ctx context.Context) (bool, error) {
 
 // FindCalls gets all the calls that were made to Find.
 // Check the length with:
-//     len(mockedRainRepository.FindCalls())
+//
+//	len(mockedRainRepository.FindCalls())
 func (mock *RainRepositoryMock) FindCalls() []struct {
 	Ctx context.Context
 } {
@@ -317,25 +322,25 @@ var _ app.StatusRepository = &StatusRepositoryMock{}
 
 // StatusRepositoryMock is a mock implementation of app.StatusRepository.
 //
-// 	func TestSomethingThatUsesStatusRepository(t *testing.T) {
+//	func TestSomethingThatUsesStatusRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.StatusRepository
-// 		mockedStatusRepository := &StatusRepositoryMock{
-// 			FindFunc: func(ctx context.Context) (status.Status, error) {
-// 				panic("mock out the Find method")
-// 			},
-// 			SaveFunc: func(ctx context.Context, st status.Status) error {
-// 				panic("mock out the Save method")
-// 			},
-// 			UpdateFunc: func(ctx context.Context, st status.Status) error {
-// 				panic("mock out the Update method")
-// 			},
-// 		}
+//		// make and configure a mocked app.StatusRepository
+//		mockedStatusRepository := &StatusRepositoryMock{
+//			FindFunc: func(ctx context.Context) (status.Status, error) {
+//				panic("mock out the Find method")
+//			},
+//			SaveFunc: func(ctx context.Context, st status.Status) error {
+//				panic("mock out the Save method")
+//			},
+//			UpdateFunc: func(ctx context.Context, st status.Status) error {
+//				panic("mock out the Update method")
+//			},
+//		}
 //
-// 		// use mockedStatusRepository in code that requires app.StatusRepository
-// 		// and then make assertions.
+//		// use mockedStatusRepository in code that requires app.StatusRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type StatusRepositoryMock struct {
 	// FindFunc mocks the Find method.
 	FindFunc func(ctx context.Context) (status.Status, error)
@@ -391,7 +396,8 @@ func (mock *StatusRepositoryMock) Find(ctx context.Context) (status.Status, erro
 
 // FindCalls gets all the calls that were made to Find.
 // Check the length with:
-//     len(mockedStatusRepository.FindCalls())
+//
+//	len(mockedStatusRepository.FindCalls())
 func (mock *StatusRepositoryMock) FindCalls() []struct {
 	Ctx context.Context
 } {
@@ -424,7 +430,8 @@ func (mock *StatusRepositoryMock) Save(ctx context.Context, st status.Status) er
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedStatusRepository.SaveCalls())
+//
+//	len(mockedStatusRepository.SaveCalls())
 func (mock *StatusRepositoryMock) SaveCalls() []struct {
 	Ctx context.Context
 	St  status.Status
@@ -459,7 +466,8 @@ func (mock *StatusRepositoryMock) Update(ctx context.Context, st status.Status) 
 
 // UpdateCalls gets all the calls that were made to Update.
 // Check the length with:
-//     len(mockedStatusRepository.UpdateCalls())
+//
+//	len(mockedStatusRepository.UpdateCalls())
 func (mock *StatusRepositoryMock) UpdateCalls() []struct {
 	Ctx context.Context
 	St  status.Status
@@ -480,25 +488,25 @@ var _ app.ProgramRepository = &ProgramRepositoryMock{}
 
 // ProgramRepositoryMock is a mock implementation of app.ProgramRepository.
 //
-// 	func TestSomethingThatUsesProgramRepository(t *testing.T) {
+//	func TestSomethingThatUsesProgramRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.ProgramRepository
-// 		mockedProgramRepository := &ProgramRepositoryMock{
-// 			FindAllFunc: func(ctx context.Context) ([]program.Program, error) {
-// 				panic("mock out the FindAll method")
-// 			},
-// 			FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Program, error) {
-// 				panic("mock out the FindByHour method")
-// 			},
-// 			SaveFunc: func(ctx context.Context, programs []program.Program) error {
-// 				panic("mock out the Save method")
-// 			},
-// 		}
+//		// make and configure a mocked app.ProgramRepository
+//		mockedProgramRepository := &ProgramRepositoryMock{
+//			FindAllFunc: func(ctx context.Context) ([]program.Program, error) {
+//				panic("mock out the FindAll method")
+//			},
+//			FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Program, error) {
+//				panic("mock out the FindByHour method")
+//			},
+//			SaveFunc: func(ctx context.Context, programs []program.Program) error {
+//				panic("mock out the Save method")
+//			},
+//		}
 //
-// 		// use mockedProgramRepository in code that requires app.ProgramRepository
-// 		// and then make assertions.
+//		// use mockedProgramRepository in code that requires app.ProgramRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ProgramRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func(ctx context.Context) ([]program.Program, error)
@@ -554,7 +562,8 @@ func (mock *ProgramRepositoryMock) FindAll(ctx context.Context) ([]program.Progr
 
 // FindAllCalls gets all the calls that were made to FindAll.
 // Check the length with:
-//     len(mockedProgramRepository.FindAllCalls())
+//
+//	len(mockedProgramRepository.FindAllCalls())
 func (mock *ProgramRepositoryMock) FindAllCalls() []struct {
 	Ctx context.Context
 } {
@@ -587,7 +596,8 @@ func (mock *ProgramRepositoryMock) FindByHour(ctx context.Context, hour program.
 
 // FindByHourCalls gets all the calls that were made to FindByHour.
 // Check the length with:
-//     len(mockedProgramRepository.FindByHourCalls())
+//
+//	len(mockedProgramRepository.FindByHourCalls())
 func (mock *ProgramRepositoryMock) FindByHourCalls() []struct {
 	Ctx  context.Context
 	Hour program.Hour
@@ -622,7 +632,8 @@ func (mock *ProgramRepositoryMock) Save(ctx context.Context, programs []program.
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedProgramRepository.SaveCalls())
+//
+//	len(mockedProgramRepository.SaveCalls())
 func (mock *ProgramRepositoryMock) SaveCalls() []struct {
 	Ctx      context.Context
 	Programs []program.Program
@@ -643,25 +654,25 @@ var _ app.WeeklyProgramRepository = &WeeklyProgramRepositoryMock{}
 
 // WeeklyProgramRepositoryMock is a mock implementation of app.WeeklyProgramRepository.
 //
-// 	func TestSomethingThatUsesWeeklyProgramRepository(t *testing.T) {
+//	func TestSomethingThatUsesWeeklyProgramRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.WeeklyProgramRepository
-// 		mockedWeeklyProgramRepository := &WeeklyProgramRepositoryMock{
-// 			FindAllFunc: func(ctx context.Context) ([]program.Weekly, error) {
-// 				panic("mock out the FindAll method")
-// 			},
-// 			FindByDayAndHourFunc: func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
-// 				panic("mock out the FindByDayAndHour method")
-// 			},
-// 			SaveFunc: func(ctx context.Context, programs []program.Weekly) error {
-// 				panic("mock out the Save method")
-// 			},
-// 		}
+//		// make and configure a mocked app.WeeklyProgramRepository
+//		mockedWeeklyProgramRepository := &WeeklyProgramRepositoryMock{
+//			FindAllFunc: func(ctx context.Context) ([]program.Weekly, error) {
+//				panic("mock out the FindAll method")
+//			},
+//			FindByDayAndHourFunc: func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
+//				panic("mock out the FindByDayAndHour method")
+//			},
+//			SaveFunc: func(ctx context.Context, programs []program.Weekly) error {
+//				panic("mock out the Save method")
+//			},
+//		}
 //
-// 		// use mockedWeeklyProgramRepository in code that requires app.WeeklyProgramRepository
-// 		// and then make assertions.
+//		// use mockedWeeklyProgramRepository in code that requires app.WeeklyProgramRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type WeeklyProgramRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func(ctx context.Context) ([]program.Weekly, error)
@@ -719,7 +730,8 @@ func (mock *WeeklyProgramRepositoryMock) FindAll(ctx context.Context) ([]program
 
 // FindAllCalls gets all the calls that were made to FindAll.
 // Check the length with:
-//     len(mockedWeeklyProgramRepository.FindAllCalls())
+//
+//	len(mockedWeeklyProgramRepository.FindAllCalls())
 func (mock *WeeklyProgramRepositoryMock) FindAllCalls() []struct {
 	Ctx context.Context
 } {
@@ -754,7 +766,8 @@ func (mock *WeeklyProgramRepositoryMock) FindByDayAndHour(ctx context.Context, d
 
 // FindByDayAndHourCalls gets all the calls that were made to FindByDayAndHour.
 // Check the length with:
-//     len(mockedWeeklyProgramRepository.FindByDayAndHourCalls())
+//
+//	len(mockedWeeklyProgramRepository.FindByDayAndHourCalls())
 func (mock *WeeklyProgramRepositoryMock) FindByDayAndHourCalls() []struct {
 	Ctx  context.Context
 	Day  program.WeekDay
@@ -791,7 +804,8 @@ func (mock *WeeklyProgramRepositoryMock) Save(ctx context.Context, programs []pr
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedWeeklyProgramRepository.SaveCalls())
+//
+//	len(mockedWeeklyProgramRepository.SaveCalls())
 func (mock *WeeklyProgramRepositoryMock) SaveCalls() []struct {
 	Ctx      context.Context
 	Programs []program.Weekly
@@ -812,25 +826,25 @@ var _ app.TemperatureProgramRepository = &TemperatureProgramRepositoryMock{}
 
 // TemperatureProgramRepositoryMock is a mock implementation of app.TemperatureProgramRepository.
 //
-// 	func TestSomethingThatUsesTemperatureProgramRepository(t *testing.T) {
+//	func TestSomethingThatUsesTemperatureProgramRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.TemperatureProgramRepository
-// 		mockedTemperatureProgramRepository := &TemperatureProgramRepositoryMock{
-// 			FindAllFunc: func(ctx context.Context) ([]program.Temperature, error) {
-// 				panic("mock out the FindAll method")
-// 			},
-// 			FindByTemperatureAndHourFunc: func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
-// 				panic("mock out the FindByTemperatureAndHour method")
-// 			},
-// 			SaveFunc: func(ctx context.Context, programs []program.Temperature) error {
-// 				panic("mock out the Save method")
-// 			},
-// 		}
+//		// make and configure a mocked app.TemperatureProgramRepository
+//		mockedTemperatureProgramRepository := &TemperatureProgramRepositoryMock{
+//			FindAllFunc: func(ctx context.Context) ([]program.Temperature, error) {
+//				panic("mock out the FindAll method")
+//			},
+//			FindByTemperatureAndHourFunc: func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
+//				panic("mock out the FindByTemperatureAndHour method")
+//			},
+//			SaveFunc: func(ctx context.Context, programs []program.Temperature) error {
+//				panic("mock out the Save method")
+//			},
+//		}
 //
-// 		// use mockedTemperatureProgramRepository in code that requires app.TemperatureProgramRepository
-// 		// and then make assertions.
+//		// use mockedTemperatureProgramRepository in code that requires app.TemperatureProgramRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type TemperatureProgramRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func(ctx context.Context) ([]program.Temperature, error)
@@ -888,7 +902,8 @@ func (mock *TemperatureProgramRepositoryMock) FindAll(ctx context.Context) ([]pr
 
 // FindAllCalls gets all the calls that were made to FindAll.
 // Check the length with:
-//     len(mockedTemperatureProgramRepository.FindAllCalls())
+//
+//	len(mockedTemperatureProgramRepository.FindAllCalls())
 func (mock *TemperatureProgramRepositoryMock) FindAllCalls() []struct {
 	Ctx context.Context
 } {
@@ -923,7 +938,8 @@ func (mock *TemperatureProgramRepositoryMock) FindByTemperatureAndHour(ctx conte
 
 // FindByTemperatureAndHourCalls gets all the calls that were made to FindByTemperatureAndHour.
 // Check the length with:
-//     len(mockedTemperatureProgramRepository.FindByTemperatureAndHourCalls())
+//
+//	len(mockedTemperatureProgramRepository.FindByTemperatureAndHourCalls())
 func (mock *TemperatureProgramRepositoryMock) FindByTemperatureAndHourCalls() []struct {
 	Ctx         context.Context
 	Temperature float32
@@ -960,7 +976,8 @@ func (mock *TemperatureProgramRepositoryMock) Save(ctx context.Context, programs
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedTemperatureProgramRepository.SaveCalls())
+//
+//	len(mockedTemperatureProgramRepository.SaveCalls())
 func (mock *TemperatureProgramRepositoryMock) SaveCalls() []struct {
 	Ctx      context.Context
 	Programs []program.Temperature
@@ -981,22 +998,22 @@ var _ app.ExecutionLogRepository = &ExecutionLogRepositoryMock{}
 
 // ExecutionLogRepositoryMock is a mock implementation of app.ExecutionLogRepository.
 //
-// 	func TestSomethingThatUsesExecutionLogRepository(t *testing.T) {
+//	func TestSomethingThatUsesExecutionLogRepository(t *testing.T) {
 //
-// 		// make and configure a mocked app.ExecutionLogRepository
-// 		mockedExecutionLogRepository := &ExecutionLogRepositoryMock{
-// 			FindAllFunc: func(ctx context.Context) ([]program.ExecutionLog, error) {
-// 				panic("mock out the FindAll method")
-// 			},
-// 			SaveFunc: func(ctx context.Context, logs []program.ExecutionLog) error {
-// 				panic("mock out the Save method")
-// 			},
-// 		}
+//		// make and configure a mocked app.ExecutionLogRepository
+//		mockedExecutionLogRepository := &ExecutionLogRepositoryMock{
+//			FindAllFunc: func(ctx context.Context) ([]program.ExecutionLog, error) {
+//				panic("mock out the FindAll method")
+//			},
+//			SaveFunc: func(ctx context.Context, logs []program.ExecutionLog) error {
+//				panic("mock out the Save method")
+//			},
+//		}
 //
-// 		// use mockedExecutionLogRepository in code that requires app.ExecutionLogRepository
-// 		// and then make assertions.
+//		// use mockedExecutionLogRepository in code that requires app.ExecutionLogRepository
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ExecutionLogRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func(ctx context.Context) ([]program.ExecutionLog, error)
@@ -1041,7 +1058,8 @@ func (mock *ExecutionLogRepositoryMock) FindAll(ctx context.Context) ([]program.
 
 // FindAllCalls gets all the calls that were made to FindAll.
 // Check the length with:
-//     len(mockedExecutionLogRepository.FindAllCalls())
+//
+//	len(mockedExecutionLogRepository.FindAllCalls())
 func (mock *ExecutionLogRepositoryMock) FindAllCalls() []struct {
 	Ctx context.Context
 } {
@@ -1074,7 +1092,8 @@ func (mock *ExecutionLogRepositoryMock) Save(ctx context.Context, logs []program
 
 // SaveCalls gets all the calls that were made to Save.
 // Check the length with:
-//     len(mockedExecutionLogRepository.SaveCalls())
+//
+//	len(mockedExecutionLogRepository.SaveCalls())
 func (mock *ExecutionLogRepositoryMock) SaveCalls() []struct {
 	Ctx  context.Context
 	Logs []program.ExecutionLog

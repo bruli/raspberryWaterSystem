@@ -19,9 +19,17 @@ type ZoneRepository struct {
 	filePath string
 }
 
-func (z ZoneRepository) Update(ctx context.Context, zo zone.Zone) error {
-	// TODO implement me
-	panic("implement me")
+func (z ZoneRepository) Remove(_ context.Context, zo zone.Zone) error {
+	zones := make(zonesMap)
+	if err := readYamlFile(z.filePath, &zones); err != nil {
+		return err
+	}
+	_, ok := zones[zo.Id()]
+	if !ok {
+		return vo.NewNotFoundError(zo.Id())
+	}
+	delete(zones, zo.Id())
+	return writeYamlFile(z.filePath, zones)
 }
 
 func NewZoneRepository(filePath string) ZoneRepository {

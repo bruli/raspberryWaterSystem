@@ -12,7 +12,7 @@ type ZoneBuilder struct {
 
 func (b ZoneBuilder) Build() zone.Zone {
 	var z zone.Zone
-	id := uuid.New().String()
+	id := uuid.NewString()
 	if b.ID != nil {
 		id = *b.ID
 	}

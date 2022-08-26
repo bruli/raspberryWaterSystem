@@ -79,6 +79,7 @@ func main() {
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 	chBus.Subscribe(app.SaveExecutionLogCmdName, logCHMdw(app.NewSaveExecutionLog(execLogRepo)))
 	chBus.Subscribe(app.PublishExecutionLogCmdName, logCHMdw(app.NewPublishExecutionLog(execLogPub)))
+	chBus.Subscribe(app.RemoveZoneCmdName, logCHMdw(app.NewRemoveZone(zr)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
@@ -194,6 +195,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/zones/{id}/execute",
 			Method:      http.MethodPost,
 			HandlerFunc: authMdw(http2.ExecuteZone(chBus)),
+		},
+		{
+			Endpoint:    "/zones/{id}",
+			Method:      http.MethodDelete,
+			HandlerFunc: authMdw(http2.RemoveZone(chBus)),
 		},
 		{
 			Endpoint:    "/status",

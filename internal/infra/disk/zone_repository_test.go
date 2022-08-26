@@ -46,6 +46,20 @@ func TestZoneRepository(t *testing.T) {
 				require.Equal(t, *savedZone, zo)
 			})
 		})
+		t.Run(`when Remove method is called`, func(t *testing.T) {
+			t.Run(`with an invalid zone,
+			then it returns a not found error`, func(t *testing.T) {
+				err := repo.Remove(ctx, fixtures.ZoneBuilder{}.Build())
+				require.ErrorAs(t, err, &vo.NotFoundError{})
+			})
+			t.Run(`with a valid zone,
+			then it returns nil`, func(t *testing.T) {
+				err := repo.Remove(ctx, *savedZone)
+				require.NoError(t, err)
+				_, errFind := repo.FindByID(ctx, savedZone.Id())
+				require.ErrorAs(t, errFind, &vo.NotFoundError{})
+			})
+		})
 	})
 }
 
