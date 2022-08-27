@@ -1,5 +1,5 @@
-github.com/bruli/raspberryRainSensor v0.0.0-20220807151108-fd46e5f7af2e h1:TMi6oaXc2I6vCAF9kHNpFQNxWLvOK/0Bh8bqNW63IWU=
-github.com/bruli/raspberryRainSensor v0.0.0-20220807151108-fd46e5f7af2e/go.mod h1:n9nXHmSSa8vqqn2pf7TZZV+PT7FamUGRkxKX47wXYRw=
+github.com/bruli/raspberryRainSensor v0.0.0-20220827134114-8d991221ab58 h1:v0YN0oAfnAp9yiF0M6acgraB4tzYnccvQNcAJVPu160=
+github.com/bruli/raspberryRainSensor v0.0.0-20220827134114-8d991221ab58/go.mod h1:kVanx5D3kn8v9OTbnYeyuSSjPpVfnobi6xaFTIVQn0E=
 github.com/d2r2/go-dht v0.0.0-20200119175940-4ba96621a218 h1:z3u7ZAkBvqHD2zaECn0qd1BwMCTiAYcQjFdU8vflVHo=
 github.com/d2r2/go-dht v0.0.0-20200119175940-4ba96621a218/go.mod h1:AzSqP4S4/6pINOKg3VC79WC7YY3zskQcrXMFzphCry0=
 github.com/d2r2/go-logger v0.0.0-20210606094344-60e9d1233e22 h1:nO+SY4KOMsF/LsZ5EtbSKhiT3M6sv/igo2PEru/xEHI=
@@ -19,7 +19,6 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rs/cors v1.8.2 h1:KCooALfAYGs415Cwu5ABvv9n9509fSiG5SQJn/AQo4U=
 github.com/rs/cors v1.8.2/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
-github.com/stianeikeland/go-rpio/v4 v4.6.0/go.mod h1:A3GvHxC1Om5zaId+HqB3HKqx4K/AqeckxB7qRjxMK7o=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=

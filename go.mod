@@ -3,7 +3,7 @@ module github.com/bruli/raspberryWaterSystem
 go 1.19
 
 require (
-	github.com/bruli/raspberryRainSensor v0.0.0-20220807151108-fd46e5f7af2e
+	github.com/bruli/raspberryRainSensor v0.0.0-20220827134114-8d991221ab58
 	github.com/davecgh/go-spew v1.1.1
 )
 
