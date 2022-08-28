@@ -41,17 +41,28 @@ docker-ps:
 	docker-compose ps
 
 docker-exec:
-	docker exec -it water_system sh
+	docker exec -it water_system bash:q
 
 lint:
 	golangci-lint run
 	devops/scripts/json-lint.sh
 	go mod tidy -v && git --no-pager diff --quiet go.mod go.sum
 
+clean:
+	go fmt ./...
+
 import-jsonschema:
 	devops/scripts/import_jsonschema.sh
 
 encryptVault:
-	ansible-vault encrypt --vault-id raspberry_water_system@deploy/password deploy/inventories/production/group_vars/raspberry_water_system/vault.yml
+	ansible-vault encrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
 decryptVault:
-	ansible-vault decrypt --vault-id raspberry_water_system@deploy/password deploy/inventories/production/group_vars/raspberry_water_system/vault.yml
+	ansible-vault decrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
+
+build:
+	@make clean
+	CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go build -buildvcs=false -o deploy/assets/server ./cmd/server/
+
+docker-exec-builder:
+	docker build -t builder .
+	docker run -it --rm -v $(shell pwd):/app builder bash

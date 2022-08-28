@@ -16,19 +16,19 @@ var _ app.ExecutionLogPublisher = &ExecutionLogPublisherMock{}
 
 // ExecutionLogPublisherMock is a mock implementation of app.ExecutionLogPublisher.
 //
-// 	func TestSomethingThatUsesExecutionLogPublisher(t *testing.T) {
+//	func TestSomethingThatUsesExecutionLogPublisher(t *testing.T) {
 //
-// 		// make and configure a mocked app.ExecutionLogPublisher
-// 		mockedExecutionLogPublisher := &ExecutionLogPublisherMock{
-// 			PublishFunc: func(ctx context.Context, execLog program.ExecutionLog) error {
-// 				panic("mock out the Publish method")
-// 			},
-// 		}
+//		// make and configure a mocked app.ExecutionLogPublisher
+//		mockedExecutionLogPublisher := &ExecutionLogPublisherMock{
+//			PublishFunc: func(ctx context.Context, execLog program.ExecutionLog) error {
+//				panic("mock out the Publish method")
+//			},
+//		}
 //
-// 		// use mockedExecutionLogPublisher in code that requires app.ExecutionLogPublisher
-// 		// and then make assertions.
+//		// use mockedExecutionLogPublisher in code that requires app.ExecutionLogPublisher
+//		// and then make assertions.
 //
-// 	}
+//	}
 type ExecutionLogPublisherMock struct {
 	// PublishFunc mocks the Publish method.
 	PublishFunc func(ctx context.Context, execLog program.ExecutionLog) error
@@ -66,7 +66,8 @@ func (mock *ExecutionLogPublisherMock) Publish(ctx context.Context, execLog prog
 
 // PublishCalls gets all the calls that were made to Publish.
 // Check the length with:
-//     len(mockedExecutionLogPublisher.PublishCalls())
+//
+//	len(mockedExecutionLogPublisher.PublishCalls())
 func (mock *ExecutionLogPublisherMock) PublishCalls() []struct {
 	Ctx     context.Context
 	ExecLog program.ExecutionLog

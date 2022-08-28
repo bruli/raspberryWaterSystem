@@ -15,19 +15,19 @@ var _ app.PinExecutor = &PinExecutorMock{}
 
 // PinExecutorMock is a mock implementation of app.PinExecutor.
 //
-// 	func TestSomethingThatUsesPinExecutor(t *testing.T) {
+//	func TestSomethingThatUsesPinExecutor(t *testing.T) {
 //
-// 		// make and configure a mocked app.PinExecutor
-// 		mockedPinExecutor := &PinExecutorMock{
-// 			ExecuteFunc: func(ctx context.Context, seconds uint, pins []string) error {
-// 				panic("mock out the Execute method")
-// 			},
-// 		}
+//		// make and configure a mocked app.PinExecutor
+//		mockedPinExecutor := &PinExecutorMock{
+//			ExecuteFunc: func(ctx context.Context, seconds uint, pins []string) error {
+//				panic("mock out the Execute method")
+//			},
+//		}
 //
-// 		// use mockedPinExecutor in code that requires app.PinExecutor
-// 		// and then make assertions.
+//		// use mockedPinExecutor in code that requires app.PinExecutor
+//		// and then make assertions.
 //
-// 	}
+//	}
 type PinExecutorMock struct {
 	// ExecuteFunc mocks the Execute method.
 	ExecuteFunc func(ctx context.Context, seconds uint, pins []string) error
@@ -69,7 +69,8 @@ func (mock *PinExecutorMock) Execute(ctx context.Context, seconds uint, pins []s
 
 // ExecuteCalls gets all the calls that were made to Execute.
 // Check the length with:
-//     len(mockedPinExecutor.ExecuteCalls())
+//
+//	len(mockedPinExecutor.ExecuteCalls())
 func (mock *PinExecutorMock) ExecuteCalls() []struct {
 	Ctx     context.Context
 	Seconds uint
