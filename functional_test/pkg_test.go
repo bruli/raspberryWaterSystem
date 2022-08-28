@@ -39,9 +39,8 @@ func runPkg(t *testing.T) {
 		})
 		t.Run(`when GetLogs method is called,
 		then it returns a valid logs slice`, func(t *testing.T) {
-			logs, err := pkg.GetLogs(ctx, 1)
+			_, err := pkg.GetLogs(ctx, 1)
 			require.NoError(t, err)
-			require.NotEmpty(t, logs)
 		})
 	})
 }

@@ -1,9 +1,9 @@
-FROM golang:1.19-alpine
+FROM golang:1.19-bullseye
 
 RUN mkdir /app
 WORKDIR /app
 
-RUN apk add --update --no-cache make git gcc jq
+RUN apt-get update && apt-get upgrade -y && apt-get install -y make git
 
 RUN go install -v github.com/cespare/reflex@latest
 EXPOSE 8080
