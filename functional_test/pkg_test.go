@@ -26,5 +26,22 @@ func runPkg(t *testing.T) {
 			require.NoError(t, err)
 			require.NotEmpty(t, status)
 		})
+		t.Run(`when GetWeather method is called,
+		then it returns a valid weather object`, func(t *testing.T) {
+			weather, err := pkg.GetWeather(ctx)
+			require.NoError(t, err)
+			require.NotEmpty(t, weather)
+		})
+		t.Run(`when Execute zone method is called,
+		then it returns nil`, func(t *testing.T) {
+			err = pkg.ExecuteZone(ctx, savedZone.Id(), 2)
+			require.NoError(t, err)
+		})
+		t.Run(`when GetLogs method is called,
+		then it returns a valid logs slice`, func(t *testing.T) {
+			logs, err := pkg.GetLogs(ctx, 1)
+			require.NoError(t, err)
+			require.NotEmpty(t, logs)
+		})
 	})
 }

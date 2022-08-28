@@ -9,8 +9,8 @@ type (
 	ExecuteZoneFunc func(ctx context.Context, zone string, seconds int) error
 	Handlers        struct {
 		GetStatus   StatusFunc
-		Weather     WeatherFunc
-		Logs        LogsFunc
+		GetWeather  WeatherFunc
+		GetLogs     LogsFunc
 		ExecuteZone ExecuteZoneFunc
 	}
 )

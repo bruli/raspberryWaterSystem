@@ -76,7 +76,8 @@ func (z *Zone) Execute(seconds uint) error {
 		pins[i] = p.pin
 	}
 	z.Record(Executed{
-		BasicEvent: cqs.NewBasicEvent(ExecutedEventName, uuid.New(), z.name),
+		BasicEvent: cqs.NewBasicEvent(ExecutedEventName, uuid.New(), z.id),
+		ZoneID:     z.id,
 		ZoneName:   z.name,
 		Seconds:    seconds,
 		RelayPins:  pins,

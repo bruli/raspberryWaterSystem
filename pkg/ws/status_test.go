@@ -28,7 +28,6 @@ func TestGetStatus(t *testing.T) {
 		Temperature:     20,
 		UpdatedAt:       vo.StringPtr(vo.TimeNow().EpochString()),
 	}
-	invalidResp := struct{ id string }{}
 	started, _ := vo.ParseFromEpochStr(statusResp.SystemStartedAt)
 	updated, _ := vo.ParseFromEpochStr(vo.StringValue(statusResp.UpdatedAt))
 	status := ws.Status{
@@ -61,7 +60,7 @@ func TestGetStatus(t *testing.T) {
 		},
 		{
 			name:        "and http client returns ok but invalid response object, then it returns a failed to read response error",
-			response:    &http.Response{StatusCode: http.StatusOK, Body: buildBody(t, invalidResp)},
+			response:    &http.Response{StatusCode: http.StatusOK, Body: buildBody(t, invalidResponse{})},
 			expectedErr: ws.ErrFailedToReadResponse,
 		},
 		{
@@ -96,4 +95,8 @@ func buildBody(t *testing.T, resp interface{}) io.ReadCloser {
 	body := io.NopCloser(strings.NewReader(string(data)))
 
 	return body
+}
+
+type invalidResponse struct {
+	ID string
 }

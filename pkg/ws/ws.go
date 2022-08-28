@@ -10,8 +10,8 @@ func New(serverURL url.URL, cl HTTPClient, token string) Handlers {
 	}
 	return Handlers{
 		GetStatus:   GetStatus(cli),
-		Weather:     nil,
-		Logs:        nil,
-		ExecuteZone: nil,
+		GetWeather:  GetWeather(cli),
+		GetLogs:     GetLog(cli),
+		ExecuteZone: ExecuteZone(cli),
 	}
 }

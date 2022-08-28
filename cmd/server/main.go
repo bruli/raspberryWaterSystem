@@ -42,7 +42,7 @@ func main() {
 	ctx := context.Background()
 	logger := log.New(os.Stdout, config.ProjectPrefix, int(time.Now().Unix()))
 
-	eventsCh := make(chan cqs.Event)
+	eventsCh := make(chan cqs.Event, 5)
 	defer close(eventsCh)
 
 	logCHMdw := cqs.NewCommandHndErrorMiddleware(logger)
