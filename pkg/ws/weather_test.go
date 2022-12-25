@@ -3,10 +3,11 @@ package ws_test
 import (
 	"context"
 	"errors"
-	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"net/http"
 	"net/url"
 	"testing"
+
+	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/pkg/ws"

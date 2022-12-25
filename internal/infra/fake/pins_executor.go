@@ -2,20 +2,19 @@ package fake
 
 import (
 	"context"
-	"log"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
-type PinsExecutor struct {
-	log *log.Logger
-}
+type PinsExecutor struct{}
 
-func NewPinsExecutor(log *log.Logger) PinsExecutor {
-	return PinsExecutor{log: log}
+func NewPinsExecutor() PinsExecutor {
+	return PinsExecutor{}
 }
 
 func (p PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string) error {
 	time.Sleep(time.Duration(seconds) * time.Second)
-	p.log.Printf("pins %s executed %v seconds", pins, seconds)
+	log.Debug().Msgf("pins %s executed %v seconds", pins, seconds)
 	return nil
 }

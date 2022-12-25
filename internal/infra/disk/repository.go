@@ -3,7 +3,6 @@ package disk
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -13,7 +12,7 @@ func readYamlFile(path string, data interface{}) error {
 	if err := checkFile(path); err != nil {
 		return fmt.Errorf("failed to check %s file", path)
 	}
-	fileData, err := ioutil.ReadFile(path)
+	fileData, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("failed to read file %s: %w", path, err)
 	}
@@ -27,7 +26,7 @@ func readJsonFile(path string, data interface{}) error {
 	if err := checkFile(path); err != nil {
 		return fmt.Errorf("failed to check %s file", path)
 	}
-	fileData, err := ioutil.ReadFile(path)
+	fileData, err := os.ReadFile(path)
 	if err != nil {
 		return fmt.Errorf("failed to read file %s: %w", path, err)
 	}
@@ -41,7 +40,7 @@ func checkFile(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err = ioutil.WriteFile(path, nil, 0o755); err != nil {
+			if err = os.WriteFile(path, nil, 0o755); err != nil {
 				return err
 			}
 		}
@@ -54,7 +53,7 @@ func writeYamlFile(path string, data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
-	return ioutil.WriteFile(path, dataFile, 0o755)
+	return os.WriteFile(path, dataFile, 0o755)
 }
 
 func writeJsonFile(path string, data interface{}) error {
@@ -62,5 +61,5 @@ func writeJsonFile(path string, data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
-	return ioutil.WriteFile(path, dataFile, 0o755)
+	return os.WriteFile(path, dataFile, 0o755)
 }
