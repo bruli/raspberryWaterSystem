@@ -17,12 +17,6 @@
 # vendor/
 
 .idea
-/test/acceptance/assets/
-!/test/acceptance/assets/.gitkeep
-/test/acceptance/server
-/cmd/server/server
-/deploy/config/raspberry-server.conf
-/deploy/password
-/config.yaml
-/deploy/assets/
-!/deploy/assets/.gitkeep
+/devops/ansible/password
+/devops/ansible/assets/
+!/devops/ansible/assets/.gitkeep
