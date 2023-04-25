@@ -21,8 +21,13 @@ type ProgramRepository struct {
 }
 
 func (d ProgramRepository) Save(ctx context.Context, programs []program.Program) error {
-	dailyPrgms := buildProgramMap(programs)
-	return writeYamlFile(d.filePath, dailyPrgms)
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		dailyPrgms := buildProgramMap(programs)
+		return writeYamlFile(d.filePath, dailyPrgms)
+	}
 }
 
 func buildProgramMap(programs []program.Program) programMap {

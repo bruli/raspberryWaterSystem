@@ -36,11 +36,16 @@ func buildLogs(execLogs []program.ExecutionLog) []log {
 }
 
 func (e ExecutionLogRepository) FindAll(ctx context.Context) ([]program.ExecutionLog, error) {
-	var logs []log
-	if err := readJsonFile(e.path, &logs); err != nil {
-		return []program.ExecutionLog{}, nil
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var logs []log
+		if err := readJsonFile(e.path, &logs); err != nil {
+			return []program.ExecutionLog{}, nil
+		}
+		return buildExecutionLogs(logs), nil
 	}
-	return buildExecutionLogs(logs), nil
 }
 
 func buildExecutionLogs(logs []log) []program.ExecutionLog {

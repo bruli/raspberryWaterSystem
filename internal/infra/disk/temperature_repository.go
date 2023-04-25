@@ -15,19 +15,29 @@ type TemperatureProgramRepository struct {
 }
 
 func (t TemperatureProgramRepository) Save(ctx context.Context, programs []program.Temperature) error {
-	temp := make(temperatureMap)
-	for _, pr := range programs {
-		temp[pr.Temperature()] = buildProgramMap(pr.Programs())
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		temp := make(temperatureMap)
+		for _, pr := range programs {
+			temp[pr.Temperature()] = buildProgramMap(pr.Programs())
+		}
+		return writeYamlFile(t.path, temp)
 	}
-	return writeYamlFile(t.path, temp)
 }
 
 func (t TemperatureProgramRepository) FindAll(ctx context.Context) ([]program.Temperature, error) {
-	temperature := make(temperatureMap)
-	if err := readYamlFile(t.path, &temperature); err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		temperature := make(temperatureMap)
+		if err := readYamlFile(t.path, &temperature); err != nil {
+			return nil, err
+		}
+		return buildTemperaturePrograms(temperature), nil
 	}
-	return buildTemperaturePrograms(temperature), nil
 }
 
 func buildTemperaturePrograms(temperature temperatureMap) []program.Temperature {
@@ -41,19 +51,24 @@ func buildTemperaturePrograms(temperature temperatureMap) []program.Temperature 
 }
 
 func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
-	temp := make(temperatureMap)
-	if err := readYamlFile(t.path, &temp); err != nil {
-		return program.Temperature{}, err
+	select {
+	case <-ctx.Done():
+		return program.Temperature{}, ctx.Err()
+	default:
+		temp := make(temperatureMap)
+		if err := readYamlFile(t.path, &temp); err != nil {
+			return program.Temperature{}, err
+		}
+		byTemp, ok := temp[temperature]
+		if !ok {
+			return program.Temperature{}, vo.NotFoundError{}
+		}
+		byHour, ok := byTemp[hour.String()]
+		if !ok {
+			return program.Temperature{}, vo.NotFoundError{}
+		}
+		return buildProgramTemperature(temperature, hour, byHour), nil
 	}
-	byTemp, ok := temp[temperature]
-	if !ok {
-		return program.Temperature{}, vo.NotFoundError{}
-	}
-	byHour, ok := byTemp[hour.String()]
-	if !ok {
-		return program.Temperature{}, vo.NotFoundError{}
-	}
-	return buildProgramTemperature(temperature, hour, byHour), nil
 }
 
 func buildProgramTemperature(temperature float32, hour program.Hour, prgms []programData) program.Temperature {

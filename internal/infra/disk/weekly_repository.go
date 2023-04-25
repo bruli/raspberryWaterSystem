@@ -15,19 +15,24 @@ type WeeklyRepository struct {
 }
 
 func (w WeeklyRepository) FindByDayAndHour(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
-	weekly := make(weeklyMap)
-	if err := readYamlFile(w.path, &weekly); err != nil {
-		return program.Weekly{}, err
+	select {
+	case <-ctx.Done():
+		return program.Weekly{}, ctx.Err()
+	default:
+		weekly := make(weeklyMap)
+		if err := readYamlFile(w.path, &weekly); err != nil {
+			return program.Weekly{}, err
+		}
+		byDay, ok := weekly[day.String()]
+		if !ok {
+			return program.Weekly{}, vo.NotFoundError{}
+		}
+		byHour, ok := byDay[hour.String()]
+		if !ok {
+			return program.Weekly{}, vo.NotFoundError{}
+		}
+		return buildProgramWeekly(day, hour, byHour), nil
 	}
-	byDay, ok := weekly[day.String()]
-	if !ok {
-		return program.Weekly{}, vo.NotFoundError{}
-	}
-	byHour, ok := byDay[hour.String()]
-	if !ok {
-		return program.Weekly{}, vo.NotFoundError{}
-	}
-	return buildProgramWeekly(day, hour, byHour), nil
 }
 
 func buildProgramWeekly(day program.WeekDay, hour program.Hour, prgms []programData) program.Weekly {
@@ -48,19 +53,29 @@ func buildProgramWeekly(day program.WeekDay, hour program.Hour, prgms []programD
 }
 
 func (w WeeklyRepository) Save(ctx context.Context, programs []program.Weekly) error {
-	weekly := make(weeklyMap)
-	for _, pr := range programs {
-		weekly[pr.WeekDay().String()] = buildProgramMap(pr.Programs())
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		weekly := make(weeklyMap)
+		for _, pr := range programs {
+			weekly[pr.WeekDay().String()] = buildProgramMap(pr.Programs())
+		}
+		return writeYamlFile(w.path, weekly)
 	}
-	return writeYamlFile(w.path, weekly)
 }
 
 func (w WeeklyRepository) FindAll(ctx context.Context) ([]program.Weekly, error) {
-	weekly := make(weeklyMap)
-	if err := readYamlFile(w.path, &weekly); err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		weekly := make(weeklyMap)
+		if err := readYamlFile(w.path, &weekly); err != nil {
+			return nil, err
+		}
+		return buildWeeklyPrograms(weekly), nil
 	}
-	return buildWeeklyPrograms(weekly), nil
 }
 
 func buildWeeklyPrograms(weekly weeklyMap) []program.Weekly {

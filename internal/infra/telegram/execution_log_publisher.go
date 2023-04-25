@@ -19,12 +19,17 @@ func NewExecutionLogPublisher(token string, chatID int) *ExecutionLogPublisher {
 }
 
 func (e ExecutionLogPublisher) Publish(ctx context.Context, execLog program.ExecutionLog) error {
-	bot, err := tgbotapi.NewBotAPI(e.token)
-	if err != nil {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		bot, err := tgbotapi.NewBotAPI(e.token)
+		if err != nil {
+			return err
+		}
+		message := fmt.Sprintf("%s zone executed during %vs", execLog.ZoneName(), execLog.Seconds().Int())
+		msg := tgbotapi.NewMessage(int64(e.chatID), message)
+		_, err = bot.Send(msg)
 		return err
 	}
-	message := fmt.Sprintf("%s zone executed during %vs", execLog.ZoneName(), execLog.Seconds().Int())
-	msg := tgbotapi.NewMessage(int64(e.chatID), message)
-	_, err = bot.Send(msg)
-	return err
 }

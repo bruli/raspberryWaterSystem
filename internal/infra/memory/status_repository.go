@@ -24,6 +24,11 @@ func (s StatusRepository) Update(ctx context.Context, st status.Status) error {
 }
 
 func (s StatusRepository) Save(ctx context.Context, st status.Status) error {
-	currentStatus = &st
-	return nil
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		currentStatus = &st
+		return nil
+	}
 }

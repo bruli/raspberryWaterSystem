@@ -13,5 +13,5 @@ func temperatureRepository() app.TemperatureRepository {
 }
 
 func pinsExecutor() app.PinExecutor {
-	return gpio.PinsExecutor{}
+	return gpio.NewPinsExecutor()
 }

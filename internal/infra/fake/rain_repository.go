@@ -5,5 +5,10 @@ import "context"
 type RainRepository struct{}
 
 func (r RainRepository) Find(ctx context.Context) (bool, error) {
-	return false, nil
+	select {
+	case <-ctx.Done():
+		return false, ctx.Err()
+	default:
+		return false, nil
+	}
 }

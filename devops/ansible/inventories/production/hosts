@@ -4,6 +4,7 @@ production ansible_user=pi ansible_host=192.168.1.10
 production
 
 [raspberry_water_system:vars]
-home=/home/pi
-binary_path=/home/pi/server
+home=/home/pi/waterSystem
+binary_path={{ home }}/server
 service_name=water_system
+systemd_path=/etc/systemd/system/water_system.d
