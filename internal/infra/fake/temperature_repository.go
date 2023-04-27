@@ -9,6 +9,6 @@ func (t TemperatureRepository) Find(ctx context.Context) (temp, hum float32, err
 	case <-ctx.Done():
 		return 0, 0, ctx.Err()
 	default:
-		return 20.05, 40.3, nil
+		return 25.05, 50.3, nil
 	}
 }

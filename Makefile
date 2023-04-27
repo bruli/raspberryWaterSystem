@@ -61,11 +61,11 @@ decryptVault:
 
 build:
 	@make clean
-	CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go build -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
+	CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "-s -w" -tags prod -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
 
 docker-exec-builder:
 	docker build -t builder .
 	docker run -it --rm -v $(shell pwd):/app builder bash
 
 deploy:
-	ansible-playbook -i devops/ansible/inventories/production/hosts devops/ansible/deploy.yml
+	devops/scripts/deploy.sh

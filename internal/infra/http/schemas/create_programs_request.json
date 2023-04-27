@@ -2,9 +2,29 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/bruli/raspberryWaterSystem/internaL/infra/http/schemas/programs_request.json",
   "type": "object",
-  "title": "Creae programs request",
+  "title": "Create programs request",
   "description": "This schema defines the creation programs request",
-  "examples": [],
+  "examples": [
+    {
+      "daily": [
+        {
+          "hour": "20:00",
+          "executions": [
+            {
+              "seconds": 20,
+              "zones": [
+                "bbf"
+              ]
+            }
+          ]
+        }
+      ],
+      "odd": [],
+      "even": [],
+      "weekly": [],
+      "temperature": []
+    }
+  ],
   "properties": {
     "daily": {
       "type": "array",

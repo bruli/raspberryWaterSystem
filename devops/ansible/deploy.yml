@@ -7,13 +7,17 @@
           skip: true
       shell: systemctl stop "{{ service_name }}"
       become: yes
-    - name: Copy old binary file if exists
-      with_first_found:
-        - files:
-          - "{{ binary_path }}"
-          skip: true
-      shell: cp {{ binary_path }} {{ binary_path }}_old
-      become: yes
+    - name: Check that the binary file exists
+      stat:
+        path: "{{ binary_path }}"
+      register: stat_result
+    - name: Copy old binary file
+      copy:
+        src: "{{ binary_path }}"
+        dest: "{{ binary_path }}_old"
+        remote_src: yes
+        force: yes
+      when: stat_result.stat.exists == true
     - name: Upload binary file
       copy:
         src: assets/server
@@ -34,7 +38,7 @@
         dest: /etc/systemd/system/water_system.conf
         mode: 0644
         force: yes
-        become: yes
+      become: yes
     - name: Upload service file
       template:
         src: config/water_system.service
@@ -49,5 +53,5 @@
       shell: systemctl enable "{{ service_name }}"
       become: yes
     - name: Start service
-      shell: systemctl start "{{ service_name }}"
+      shell: systemctl restart "{{ service_name }}"
       become: yes
