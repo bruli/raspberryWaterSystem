@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -105,7 +106,7 @@ func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.Comm
 			return
 		case <-ticker.C:
 			if err := worker.ExecutionInTime(ctx, qh, ch, vo.TimeNow()); err != nil {
-				log.Printf("failed execution in time worker: %s", err.Error())
+				logger.Err(err).Msg("failed execution in time worker")
 			}
 		}
 	}
@@ -118,7 +119,7 @@ func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, 
 			return
 		case event := <-ch:
 			if err := evBus.Dispatch(ctx, event); err != nil {
-				logger.Printf("failed dispatching %s: %s", event.EventName(), err.Error())
+				logger.Err(err).Msg(fmt.Sprintf("failed dispatching %q", event.EventName()))
 			}
 		}
 	}

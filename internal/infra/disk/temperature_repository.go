@@ -59,11 +59,15 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 		if err := readYamlFile(t.path, &temp); err != nil {
 			return program.Temperature{}, err
 		}
-		byTemp, ok := temp[temperature]
-		if !ok {
-			return program.Temperature{}, vo.NotFoundError{}
+		programs := make(programMap, 0)
+		for tempKey, progs := range temp {
+			if temperature >= tempKey {
+				for hourKey, prgms := range progs {
+					programs[hourKey] = prgms
+				}
+			}
 		}
-		byHour, ok := byTemp[hour.String()]
+		byHour, ok := programs[hour.String()]
 		if !ok {
 			return program.Temperature{}, vo.NotFoundError{}
 		}
