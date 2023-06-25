@@ -1,5 +1,4 @@
 //go:build infra
-// +build infra
 
 package disk_test
 
@@ -29,9 +28,11 @@ func TestTemperatureRepository(t *testing.T) {
 			require.NoError(t, err)
 			hour3, err := program.ParseHour("22:12")
 			require.NoError(t, err)
+			seconds1, err := program.ParseSeconds(15)
+			require.NoError(t, err)
 			executions := []program.Execution{
-				fixtures.ExecutionBuilder{}.Build(),
-				fixtures.ExecutionBuilder{}.Build(),
+				fixtures.ExecutionBuilder{Zones: []string{"1"}, Seconds: &seconds1}.Build(),
+				fixtures.ExecutionBuilder{Zones: []string{"2"}}.Build(),
 			}
 			programs1 := []program.Program{
 				fixtures.ProgramBuilder{Hour: &hour1}.Build(),
@@ -64,20 +65,20 @@ func TestTemperatureRepository(t *testing.T) {
 			require.Len(t, prgms, 3)
 		})
 		t.Run(`when FindByTemperatureAndHour method is called,`, func(t *testing.T) {
-			//t.Run(`with an invalid temperature,
-			//then it returns a not found error`, func(t *testing.T) {
-			//	hour, err := program.ParseHour("08:00")
-			//	require.NoError(t, err)
-			//	_, err = repo.FindByTemperatureAndHour(ctx, float32(40), hour)
-			//	require.ErrorAs(t, err, &vo.NotFoundError{})
-			//})
-			//t.Run(`with an invalid hour,
-			//then it returns a not found error`, func(t *testing.T) {
-			//	hour, err := program.ParseHour("08:00")
-			//	require.NoError(t, err)
-			//	_, err = repo.FindByTemperatureAndHour(ctx, float32(22.3), hour)
-			//	require.ErrorAs(t, err, &vo.NotFoundError{})
-			//})
+			t.Run(`with an invalid temperature,
+			then it returns a not found error`, func(t *testing.T) {
+				hour, err := program.ParseHour("08:00")
+				require.NoError(t, err)
+				_, err = repo.FindByTemperatureAndHour(ctx, float32(40), hour)
+				require.ErrorAs(t, err, &vo.NotFoundError{})
+			})
+			t.Run(`with an invalid hour,
+			then it returns a not found error`, func(t *testing.T) {
+				hour, err := program.ParseHour("08:00")
+				require.NoError(t, err)
+				_, err = repo.FindByTemperatureAndHour(ctx, float32(22.3), hour)
+				require.ErrorAs(t, err, &vo.NotFoundError{})
+			})
 			t.Run(`with an major temperature and hour,
 			then it returns a valid temperature program`, func(t *testing.T) {
 				hour, err := program.ParseHour("15:10")
@@ -86,6 +87,12 @@ func TestTemperatureRepository(t *testing.T) {
 				temp, err := repo.FindByTemperatureAndHour(ctx, tempValue, hour)
 				require.NoError(t, err)
 				require.Len(t, temp.Programs(), 2)
+				require.Len(t, temp.Programs()[0].Executions(), 1)
+				require.Equal(t, []string{"1"}, temp.Programs()[0].Executions()[0].Zones())
+				require.Equal(t, 15, temp.Programs()[0].Executions()[0].Seconds().Int())
+				require.Len(t, temp.Programs()[1].Executions(), 1)
+				require.Equal(t, []string{"2"}, temp.Programs()[1].Executions()[0].Zones())
+				require.Equal(t, 20, temp.Programs()[1].Executions()[0].Seconds().Int())
 				require.Equal(t, tempValue, temp.Temperature())
 			})
 		})

@@ -76,20 +76,24 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 }
 
 func buildProgramTemperature(temperature float32, hour program.Hour, prgms []programData) program.Temperature {
-	programs := make([]program.Program, 0, len(prgms))
+	programs := make([]program.Program, len(prgms))
 	var temp program.Temperature
 	var pg program.Program
-	executions := make([]program.Execution, 0, len(prgms))
-	for _, pd := range prgms {
-		var execution program.Execution
-		sec, _ := program.ParseSeconds(pd.Seconds)
-		execution.Hydrate(sec, pd.Zones)
-		executions = append(executions, execution)
-		pg.Hydrate(hour, executions)
-		programs = append(programs, pg)
+	for i, pd := range prgms {
+		pg.Hydrate(hour, buildExecutions(pd))
+		programs[i] = pg
 	}
 	temp.Hydrate(temperature, programs)
 	return temp
+}
+
+func buildExecutions(pd programData) []program.Execution {
+	executions := make([]program.Execution, 1)
+	var execution program.Execution
+	sec, _ := program.ParseSeconds(pd.Seconds)
+	execution.Hydrate(sec, pd.Zones)
+	executions[0] = execution
+	return executions
 }
 
 func NewTemperatureProgramRepository(path string) TemperatureProgramRepository {
