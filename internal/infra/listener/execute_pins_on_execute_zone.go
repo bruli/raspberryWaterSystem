@@ -2,6 +2,7 @@ package listener
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
@@ -32,11 +33,8 @@ func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) erro
 	}); err != nil {
 		return err
 	}
-	_, err := e.ch.Handle(ctx, app.PublishExecutionLogCmd{
-		ZoneName:   event.ZoneName,
-		Seconds:    sec,
-		ExecutedAt: now,
-	})
+	message := fmt.Sprintf("%s zone executed during %vs", event.ZoneName, sec)
+	_, err := e.ch.Handle(ctx, app.PublishMessageCmd{Message: message})
 	return err
 }
 

@@ -17,7 +17,7 @@ func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHan
 	if err != nil {
 		return err
 	}
-	if st.Weather().IsRaining() {
+	if st.Weather().IsRaining() || !st.IsActive() {
 		return nil
 	}
 	temp := st.Weather().Temp()

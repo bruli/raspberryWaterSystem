@@ -28,7 +28,7 @@ func TestExecutionLogPublisherPublish(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	publisher := telegram.NewExecutionLogPublisher(token, chatID)
+	publisher := telegram.NewMessagePublisher(token, chatID)
 	err = publisher.Publish(context.Background(), fixtures.ExecutionLogBuilder{}.Build())
 	require.NoError(t, err)
 }

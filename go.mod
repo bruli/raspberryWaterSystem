@@ -1,6 +1,6 @@
 module github.com/bruli/raspberryWaterSystem
 
-go 1.19
+go 1.20
 
 require (
 	github.com/bruli/raspberryRainSensor v0.0.0-20221224162955-10db9595164a

@@ -13,6 +13,7 @@ type StatusBuilder struct {
 	SystemStartedAt *vo.Time
 	Weather         *weather.Weather
 	UpdatedAt       *vo.Time
+	Active          bool
 }
 
 func (b StatusBuilder) Build() status.Status {
@@ -30,6 +31,6 @@ func (b StatusBuilder) Build() status.Status {
 	if b.UpdatedAt != nil {
 		updateAt = b.UpdatedAt
 	}
-	st.Hydrate(start, weath, updateAt)
+	st.Hydrate(start, weath, updateAt, b.Active)
 	return st
 }

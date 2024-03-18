@@ -41,7 +41,7 @@ docker-ps:
 	docker-compose ps
 
 docker-exec:
-	docker exec -it water_system bash:q
+	docker exec -it water_system bash
 
 lint:
 	golangci-lint run

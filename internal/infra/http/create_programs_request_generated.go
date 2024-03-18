@@ -2,15 +2,15 @@
 
 package http
 
-import "fmt"
 import "encoding/json"
+import "fmt"
 
 type ExecutionItemRequest struct {
 	// Seconds corresponds to the JSON schema field "seconds".
-	Seconds int `json:"seconds"`
+	Seconds int `json:"seconds" yaml:"seconds" mapstructure:"seconds"`
 
 	// Zones corresponds to the JSON schema field "zones".
-	Zones []string `json:"zones"`
+	Zones []string `json:"zones" yaml:"zones" mapstructure:"zones"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -20,10 +20,10 @@ func (j *ExecutionItemRequest) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	if v, ok := raw["seconds"]; !ok || v == nil {
-		return fmt.Errorf("field seconds: required")
+		return fmt.Errorf("field seconds in ExecutionItemRequest: required")
 	}
 	if v, ok := raw["zones"]; !ok || v == nil {
-		return fmt.Errorf("field zones: required")
+		return fmt.Errorf("field zones in ExecutionItemRequest: required")
 	}
 	type Plain ExecutionItemRequest
 	var plain Plain
@@ -34,22 +34,12 @@ func (j *ExecutionItemRequest) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// This schema defines the creation programs request
-type CreateProgramsRequestJson struct {
-	// Daily corresponds to the JSON schema field "daily".
-	Daily []ProgramItemRequest `json:"daily,omitempty"`
+type ProgramItemRequest struct {
+	// Executions corresponds to the JSON schema field "executions".
+	Executions []ExecutionItemRequest `json:"executions" yaml:"executions" mapstructure:"executions"`
 
-	// Even corresponds to the JSON schema field "even".
-	Even []ProgramItemRequest `json:"even,omitempty"`
-
-	// Odd corresponds to the JSON schema field "odd".
-	Odd []ProgramItemRequest `json:"odd,omitempty"`
-
-	// Temperature corresponds to the JSON schema field "temperature".
-	Temperature []TemperatureItemRequest `json:"temperature,omitempty"`
-
-	// Weekly corresponds to the JSON schema field "weekly".
-	Weekly []WeeklyItemRequest `json:"weekly,omitempty"`
+	// Hour corresponds to the JSON schema field "hour".
+	Hour string `json:"hour" yaml:"hour" mapstructure:"hour"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -59,10 +49,10 @@ func (j *ProgramItemRequest) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	if v, ok := raw["executions"]; !ok || v == nil {
-		return fmt.Errorf("field executions: required")
+		return fmt.Errorf("field executions in ProgramItemRequest: required")
 	}
 	if v, ok := raw["hour"]; !ok || v == nil {
-		return fmt.Errorf("field hour: required")
+		return fmt.Errorf("field hour in ProgramItemRequest: required")
 	}
 	type Plain ProgramItemRequest
 	var plain Plain
@@ -75,10 +65,10 @@ func (j *ProgramItemRequest) UnmarshalJSON(b []byte) error {
 
 type TemperatureItemRequest struct {
 	// Programs corresponds to the JSON schema field "programs".
-	Programs []ProgramItemRequest `json:"programs"`
+	Programs []ProgramItemRequest `json:"programs" yaml:"programs" mapstructure:"programs"`
 
 	// Temperature corresponds to the JSON schema field "temperature".
-	Temperature float64 `json:"temperature"`
+	Temperature float64 `json:"temperature" yaml:"temperature" mapstructure:"temperature"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -88,10 +78,10 @@ func (j *TemperatureItemRequest) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	if v, ok := raw["programs"]; !ok || v == nil {
-		return fmt.Errorf("field programs: required")
+		return fmt.Errorf("field programs in TemperatureItemRequest: required")
 	}
 	if v, ok := raw["temperature"]; !ok || v == nil {
-		return fmt.Errorf("field temperature: required")
+		return fmt.Errorf("field temperature in TemperatureItemRequest: required")
 	}
 	type Plain TemperatureItemRequest
 	var plain Plain
@@ -104,10 +94,10 @@ func (j *TemperatureItemRequest) UnmarshalJSON(b []byte) error {
 
 type WeeklyItemRequest struct {
 	// Programs corresponds to the JSON schema field "programs".
-	Programs []ProgramItemRequest `json:"programs"`
+	Programs []ProgramItemRequest `json:"programs" yaml:"programs" mapstructure:"programs"`
 
 	// WeekDay corresponds to the JSON schema field "week_day".
-	WeekDay string `json:"week_day"`
+	WeekDay string `json:"week_day" yaml:"week_day" mapstructure:"week_day"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -117,10 +107,10 @@ func (j *WeeklyItemRequest) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	if v, ok := raw["programs"]; !ok || v == nil {
-		return fmt.Errorf("field programs: required")
+		return fmt.Errorf("field programs in WeeklyItemRequest: required")
 	}
 	if v, ok := raw["week_day"]; !ok || v == nil {
-		return fmt.Errorf("field week_day: required")
+		return fmt.Errorf("field week_day in WeeklyItemRequest: required")
 	}
 	type Plain WeeklyItemRequest
 	var plain Plain
@@ -131,10 +121,20 @@ func (j *WeeklyItemRequest) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type ProgramItemRequest struct {
-	// Executions corresponds to the JSON schema field "executions".
-	Executions []ExecutionItemRequest `json:"executions"`
+// This schema defines the creation programs request
+type CreateProgramsRequestJson struct {
+	// Daily corresponds to the JSON schema field "daily".
+	Daily []ProgramItemRequest `json:"daily,omitempty" yaml:"daily,omitempty" mapstructure:"daily,omitempty"`
 
-	// Hour corresponds to the JSON schema field "hour".
-	Hour string `json:"hour"`
+	// Even corresponds to the JSON schema field "even".
+	Even []ProgramItemRequest `json:"even,omitempty" yaml:"even,omitempty" mapstructure:"even,omitempty"`
+
+	// Odd corresponds to the JSON schema field "odd".
+	Odd []ProgramItemRequest `json:"odd,omitempty" yaml:"odd,omitempty" mapstructure:"odd,omitempty"`
+
+	// Temperature corresponds to the JSON schema field "temperature".
+	Temperature []TemperatureItemRequest `json:"temperature,omitempty" yaml:"temperature,omitempty" mapstructure:"temperature,omitempty"`
+
+	// Weekly corresponds to the JSON schema field "weekly".
+	Weekly []WeeklyItemRequest `json:"weekly,omitempty" yaml:"weekly,omitempty" mapstructure:"weekly,omitempty"`
 }

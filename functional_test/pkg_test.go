@@ -1,5 +1,4 @@
 //go:build functional
-// +build functional
 
 package functional_test
 
@@ -40,6 +39,23 @@ func runPkg(t *testing.T) {
 		t.Run(`when GetLogs method is called,
 		then it returns a valid logs slice`, func(t *testing.T) {
 			_, err := pkg.GetLogs(ctx, 1)
+			require.NoError(t, err)
+		})
+		t.Run(`when Activate method is called,
+		then it returns nil`, func(t *testing.T) {
+			err = pkg.Activate(ctx, true)
+			require.NoError(t, err)
+			status, err := pkg.GetStatus(ctx)
+			require.NoError(t, err)
+			require.True(t, status.Active)
+
+			err = pkg.Activate(ctx, false)
+			require.NoError(t, err)
+			statusDeactivated, err := pkg.GetStatus(ctx)
+			require.NoError(t, err)
+			require.False(t, statusDeactivated.Active)
+
+			err = pkg.Activate(ctx, true)
 			require.NoError(t, err)
 		})
 	})

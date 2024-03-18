@@ -54,7 +54,7 @@ func main() {
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
 	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile())
 	pe := pinsExecutor()
-	execLogPub := telegram.NewExecutionLogPublisher(conf.TelegramToken(), conf.TelegramChatID())
+	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken(), conf.TelegramChatID())
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
@@ -71,13 +71,17 @@ func main() {
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 	chBus.Subscribe(app.SaveExecutionLogCmdName, logCHMdw(app.NewSaveExecutionLog(execLogRepo)))
-	chBus.Subscribe(app.PublishExecutionLogCmdName, logCHMdw(app.NewPublishExecutionLog(execLogPub)))
+	chBus.Subscribe(app.PublishMessageCmdName, logCHMdw(app.NewPublishMessage(messagePublisher)))
 	chBus.Subscribe(app.RemoveZoneCmdName, logCHMdw(app.NewRemoveZone(zr)))
+	chBus.Subscribe(app.ActivateDeactivateServerCmdName, logCHMdw(app.NewActivateDeactivateServer(sr)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.ExecutedEventName},
 	}, listener.NewExecutePinsOnExecuteZone(chBus))
+	eventBus.Subscribe(zone.Ignored{
+		BasicEvent: cqs.BasicEvent{NameAttr: zone.IgnoredEventName},
+	}, listener.NewPublishMessageOnZoneIgnored(chBus))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.Fatal().Err(err)
@@ -92,7 +96,7 @@ func main() {
 		log.Fatal().Err(err)
 	}
 	httpHandlers := httpx.NewHandler(definitions)
-	if err := httpx.RunServer(ctx, conf.ServerURL(), httpHandlers, &httpx.CORSOpt{}); err != nil {
+	if err = httpx.RunServer(ctx, conf.ServerURL(), httpHandlers, &httpx.CORSOpt{}); err != nil {
 		log.Fatal().Err(err).Msg("system error")
 	}
 }
@@ -198,6 +202,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/status",
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(http2.FindStatus(qhBus)),
+		},
+		{
+			Endpoint:    "/status/{action}",
+			Method:      http.MethodPatch,
+			HandlerFunc: authMdw(http2.ActivateDeactivateServer(chBus)),
 		},
 		{
 			Endpoint:    "/weather",

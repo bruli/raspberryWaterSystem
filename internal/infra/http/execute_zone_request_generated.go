@@ -2,13 +2,13 @@
 
 package http
 
-import "fmt"
 import "encoding/json"
+import "fmt"
 
 // This schema defines the request to execute a zone
 type ExecuteZoneRequestJson struct {
 	// Seconds corresponds to the JSON schema field "seconds".
-	Seconds int `json:"seconds"`
+	Seconds int `json:"seconds" yaml:"seconds" mapstructure:"seconds"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -18,7 +18,7 @@ func (j *ExecuteZoneRequestJson) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	if v, ok := raw["seconds"]; !ok || v == nil {
-		return fmt.Errorf("field seconds: required")
+		return fmt.Errorf("field seconds in ExecuteZoneRequestJson: required")
 	}
 	type Plain ExecuteZoneRequestJson
 	var plain Plain

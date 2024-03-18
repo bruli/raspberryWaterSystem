@@ -13,10 +13,15 @@ var currentStatus *status.Status
 type StatusRepository struct{}
 
 func (s StatusRepository) Find(ctx context.Context) (status.Status, error) {
-	if currentStatus == nil {
-		return status.Status{}, vo.NotFoundError{}
+	select {
+	case <-ctx.Done():
+		return status.Status{}, ctx.Err()
+	default:
+		if currentStatus == nil {
+			return status.Status{}, vo.NotFoundError{}
+		}
+		return *currentStatus, nil
 	}
-	return *currentStatus, nil
 }
 
 func (s StatusRepository) Update(ctx context.Context, st status.Status) error {

@@ -30,6 +30,7 @@ func FindStatus(qh cqs.QueryHandler) http.HandlerFunc {
 			updated = vo.StringPtr(currenSt.UpdatedAt().EpochString())
 		}
 		resp := StatusResponseJson{
+			Active:          currenSt.IsActive(),
 			Humidity:        float64(currenSt.Weather().Humidity()),
 			IsRaining:       currenSt.Weather().IsRaining(),
 			SystemStartedAt: currenSt.SystemStartedAt().EpochString(),

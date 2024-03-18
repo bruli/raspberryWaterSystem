@@ -2,25 +2,28 @@
 
 package http
 
-import "fmt"
 import "encoding/json"
+import "fmt"
 
 // This schema defines the status response
 type StatusResponseJson struct {
+	// Active corresponds to the JSON schema field "active".
+	Active bool `json:"active" yaml:"active" mapstructure:"active"`
+
 	// Humidity corresponds to the JSON schema field "humidity".
-	Humidity float64 `json:"humidity"`
+	Humidity float64 `json:"humidity" yaml:"humidity" mapstructure:"humidity"`
 
 	// IsRaining corresponds to the JSON schema field "is_raining".
-	IsRaining bool `json:"is_raining"`
+	IsRaining bool `json:"is_raining" yaml:"is_raining" mapstructure:"is_raining"`
 
 	// SystemStartedAt corresponds to the JSON schema field "system_started_at".
-	SystemStartedAt string `json:"system_started_at"`
+	SystemStartedAt string `json:"system_started_at" yaml:"system_started_at" mapstructure:"system_started_at"`
 
 	// Temperature corresponds to the JSON schema field "temperature".
-	Temperature float64 `json:"temperature"`
+	Temperature float64 `json:"temperature" yaml:"temperature" mapstructure:"temperature"`
 
 	// UpdatedAt corresponds to the JSON schema field "updated_at".
-	UpdatedAt *string `json:"updated_at,omitempty"`
+	UpdatedAt *string `json:"updated_at,omitempty" yaml:"updated_at,omitempty" mapstructure:"updated_at,omitempty"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -29,17 +32,20 @@ func (j *StatusResponseJson) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &raw); err != nil {
 		return err
 	}
+	if v, ok := raw["active"]; !ok || v == nil {
+		return fmt.Errorf("field active in StatusResponseJson: required")
+	}
 	if v, ok := raw["humidity"]; !ok || v == nil {
-		return fmt.Errorf("field humidity: required")
+		return fmt.Errorf("field humidity in StatusResponseJson: required")
 	}
 	if v, ok := raw["is_raining"]; !ok || v == nil {
-		return fmt.Errorf("field is_raining: required")
+		return fmt.Errorf("field is_raining in StatusResponseJson: required")
 	}
 	if v, ok := raw["system_started_at"]; !ok || v == nil {
-		return fmt.Errorf("field system_started_at: required")
+		return fmt.Errorf("field system_started_at in StatusResponseJson: required")
 	}
 	if v, ok := raw["temperature"]; !ok || v == nil {
-		return fmt.Errorf("field temperature: required")
+		return fmt.Errorf("field temperature in StatusResponseJson: required")
 	}
 	type Plain StatusResponseJson
 	var plain Plain

@@ -2,18 +2,18 @@
 
 package http
 
-import "fmt"
 import "encoding/json"
+import "fmt"
 
 type ExecutionLogItemResponse struct {
 	// ExecutedAt corresponds to the JSON schema field "executed_at".
-	ExecutedAt string `json:"executed_at"`
+	ExecutedAt string `json:"executed_at" yaml:"executed_at" mapstructure:"executed_at"`
 
 	// Seconds corresponds to the JSON schema field "seconds".
-	Seconds int `json:"seconds"`
+	Seconds int `json:"seconds" yaml:"seconds" mapstructure:"seconds"`
 
 	// ZoneName corresponds to the JSON schema field "zone_name".
-	ZoneName string `json:"zone_name"`
+	ZoneName string `json:"zone_name" yaml:"zone_name" mapstructure:"zone_name"`
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
@@ -23,13 +23,13 @@ func (j *ExecutionLogItemResponse) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	if v, ok := raw["executed_at"]; !ok || v == nil {
-		return fmt.Errorf("field executed_at: required")
+		return fmt.Errorf("field executed_at in ExecutionLogItemResponse: required")
 	}
 	if v, ok := raw["seconds"]; !ok || v == nil {
-		return fmt.Errorf("field seconds: required")
+		return fmt.Errorf("field seconds in ExecutionLogItemResponse: required")
 	}
 	if v, ok := raw["zone_name"]; !ok || v == nil {
-		return fmt.Errorf("field zone_name: required")
+		return fmt.Errorf("field zone_name in ExecutionLogItemResponse: required")
 	}
 	type Plain ExecutionLogItemResponse
 	var plain Plain

@@ -13,5 +13,6 @@ func New(serverURL url.URL, cl HTTPClient, token string) Handlers {
 		GetWeather:  GetWeather(cli),
 		GetLogs:     GetLog(cli),
 		ExecuteZone: ExecuteZone(cli),
+		Activate:    Activate(cli),
 	}
 }
