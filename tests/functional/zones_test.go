@@ -1,6 +1,6 @@
 //go:build functional
 
-package functional_test
+package functional
 
 import (
 	"fmt"
