@@ -3,67 +3,80 @@
 package functional
 
 import (
-	"net/http"
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
+	http2 "net/http"
 	"testing"
-
-	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 
 	"github.com/stretchr/testify/require"
 )
 
-func runPrograms(t *testing.T) {
+func TestPrograms(t *testing.T) {
+	zo := fixtures.ZoneBuilder{}.Build()
+	relays := make([]int, len(zo.Relays()))
+	for i, r := range zo.Relays() {
+		relays[i] = r.Id().Int()
+	}
+	req := http.CreateZoneRequestJson{
+		Id:     zo.Id(),
+		Name:   zo.Name(),
+		Relays: relays,
+	}
+	resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/zones", cl)
+	require.NoError(t, err)
+	require.Equal(t, http2.StatusOK, resp.StatusCode)
 	t.Run(`Given a create programs endpoint,
 	when a request is sent`, func(t *testing.T) {
 		t.Run(`without authorization,
 		then it returns unauthorized`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, nil, http.MethodPut, "/programs", cl)
+			resp, err := buildRequestAndSend(ctx, nil, nil, http2.MethodPut, "/programs", cl)
 			require.NoError(t, err)
-			require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
 		t.Run(`with authorization,
 		then it returns unauthorized`, func(t *testing.T) {
-			req := http2.CreateProgramsRequestJson{
-				Daily: []http2.ProgramItemRequest{
+			req := http.CreateProgramsRequestJson{
+				Daily: []http.ProgramItemRequest{
 					{
-						Executions: []http2.ExecutionItemRequest{
+						Executions: []http.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{savedZone.Id()},
+								Zones:   []string{zo.Id()},
 							},
 						},
 						Hour: "16:13",
 					},
 				},
-				Odd: []http2.ProgramItemRequest{
+				Odd: []http.ProgramItemRequest{
 					{
-						Executions: []http2.ExecutionItemRequest{
+						Executions: []http.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{savedZone.Id()},
+								Zones:   []string{zo.Id()},
 							},
 						},
 						Hour: "15:10",
 					},
 				},
-				Even: []http2.ProgramItemRequest{
+				Even: []http.ProgramItemRequest{
 					{
-						Executions: []http2.ExecutionItemRequest{
+						Executions: []http.ExecutionItemRequest{
 							{
 								Seconds: 20,
-								Zones:   []string{savedZone.Id()},
+								Zones:   []string{zo.Id()},
 							},
 						},
 						Hour: "15:10",
 					},
 				},
-				Weekly: []http2.WeeklyItemRequest{
+				Weekly: []http.WeeklyItemRequest{
 					{
-						Programs: []http2.ProgramItemRequest{
+						Programs: []http.ProgramItemRequest{
 							{
-								Executions: []http2.ExecutionItemRequest{
+								Executions: []http.ExecutionItemRequest{
 									{
 										Seconds: 15,
-										Zones:   []string{savedZone.Id()},
+										Zones:   []string{zo.Id()},
 									},
 								},
 								Hour: "08:00",
@@ -72,14 +85,14 @@ func runPrograms(t *testing.T) {
 						WeekDay: "Friday",
 					},
 				},
-				Temperature: []http2.TemperatureItemRequest{
+				Temperature: []http.TemperatureItemRequest{
 					{
-						Programs: []http2.ProgramItemRequest{
+						Programs: []http.ProgramItemRequest{
 							{
-								Executions: []http2.ExecutionItemRequest{
+								Executions: []http.ExecutionItemRequest{
 									{
 										Seconds: 15,
-										Zones:   []string{savedZone.Id()},
+										Zones:   []string{zo.Id()},
 									},
 								},
 								Hour: "08:00",
@@ -89,25 +102,25 @@ func runPrograms(t *testing.T) {
 					},
 				},
 			}
-			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http.MethodPut, "/programs", cl)
+			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/programs", cl)
 			require.NoError(t, err)
-			require.Equal(t, http.StatusOK, resp.StatusCode)
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
 		})
 	})
 	t.Run(`Given a find all programs endpoint,
 	when a request is sent`, func(t *testing.T) {
 		t.Run(`without authorization,
 		then it returns an unauthorized`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, nil, http.MethodGet, "/programs", cl)
+			resp, err := buildRequestAndSend(ctx, nil, nil, http2.MethodGet, "/programs", cl)
 			require.NoError(t, err)
-			require.Equal(t, http.StatusUnauthorized, resp.StatusCode)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
 		t.Run(`with authorization,
 		then it returns a valid response`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, authorizationHeader(), http.MethodGet, "/programs", cl)
+			resp, err := buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodGet, "/programs", cl)
 			require.NoError(t, err)
-			require.Equal(t, http.StatusOK, resp.StatusCode)
-			var schema http2.ProgramsResponseJson
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
+			var schema http.ProgramsResponseJson
 			readResponse(t, resp, &schema)
 		})
 	})

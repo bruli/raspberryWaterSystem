@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func runStatus(t *testing.T) {
+func TestStatus(t *testing.T) {
 	t.Run(`Given a FindStatus endpoint,
 	when a request is sent `, func(t *testing.T) {
 		t.Run(`without authorization, then its return unauthorized`, func(t *testing.T) {
@@ -47,6 +47,9 @@ func runStatus(t *testing.T) {
 			var schema http2.StatusResponseJson
 			readResponse(t, respStatus, &schema)
 			require.False(t, schema.Active)
+
+			_, err = buildRequestAndSend(ctx, nil, authorizationHeader(), http.MethodPatch, "/status/activate", cl)
+			require.NoError(t, err)
 		})
 	})
 }

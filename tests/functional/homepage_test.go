@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func runHomepage(t *testing.T) {
+func TestHomepage(t *testing.T) {
 	t.Run(`Given a homepage endpoint,
 	when a request is sent,
 	then it returns an OK`, func(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func runWeather(t *testing.T) {
+func TestWeather(t *testing.T) {
 	t.Run(`Given a find weather endpoint,`, func(t *testing.T) {
 		t.Run(`when a request without authorization is sent,
 		then it returns an unauthorized`, func(t *testing.T) {

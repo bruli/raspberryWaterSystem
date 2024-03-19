@@ -9,11 +9,27 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
+
 	"github.com/bruli/raspberryWaterSystem/pkg/ws"
 	"github.com/stretchr/testify/require"
 )
 
 func runPkg(t *testing.T) {
+	zo := fixtures.ZoneBuilder{}.Build()
+	relays := make([]int, len(zo.Relays()))
+	for i, r := range zo.Relays() {
+		relays[i] = r.Id().Int()
+	}
+	req := http2.CreateZoneRequestJson{
+		Id:     zo.Id(),
+		Name:   zo.Name(),
+		Relays: relays,
+	}
+	resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http.MethodPut, "/zones", cl)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
 	t.Run(`Given a Water system library,`, func(t *testing.T) {
 		ctx = context.Background()
 		url, err := url.Parse("http://localhost:8083")
@@ -33,7 +49,7 @@ func runPkg(t *testing.T) {
 		})
 		t.Run(`when Execute zone method is called,
 		then it returns nil`, func(t *testing.T) {
-			err = pkg.ExecuteZone(ctx, savedZone.Id(), 2)
+			err = pkg.ExecuteZone(ctx, zo.Id(), 2)
 			require.NoError(t, err)
 		})
 		t.Run(`when GetLogs method is called,

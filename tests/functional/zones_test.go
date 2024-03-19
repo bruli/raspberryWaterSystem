@@ -7,12 +7,15 @@ import (
 	http2 "net/http"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/stretchr/testify/require"
 )
 
-func runZones(t *testing.T) {
+func TestZones(t *testing.T) {
+	var savedZone *zone.Zone
 	t.Run(`Given a Create zone endpoint`, func(t *testing.T) {
 		t.Run(`when a request is sent without authorization,
 		then it returns an unauthorized`, func(t *testing.T) {

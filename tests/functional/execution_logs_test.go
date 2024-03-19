@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func runExecutionLogs(t *testing.T) {
+func TestExecutionLogs(t *testing.T) {
 	t.Run(`Given a execution logs endpoint,
 	when a request is sent `, func(t *testing.T) {
 		t.Run(`without authorization, then it returns an unauthorized`, func(t *testing.T) {
