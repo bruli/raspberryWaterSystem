@@ -40,20 +40,20 @@ tools-local: tool-golangci-lint tool-moq tool-fumpt	 tool-jsonschema tool-json-l
 
 .PHONY: tool-golangci-lint
 tool-golangci-lint:
-	devops/scripts/goget.sh github.com/golangci/golangci-lint/cmd/golangci-lint
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 .PHONY: tool-fumpt
 tool-fumpt:
-	devops/scripts/goget.sh mvdan.cc/gofumpt
+	go install mvdan.cc/gofumpt@latest
 
 .PHONY: tool-moq
 tool-moq:
-	devops/scripts/goget.sh github.com/matryer/moq
+	go get github.com/matryer/moq@latest
 
 .PHONY: tool-jsonschema
 tool-jsonschema:
-	devops/scripts/goget.sh github.com/atombender/go-jsonschema/...
-	devops/scripts/goget.sh github.com/atombender/go-jsonschema/cmd/gojsonschema
+	go get github.com/atombender/go-jsonschema/...
+	go install github.com/atombender/go-jsonschema@latest
 
 .PHONY: tool-json-lint
 tool-json-lint:
@@ -99,7 +99,7 @@ lint:
 
 .PHONY: clean
 clean:
-	go fmt ./...
+	gofumpt -w .
 
 .PHONY: import-jsonschema
 import-jsonschema:

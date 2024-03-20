@@ -3,10 +3,11 @@
 package functional
 
 import (
-	"github.com/bruli/raspberryWaterSystem/fixtures"
-	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	http2 "net/http"
 	"testing"
+
+	"github.com/bruli/raspberryWaterSystem/fixtures"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 
 	"github.com/stretchr/testify/require"
 )
