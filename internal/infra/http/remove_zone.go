@@ -8,7 +8,7 @@ import (
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 func RemoveZone(ch cqs.CommandHandler) http.HandlerFunc {

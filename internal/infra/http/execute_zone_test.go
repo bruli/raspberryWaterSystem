@@ -9,7 +9,7 @@ import (
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"

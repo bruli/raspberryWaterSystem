@@ -6,7 +6,7 @@ import (
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/v5"
 )
 
 const (
