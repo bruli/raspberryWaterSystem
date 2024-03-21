@@ -99,7 +99,7 @@ lint:
 
 .PHONY: clean
 clean:
-	gofumpt -w .
+	go fmt ./...
 
 .PHONY: import-jsonschema
 import-jsonschema:
