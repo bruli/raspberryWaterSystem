@@ -7,7 +7,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
@@ -21,7 +20,7 @@ func TestFindStatusHandle(t *testing.T) {
 		name                 string
 		expectedErr, findErr error
 		status               status.Status
-		expectedResult       cqs.QueryResult
+		expectedResult       any
 	}{
 		{
 			name:        "and find method returns an error, then it returns same error",

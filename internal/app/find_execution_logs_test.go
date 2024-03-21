@@ -11,7 +11,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
@@ -29,7 +28,7 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 		limit                int
 		expectedErr, findErr error
 		logs                 []program.ExecutionLog
-		expectedResult       cqs.QueryResult
+		expectedResult       any
 	}{
 		{
 			name:        "with an invalid limit, then it returns an invalid execution log limit error",

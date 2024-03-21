@@ -18,7 +18,7 @@ func TestQueryBusHandle(t *testing.T) {
 		name, queryName string
 		handler         cqs.QueryHandler
 		query           cqs.Query
-		expectedResult  cqs.QueryResult
+		expectedResult  any
 		expectedErr     error
 	}{
 		{
@@ -71,10 +71,10 @@ func (c query) Name() string {
 }
 
 type queryHandler struct {
-	result cqs.QueryResult
+	result any
 	err    error
 }
 
-func (q queryHandler) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (q queryHandler) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	return q.result, q.err
 }

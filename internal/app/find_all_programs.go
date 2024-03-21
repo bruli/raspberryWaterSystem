@@ -21,7 +21,7 @@ type FindAllPrograms struct {
 	temperature      TemperatureProgramRepository
 }
 
-func (f FindAllPrograms) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (f FindAllPrograms) Handle(ctx context.Context, _ cqs.Query) (any, error) {
 	dailies, err := f.daily.FindAll(ctx)
 	if err != nil {
 		return nil, err

@@ -21,7 +21,7 @@ func TestFindExecutionLogs(t *testing.T) {
 		name, url    string
 		expectedCode int
 		qhErr        error
-		result       cqs.QueryResult
+		result       any
 	}{
 		{
 			name:         "with an invalid limit value, then it returns a bad request",
@@ -56,7 +56,7 @@ func TestFindExecutionLogs(t *testing.T) {
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			qh := &QueryHandlerMock{
-				HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+				HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
 					return tt.result, tt.qhErr
 				},
 			}

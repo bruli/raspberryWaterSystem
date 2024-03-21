@@ -7,7 +7,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
@@ -22,7 +21,7 @@ func TestFindWeatherHandle(t *testing.T) {
 		name string
 		expectedErr, tempErr,
 		rainErr error
-		expectedResult cqs.QueryResult
+		expectedResult any
 		temp, hum      float32
 		rain           bool
 	}{

@@ -72,7 +72,7 @@ var _ cqs.QueryHandler = &QueryHandlerMock{}
 //
 //		// make and configure a mocked cqs.QueryHandler
 //		mockedQueryHandler := &QueryHandlerMock{
-//			HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+//			HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
 //				panic("mock out the Handle method")
 //			},
 //		}
@@ -83,7 +83,7 @@ var _ cqs.QueryHandler = &QueryHandlerMock{}
 //	}
 type QueryHandlerMock struct {
 	// HandleFunc mocks the Handle method.
-	HandleFunc func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error)
+	HandleFunc func(ctx context.Context, query cqs.Query) (any, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -99,7 +99,7 @@ type QueryHandlerMock struct {
 }
 
 // Handle calls HandleFunc.
-func (mock *QueryHandlerMock) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (mock *QueryHandlerMock) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	if mock.HandleFunc == nil {
 		panic("QueryHandlerMock.HandleFunc: method is nil but QueryHandler.Handle was just called")
 	}

@@ -40,7 +40,7 @@ func TestFindAllProgramsHandle(t *testing.T) {
 		expectedErr, dailyErr,
 		oddErr, evenErr,
 		weeklyErr, tempErr error
-		expectedResult     cqs.QueryResult
+		expectedResult     any
 		dailies, odd, even []program.Program
 		weeklies           []program.Weekly
 		temps              []program.Temperature

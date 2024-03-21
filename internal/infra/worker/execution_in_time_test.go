@@ -49,7 +49,7 @@ func TestExecutionInTime(t *testing.T) {
 		expectedErr, findStatusErr,
 		findProgramsErr, dailyErr,
 		oddEvenErr, weeklyErr, tempErr error
-		statusResult, programsResult cqs.QueryResult
+		statusResult, programsResult any
 		now                          vo.Time
 	}{
 		{
@@ -128,7 +128,7 @@ func TestExecutionInTime(t *testing.T) {
 		when is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			qh := &QueryHandlerMock{
-				HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+				HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
 					_, findStatus := query.(app.FindStatusQuery)
 					if findStatus {
 						return tt.statusResult, tt.findStatusErr

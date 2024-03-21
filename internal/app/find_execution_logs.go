@@ -23,7 +23,7 @@ type FindExecutionLogs struct {
 	elr ExecutionLogRepository
 }
 
-func (f FindExecutionLogs) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (f FindExecutionLogs) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	q, _ := query.(FindExecutionLogsQuery)
 	if q.Limit > maxExecutionLogs {
 		return nil, ErrInvalidExecutionsLogLimit

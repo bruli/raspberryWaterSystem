@@ -27,7 +27,7 @@ type FindProgramsInTime struct {
 	Temperature      TemperatureProgramRepository
 }
 
-func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	q, _ := query.(FindProgramsInTimeQuery)
 	hour, _ := program.ParseHour(q.On.HourStr())
 	daily, err := f.findDaily(ctx, hour)

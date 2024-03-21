@@ -9,7 +9,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
@@ -27,7 +26,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 		expectedErr, dailyErr,
 		oddErr, evenErr,
 		weeklyErr, tempErr error
-		expectedResult   cqs.QueryResult
+		expectedResult   any
 		daily, odd, even program.Program
 		weekly           program.Weekly
 		temp             program.Temperature

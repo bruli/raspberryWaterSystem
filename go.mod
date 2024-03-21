@@ -1,9 +1,9 @@
 module github.com/bruli/raspberryWaterSystem
 
-go 1.21
+go 1.19
 
 require (
-	github.com/bruli/raspberryRainSensor v0.0.0-20221224162955-10db9595164a
+	github.com/bruli/raspberryRainSensor v0.0.0-20240320090310-c3df1a956641
 	github.com/davecgh/go-spew v1.1.1
 )
 
@@ -12,27 +12,11 @@ require gopkg.in/yaml.v3 v3.0.1
 require github.com/google/uuid v1.3.0
 
 require (
-	github.com/atombender/go-jsonschema v0.15.0 // indirect
-	github.com/fatih/color v1.13.0 // indirect
-	github.com/goccy/go-yaml v1.11.2 // indirect
-	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/matryer/moq v0.3.4 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.8.2 // indirect
-	github.com/sanity-io/litter v1.5.5 // indirect
-	github.com/santhosh-tekuri/jsonschema/cmd/jv v0.6.0 // indirect
-	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
-	github.com/spf13/cobra v1.8.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/exp v0.0.0-20240112132812-db7319d0e0e3 // indirect
-	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
-	golang.org/x/tools v0.17.0 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 )
 
 require (

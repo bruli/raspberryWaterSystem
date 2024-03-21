@@ -11,7 +11,7 @@ type QueryBus struct {
 	m map[string]cqs.QueryHandler
 }
 
-func (c QueryBus) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (c QueryBus) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	hand, ok := c.m[query.Name()]
 	if !ok {
 		return nil, UnSubscribedQueryError{name: query.Name()}

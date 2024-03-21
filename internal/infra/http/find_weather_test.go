@@ -20,7 +20,7 @@ func TestFindWeather(t *testing.T) {
 		name         string
 		expectedCode int
 		qhErr        error
-		result       cqs.QueryResult
+		result       any
 	}{
 		{
 			name:         "and query handler returns an error, then it returns an internal server error",
@@ -39,7 +39,7 @@ func TestFindWeather(t *testing.T) {
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			qh := &QueryHandlerMock{
-				HandleFunc: func(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+				HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
 					return tt.result, tt.qhErr
 				},
 			}

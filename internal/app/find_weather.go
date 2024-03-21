@@ -20,7 +20,7 @@ type FindWeather struct {
 	rr RainRepository
 }
 
-func (f FindWeather) Handle(ctx context.Context, query cqs.Query) (cqs.QueryResult, error) {
+func (f FindWeather) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	temp, hum, err := f.tr.Find(ctx)
 	if err != nil {
 		return nil, err
