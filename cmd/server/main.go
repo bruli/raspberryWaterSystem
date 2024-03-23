@@ -74,6 +74,7 @@ func main() {
 	chBus.Subscribe(app.PublishMessageCmdName, logCHMdw(app.NewPublishMessage(messagePublisher)))
 	chBus.Subscribe(app.RemoveZoneCmdName, logCHMdw(app.NewRemoveZone(zr)))
 	chBus.Subscribe(app.ActivateDeactivateServerCmdName, logCHMdw(app.NewActivateDeactivateServer(sr)))
+	chBus.Subscribe(app.ExecuteZoneWithStatusCmdName, eventsMultiCHMdw(app.NewExecuteZoneWithStatus(zr, sr)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{

@@ -17,6 +17,11 @@ var (
 	ErrInvalidSecondsExecutionZone = errors.New("execution zone has limit 300")
 )
 
+const (
+	RainingIgnoredReason     = "It's raining!!"
+	DeactivatedIgnoredReason = "Deactivated!!"
+)
+
 type Zone struct {
 	cqs.BasicAggregateRoot
 	id, name string
@@ -83,4 +88,23 @@ func (z *Zone) Execute(seconds uint) error {
 		RelayPins:  pins,
 	})
 	return nil
+}
+
+func (z *Zone) ExecuteWithStatus(active, raining bool, seconds uint) error {
+	event := Ignored{
+		BasicEvent: cqs.NewBasicEvent(IgnoredEventName, uuid.New(), z.id),
+		ZoneName:   z.name,
+	}
+	switch {
+	case !active:
+		event.Reason = DeactivatedIgnoredReason
+		z.Record(event)
+		return nil
+	case raining:
+		event.Reason = RainingIgnoredReason
+		z.Record(event)
+		return nil
+	default:
+		return z.Execute(seconds)
+	}
 }

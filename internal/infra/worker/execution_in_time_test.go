@@ -27,7 +27,6 @@ func TestExecutionInTime(t *testing.T) {
 	hour, err := program.ParseHour(now.HourStr())
 	require.NoError(t, err)
 	errTest := errors.New("")
-	rainingWeather := fixtures.WeatherBuilder{Raining: true}.Build()
 	status := fixtures.StatusBuilder{Active: true}.Build()
 	prog := fixtures.ProgramBuilder{Hour: &hour}.Build()
 	day := program.WeekDay(nowTime.Weekday())
@@ -57,16 +56,6 @@ func TestExecutionInTime(t *testing.T) {
 			now:           now,
 			findStatusErr: errTest,
 			expectedErr:   worker.ReadCurrentStatusError{},
-		},
-		{
-			name:         "and find status returns is raining, then it stop the execution",
-			now:          now,
-			statusResult: fixtures.StatusBuilder{Weather: &rainingWeather}.Build(),
-		},
-		{
-			name:         "and find status returns not active status, then it stop the execution",
-			now:          now,
-			statusResult: fixtures.StatusBuilder{Active: false}.Build(),
 		},
 		{
 			name:            "and find programs returns error, then it returns a find programs error",

@@ -17,9 +17,6 @@ func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHan
 	if err != nil {
 		return err
 	}
-	if st.Weather().IsRaining() || !st.IsActive() {
-		return nil
-	}
 	temp := st.Weather().Temp()
 	prgms, err := findingPrograms(ctx, qh, now, temp)
 	if err != nil {
@@ -124,7 +121,7 @@ func executeProgram(ctx context.Context, ch cqs.CommandHandler, prg program.Prog
 	if nowHour == prg.Hour().String() {
 		for _, exec := range prg.Executions() {
 			for _, zo := range exec.Zones() {
-				if _, err := ch.Handle(ctx, app.ExecuteZoneCmd{
+				if _, err := ch.Handle(ctx, app.ExecuteZoneWithStatusCmd{
 					Seconds: uint(exec.Seconds().Int()),
 					ZoneID:  zo,
 				}); err != nil {
