@@ -7,7 +7,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
 )
@@ -62,7 +61,7 @@ func TestFindWeatherHandle(t *testing.T) {
 			handler := app.NewFindWeather(tr, rr)
 			result, err := handler.Handle(context.Background(), app.FindWeatherQuery{})
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedResult, result)

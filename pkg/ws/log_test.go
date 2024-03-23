@@ -13,7 +13,6 @@ import (
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/pkg/ws"
 	"github.com/stretchr/testify/require"
 )
@@ -88,7 +87,7 @@ func TestGetLog(t *testing.T) {
 			pkg := ws.New(url.URL{}, cl, "token")
 			result, err := pkg.GetLogs(context.Background(), 2)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

@@ -3,14 +3,14 @@ package app_test
 import (
 	"context"
 	"errors"
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"testing"
+
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
 )
@@ -129,7 +129,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			handler := app.NewFindProgramsInTime(daily, odd, even, weekly, temperature)
 			result, err := handler.Handle(context.Background(), tt.query)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

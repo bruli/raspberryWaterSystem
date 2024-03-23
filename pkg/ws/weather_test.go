@@ -9,7 +9,6 @@ import (
 
 	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/pkg/ws"
 	"github.com/stretchr/testify/require"
 )
@@ -65,7 +64,7 @@ func TestGetWeather(t *testing.T) {
 			pkg := ws.New(url.URL{}, cl, "token")
 			we, err := pkg.GetWeather(context.Background())
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

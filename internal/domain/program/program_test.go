@@ -6,7 +6,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +39,7 @@ func TestNew(t *testing.T) {
 			t.Parallel()
 			prg, err := program.New(tt.hour, tt.executions)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)
@@ -74,7 +73,7 @@ func TestNewWeekly(t *testing.T) {
 			t.Parallel()
 			week, err := program.NewWeekly(program.WeekDay(time.Friday), tt.programs)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, program.WeekDay(time.Friday), week.WeekDay())

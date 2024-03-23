@@ -11,7 +11,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
 )
@@ -67,7 +66,7 @@ func TestRemoveZoneHandle(t *testing.T) {
 			handler := app.NewRemoveZone(zr)
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

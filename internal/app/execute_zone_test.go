@@ -8,7 +8,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/stretchr/testify/require"
@@ -66,7 +65,7 @@ func TestExecuteZoneHandle(t *testing.T) {
 			handler := app.NewExecuteZone(zr)
 			events, err := handler.Handle(context.Background(), tt.command)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

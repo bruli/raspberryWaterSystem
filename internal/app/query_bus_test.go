@@ -5,8 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
-
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
@@ -53,7 +51,7 @@ func TestQueryBusHandle(t *testing.T) {
 			bus.Subscribe(tt.queryName, tt.handler)
 			result, err := bus.Handle(context.Background(), tt.query)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				require.Nil(t, result)
 				return
 			}

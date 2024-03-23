@@ -10,7 +10,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/stretchr/testify/require"
@@ -107,7 +106,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 			handler := app.NewExecuteZoneWithStatus(zr, sr)
 			events, err := handler.Handle(context.Background(), tt.command)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

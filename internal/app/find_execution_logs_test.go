@@ -13,7 +13,6 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
 )
@@ -26,11 +25,6 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 	firstLog := fixtures.ExecutionLogBuilder{ZoneName: vo.StringPtr("zone 1"), ExecutedAt: &executedTime1}.Build()
 	secondLog := fixtures.ExecutionLogBuilder{ZoneName: vo.StringPtr("zone 2"), ExecutedAt: &executedTime2}.Build()
 	thirdLog := fixtures.ExecutionLogBuilder{ZoneName: vo.StringPtr("zone 3"), ExecutedAt: &executedTime3}.Build()
-	lessLogs := []program.ExecutionLog{
-		thirdLog,
-		secondLog,
-		firstLog,
-	}
 	tests := []struct {
 		name                 string
 		expectedErr, findErr error
@@ -57,7 +51,11 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 		{
 			name:  "and the logs are less than limit, then it returns all logs",
 			query: app.FindExecutionLogsQuery{Limit: 10},
-			logs:  lessLogs,
+			logs: []program.ExecutionLog{
+				thirdLog,
+				secondLog,
+				firstLog,
+			},
 			expectedResult: []program.ExecutionLog{
 				firstLog,
 				secondLog,
@@ -67,7 +65,11 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 		{
 			name:  "and the limit is less than logs, then it returns filter logs",
 			query: app.FindExecutionLogsQuery{Limit: 2},
-			logs:  lessLogs,
+			logs: []program.ExecutionLog{
+				thirdLog,
+				secondLog,
+				firstLog,
+			},
 			expectedResult: []program.ExecutionLog{
 				firstLog,
 				secondLog,
@@ -87,7 +89,7 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 			handler := app.NewFindExecutionLogs(elr)
 			result, err := handler.Handle(context.Background(), tt.query)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

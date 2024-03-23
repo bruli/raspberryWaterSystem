@@ -7,7 +7,6 @@ import (
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
@@ -65,7 +64,7 @@ func TestUpdateStatusHandle(t *testing.T) {
 			handler := app.NewUpdateStatus(sr)
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
-				test.CheckErrorsType(t, tt.expectedErr, err)
+				require.ErrorAs(t, err, &tt.expectedErr)
 				return
 			}
 			require.Equal(t, tt.expectedErr, err)

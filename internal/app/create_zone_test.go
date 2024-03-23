@@ -5,12 +5,13 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 )
 
@@ -88,7 +89,9 @@ func TestCreateZoneHandle(t *testing.T) {
 			}
 			handler := app.NewCreateZone(zr)
 			_, errHand := handler.Handle(context.Background(), tt.cmd)
-			test.CheckErrorsType(t, tt.expectedErr, errHand)
+			if errHand != nil {
+				require.ErrorAs(t, errHand, &tt.expectedErr)
+			}
 		})
 	}
 }
