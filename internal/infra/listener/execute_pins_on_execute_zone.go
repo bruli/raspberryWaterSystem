@@ -33,7 +33,7 @@ func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) erro
 	}); err != nil {
 		return err
 	}
-	message := fmt.Sprintf("%s zone executed during %vs", event.ZoneName, sec)
+	message := fmt.Sprintf("%s zone executed during %vs", event.ZoneName, sec.Int())
 	_, err := e.ch.Handle(ctx, app.PublishMessageCmd{Message: message})
 	return err
 }
