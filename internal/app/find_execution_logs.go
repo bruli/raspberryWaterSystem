@@ -3,6 +3,10 @@ package app
 import (
 	"context"
 	"errors"
+	"sort"
+	"time"
+
+	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 )
@@ -36,9 +40,18 @@ func (f FindExecutionLogs) Handle(ctx context.Context, query cqs.Query) (any, er
 		return nil, err
 	}
 	if q.Limit >= len(logs) {
-		return logs, nil
+		return f.orderLogs(logs), nil
 	}
-	return logs[len(logs)-q.Limit:], nil
+	filtered := logs[len(logs)-q.Limit:]
+
+	return f.orderLogs(filtered), nil
+}
+
+func (f FindExecutionLogs) orderLogs(logs []program.ExecutionLog) []program.ExecutionLog {
+	sort.Slice(logs, func(i, j int) bool {
+		return time.Time(logs[i].ExecutedAt()).After(time.Time(logs[j].ExecutedAt()))
+	})
+	return logs
 }
 
 func NewFindExecutionLogs(elr ExecutionLogRepository) FindExecutionLogs {
