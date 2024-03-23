@@ -29,7 +29,10 @@ type SaveExecutionLog struct {
 }
 
 func (s SaveExecutionLog) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(SaveExecutionLogCmd)
+	co, ok := cmd.(SaveExecutionLogCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(SaveExecutionLogCmdName, cmd.Name())
+	}
 	logs, err := s.elr.FindAll(ctx)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
@@ -17,26 +19,36 @@ import (
 func TestRemoveZoneHandle(t *testing.T) {
 	errTest := errors.New("")
 	zo := fixtures.ZoneBuilder{}.Build()
+	cmd := app.RemoveZoneCmd{}
 	tests := []struct {
 		name string
 		expectedErr, findErr,
 		removeErr error
 		zone zone.Zone
+		cmd  cqs.Command
 	}{
+		{
+			name:        "with an invalid command, then it returns an invalid command error",
+			cmd:         invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
 		{
 			name:        "and FindByID returns an error, then it returns same error",
 			findErr:     errTest,
 			expectedErr: errTest,
+			cmd:         cmd,
 		},
 		{
 			name:        "and remove method returns an error, then it returns same error",
 			zone:        zo,
 			removeErr:   errTest,
 			expectedErr: errTest,
+			cmd:         cmd,
 		},
 		{
 			name: "then it returns any error",
 			zone: zo,
+			cmd:  cmd,
 		},
 	}
 	for _, tt := range tests {
@@ -53,7 +65,7 @@ func TestRemoveZoneHandle(t *testing.T) {
 				},
 			}
 			handler := app.NewRemoveZone(zr)
-			events, err := handler.Handle(context.Background(), app.RemoveZoneCmd{})
+			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				test.CheckErrorsType(t, tt.expectedErr, err)
 				return

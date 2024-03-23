@@ -3,6 +3,7 @@ package app_test
 import (
 	"context"
 	"errors"
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"testing"
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
@@ -21,6 +22,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 	even := fixtures.ProgramBuilder{}.Build()
 	weekly := fixtures.WeeklyBuilder{}.Build()
 	temp := fixtures.TemperatureBuilder{}.Build()
+	queryTest := app.FindProgramsInTimeQuery{}
 	tests := []struct {
 		name string
 		expectedErr, dailyErr,
@@ -30,17 +32,25 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 		daily, odd, even program.Program
 		weekly           program.Weekly
 		temp             program.Temperature
+		query            cqs.Query
 	}{
+		{
+			name:        "with an invalid query, then it returns an invalid command error",
+			query:       invalidQuery{},
+			expectedErr: cqs.InvalidQueryError{},
+		},
 		{
 			name:        "and daily repository returns an error, then it returns same error",
 			dailyErr:    errTest,
 			expectedErr: errTest,
+			query:       queryTest,
 		},
 		{
 			name:        "and odd repository returns an error, then it returns same error",
 			oddErr:      errTest,
 			expectedErr: errTest,
 			daily:       daily,
+			query:       queryTest,
 		},
 		{
 			name:        "and even repository returns an error, then it returns same error",
@@ -48,6 +58,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			expectedErr: errTest,
 			daily:       daily,
 			odd:         odd,
+			query:       queryTest,
 		},
 		{
 			name:        "and weekly repository returns an error, then it returns same error",
@@ -56,6 +67,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			daily:       daily,
 			odd:         odd,
 			even:        even,
+			query:       queryTest,
 		},
 		{
 			name:        "and temperature repository returns an error, then it returns same error",
@@ -65,6 +77,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			odd:         odd,
 			even:        even,
 			weekly:      weekly,
+			query:       queryTest,
 		},
 		{
 			name:   "then it returns a valid result",
@@ -80,6 +93,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 				Weekly:      &weekly,
 				Temperature: &temp,
 			},
+			query: queryTest,
 		},
 	}
 	for _, tt := range tests {
@@ -113,7 +127,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 				},
 			}
 			handler := app.NewFindProgramsInTime(daily, odd, even, weekly, temperature)
-			result, err := handler.Handle(context.Background(), app.FindProgramsInTimeQuery{})
+			result, err := handler.Handle(context.Background(), tt.query)
 			if err != nil {
 				test.CheckErrorsType(t, tt.expectedErr, err)
 				return

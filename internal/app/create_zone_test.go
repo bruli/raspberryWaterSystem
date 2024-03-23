@@ -29,6 +29,11 @@ func TestCreateZoneHandle(t *testing.T) {
 		zone zone.Zone
 	}{
 		{
+			name:        "with an invalid command, then it returns an invalid command error",
+			cmd:         invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
+		{
 			name:        "and find returns nil error, then it returns a create zone error",
 			cmd:         cmd,
 			expectedErr: app.CreateZoneError{},

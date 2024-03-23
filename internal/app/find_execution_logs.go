@@ -24,7 +24,10 @@ type FindExecutionLogs struct {
 }
 
 func (f FindExecutionLogs) Handle(ctx context.Context, query cqs.Query) (any, error) {
-	q, _ := query.(FindExecutionLogsQuery)
+	q, ok := query.(FindExecutionLogsQuery)
+	if !ok {
+		return nil, cqs.NewInvalidQueryError(FindExecutionLogsQueryName, query.Name())
+	}
 	if q.Limit > maxExecutionLogs {
 		return nil, ErrInvalidExecutionsLogLimit
 	}

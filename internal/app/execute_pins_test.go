@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/stretchr/testify/require"
@@ -12,17 +14,26 @@ import (
 
 func TestExecutePinsHandle(t *testing.T) {
 	errTest := errors.New("")
+	cmd := app.ExecutePinsCmd{}
 	tests := []struct {
 		name                 string
 		execErr, expectedErr error
+		cmd                  cqs.Command
 	}{
 		{
+			name:        "with an invalid command, then it returns an invalid command error",
+			cmd:         invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
+		{
 			name:        "and executor returns an error, then it returns same error",
+			cmd:         cmd,
 			execErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name: "and executor returns nil, then it returns nil events",
+			cmd:  cmd,
 		},
 	}
 	for _, tt := range tests {
@@ -36,7 +47,7 @@ func TestExecutePinsHandle(t *testing.T) {
 				},
 			}
 			handler := app.NewExecutePins(pe)
-			events, err := handler.Handle(context.Background(), app.ExecutePinsCmd{})
+			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				test.CheckErrorsType(t, tt.expectedErr, err)
 				return

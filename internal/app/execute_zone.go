@@ -23,7 +23,10 @@ type ExecuteZone struct {
 }
 
 func (e ExecuteZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(ExecuteZoneCmd)
+	co, ok := cmd.(ExecuteZoneCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(ExecuteZoneCmdName, cmd.Name())
+	}
 	zo, err := e.zr.FindByID(ctx, co.ZoneID)
 	if err != nil {
 		return nil, err

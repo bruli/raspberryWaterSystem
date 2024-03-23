@@ -26,7 +26,10 @@ type CreatePrograms struct {
 }
 
 func (c CreatePrograms) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(CreateProgramsCmd)
+	co, ok := cmd.(CreateProgramsCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(CreateProgramsCmdName, cmd.Name())
+	}
 	if err := c.daily.Save(ctx, co.Daily); err != nil {
 		return nil, err
 	}

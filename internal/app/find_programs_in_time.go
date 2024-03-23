@@ -28,7 +28,10 @@ type FindProgramsInTime struct {
 }
 
 func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, error) {
-	q, _ := query.(FindProgramsInTimeQuery)
+	q, ok := query.(FindProgramsInTimeQuery)
+	if !ok {
+		return nil, cqs.NewInvalidQueryError(FindProgramsInTimeQueryName, query.Name())
+	}
 	hour, _ := program.ParseHour(q.On.HourStr())
 	daily, err := f.findDaily(ctx, hour)
 	if err != nil {

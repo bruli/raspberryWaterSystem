@@ -31,7 +31,10 @@ func NewCreateZone(zr ZoneRepository) CreateZone {
 }
 
 func (c CreateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(CreateZoneCmd)
+	co, ok := cmd.(CreateZoneCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(CreateZoneCmdName, cmd.Name())
+	}
 	_, err := c.zr.FindByID(ctx, co.ID)
 	if err == nil {
 		return nil, CreateZoneError{msg: fmt.Sprintf("a zone with id %s, already exists", co.ID)}

@@ -15,7 +15,7 @@ type PublishMessageOnZoneIgnored struct {
 
 func (p PublishMessageOnZoneIgnored) Listen(ctx context.Context, ev cqs.Event) error {
 	event, _ := ev.(zone.Ignored)
-	message := spew.Sprintf("Zone %q ignored to send water.", event.ZoneName)
+	message := spew.Sprintf("Zone %q ignored to send water. Reason: %s", event.ZoneName, event.Reason)
 	if _, err := p.ch.Handle(ctx, app.PublishMessageCmd{Message: message}); err != nil {
 		return err
 	}

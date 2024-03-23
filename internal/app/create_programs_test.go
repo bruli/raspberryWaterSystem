@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/test"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
@@ -13,39 +15,52 @@ import (
 
 func TestCreateProgramsHandle(t *testing.T) {
 	errTest := errors.New("")
+	cmd := app.CreateProgramsCmd{}
 	tests := []struct {
 		name string
+		cmd  cqs.Command
 		expectedErr, dailyErr,
 		oddErr, evenErr,
 		weeklyErr, tempErr error
 	}{
 		{
+			name:        "with an invalid command, then it returns an invalid command error",
+			cmd:         invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
+		{
 			name:        "and daily repo returns error, then it returns same error",
+			cmd:         cmd,
 			dailyErr:    errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and odd repo returns error, then it returns same error",
+			cmd:         cmd,
 			oddErr:      errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and even repo returns error, then it returns same error",
+			cmd:         cmd,
 			evenErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and weekly repo returns error, then it returns same error",
+			cmd:         cmd,
 			weeklyErr:   errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and temperature repo returns error, then it returns same error",
+			cmd:         cmd,
 			tempErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name: "then it returns nil",
+			cmd:  cmd,
 		},
 	}
 	for _, tt := range tests {
@@ -79,7 +94,7 @@ func TestCreateProgramsHandle(t *testing.T) {
 				},
 			}
 			handler := app.NewCreatePrograms(daily, odd, even, weekly, temp)
-			events, err := handler.Handle(context.Background(), app.CreateProgramsCmd{})
+			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				test.CheckErrorsType(t, tt.expectedErr, err)
 				return

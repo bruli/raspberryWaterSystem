@@ -39,6 +39,11 @@ func TestSaveExecutionLogHandle(t *testing.T) {
 		logs []program.ExecutionLog
 	}{
 		{
+			name:        "with an invalid command, then it returns an invalid command error",
+			cmd:         invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
+		{
 			name:        "and find all returns an error, then it returns same error",
 			cmd:         cmd,
 			findErr:     errTest,

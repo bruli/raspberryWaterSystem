@@ -26,7 +26,10 @@ func NewUpdateStatus(sr StatusRepository) UpdateStatus {
 }
 
 func (u UpdateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(UpdateStatusCmd)
+	co, ok := cmd.(UpdateStatusCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(UpdateStatusCmdName, cmd.Name())
+	}
 	current, err := u.sr.Find(ctx)
 	if err != nil {
 		return nil, err

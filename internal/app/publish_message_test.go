@@ -21,6 +21,11 @@ func TestPublishExecutionLogHandle(t *testing.T) {
 		cmd                     cqs.Command
 	}{
 		{
+			name:        "with an invalid command, then it returns an invalid command error",
+			cmd:         invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
+		{
 			name:        "and publish returns an error, then it returns same error",
 			cmd:         cmd,
 			publishErr:  errTest,

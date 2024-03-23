@@ -21,7 +21,10 @@ type PublishMessage struct {
 }
 
 func (p PublishMessage) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(PublishMessageCmd)
+	co, ok := cmd.(PublishMessageCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(PublishMessageCmdName, cmd.Name())
+	}
 	return nil, p.mp.Publish(ctx, co.Message)
 }
 

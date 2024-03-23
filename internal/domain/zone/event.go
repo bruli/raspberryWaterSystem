@@ -18,4 +18,5 @@ type Executed struct {
 type Ignored struct {
 	cqs.BasicEvent
 	ZoneName string
+	Reason   string
 }

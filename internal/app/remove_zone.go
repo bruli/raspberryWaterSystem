@@ -21,7 +21,10 @@ type RemoveZone struct {
 }
 
 func (r RemoveZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(RemoveZoneCmd)
+	co, ok := cmd.(RemoveZoneCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(RemoveZoneCmdName, cmd.Name())
+	}
 	zo, err := r.zr.FindByID(ctx, co.ID)
 	if err != nil {
 		return nil, err

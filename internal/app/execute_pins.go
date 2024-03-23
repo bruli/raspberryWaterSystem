@@ -22,7 +22,10 @@ type ExecutePins struct {
 }
 
 func (e ExecutePins) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(ExecutePinsCmd)
+	co, ok := cmd.(ExecutePinsCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(ExecutePinsCmdName, cmd.Name())
+	}
 	return nil, e.pe.Execute(ctx, co.Seconds, co.Pins)
 }
 

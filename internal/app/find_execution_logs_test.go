@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+
 	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
@@ -25,31 +27,37 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 	}
 	tests := []struct {
 		name                 string
-		limit                int
 		expectedErr, findErr error
 		logs                 []program.ExecutionLog
 		expectedResult       any
+		query                cqs.Query
 	}{
+
+		{
+			name:        "with an invalid query, then it returns an invalid command error",
+			query:       invalidQuery{},
+			expectedErr: cqs.InvalidQueryError{},
+		},
 		{
 			name:        "with an invalid limit, then it returns an invalid execution log limit error",
-			limit:       100,
+			query:       app.FindExecutionLogsQuery{Limit: 100},
 			expectedErr: app.ErrInvalidExecutionsLogLimit,
 		},
 		{
 			name:        "and findAll returns an error, then it returns same error",
-			limit:       10,
+			query:       app.FindExecutionLogsQuery{Limit: 10},
 			findErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:           "and the logs are less than limit, then it returns all logs",
-			limit:          10,
+			query:          app.FindExecutionLogsQuery{Limit: 10},
 			logs:           lessLogs,
 			expectedResult: lessLogs,
 		},
 		{
 			name:  "and the limit is less than logs, then it returns filter logs",
-			limit: 2,
+			query: app.FindExecutionLogsQuery{Limit: 2},
 			logs:  lessLogs,
 			expectedResult: []program.ExecutionLog{
 				lessLogs[1],
@@ -68,7 +76,7 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 				},
 			}
 			handler := app.NewFindExecutionLogs(elr)
-			result, err := handler.Handle(context.Background(), app.FindExecutionLogsQuery{Limit: tt.limit})
+			result, err := handler.Handle(context.Background(), tt.query)
 			if err != nil {
 				test.CheckErrorsType(t, tt.expectedErr, err)
 				return
@@ -77,4 +85,10 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 			require.Equal(t, tt.expectedResult, result)
 		})
 	}
+}
+
+type invalidQuery struct{}
+
+func (i invalidQuery) Name() string {
+	return "invalid"
 }

@@ -17,6 +17,10 @@ import (
 func TestExecuteZoneHandle(t *testing.T) {
 	errTest := errors.New("")
 	zo := fixtures.ZoneBuilder{}.Build()
+	cmd := app.ExecuteZoneCmd{
+		Seconds: 367,
+		ZoneID:  "name",
+	}
 	tests := []struct {
 		name                 string
 		command              cqs.Command
@@ -24,7 +28,13 @@ func TestExecuteZoneHandle(t *testing.T) {
 		zone                 zone.Zone
 	}{
 		{
+			name:        "with invalid command, then it returns an invalid command error",
+			command:     invalidCommand{},
+			expectedErr: cqs.InvalidCommandError{},
+		},
+		{
 			name:        "and find zone returns an error, then it returns same error",
+			command:     cmd,
 			findErr:     errTest,
 			expectedErr: errTest,
 		},
@@ -32,13 +42,10 @@ func TestExecuteZoneHandle(t *testing.T) {
 			name:        "and execute returns an error, then it returns an execute zone error",
 			zone:        zo,
 			expectedErr: app.ExecuteZoneError{},
-			command: app.ExecuteZoneCmd{
-				Seconds: 367,
-				ZoneID:  "name",
-			},
+			command:     cmd,
 		},
 		{
-			name: "and execute returns an error, then it returns an execute zone error",
+			name: "and execute nil, then it returns a valid event",
 			zone: zo,
 			command: app.ExecuteZoneCmd{
 				Seconds: 36,

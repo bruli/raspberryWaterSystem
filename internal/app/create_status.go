@@ -33,7 +33,10 @@ func NewCreateStatus(sr StatusRepository) CreateStatus {
 }
 
 func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, _ := cmd.(CreateStatusCmd)
+	co, ok := cmd.(CreateStatusCmd)
+	if !ok {
+		return nil, cqs.NewInvalidCommandError(CreateStatusCmdName, cmd.Name())
+	}
 	_, err := c.sr.Find(ctx)
 	if err == nil {
 		return nil, ErrStatusAlreadyExist
