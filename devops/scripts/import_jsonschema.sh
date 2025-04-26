@@ -4,7 +4,6 @@ set -e -x
 
 # shellcheck source=devops/scripts/util.sh
 source "$(dirname "$0")"/util.sh
-require gojsonschema
 
 TARGET_DIRECTORY="$(pwd)/internal/infra/http"
 

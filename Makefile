@@ -2,12 +2,7 @@ define help
 Usage: make <command>
 Commands:
    help:                      Show this help information
-   tools-local:               Install all tools
-   tool-golangci-lint:        Install golangci linter
-   tool-fumpt:                Install gofumpt tool
-   tool-moq:                  Install moq tool
    tool-jsonschema:           Install gojsonschema tool
-   tool-json-lint:            Install json lint linter
    test:                      Run unit tests
    test-with-infra:           Run infrastructure tests
    test-integration:          Run integration tests
@@ -18,6 +13,7 @@ Commands:
    docker-exec                To entry into water system container
    lint:                      Execute go linter
    clean:                     To clean code
+   fumpt:      	               Format code
    import-jsonschema:         Import and generate DTOS from json schemas
    encryptVault:              Encrypt vault secret file
    decryptVault:              Decrypt vault secret file
@@ -35,29 +31,11 @@ help:
 docker-logs:
 	docker logs -f water_system
 
-.PHONY: tools-local
-tools-local: tool-golangci-lint tool-moq tool-fumpt	 tool-jsonschema tool-json-lint
-
-.PHONY: tool-golangci-lint
-tool-golangci-lint:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-
-.PHONY: tool-fumpt
-tool-fumpt:
-	go install mvdan.cc/gofumpt@latest
-
-.PHONY: tool-moq
-tool-moq:
-	go get github.com/matryer/moq@latest
 
 .PHONY: tool-jsonschema
 tool-jsonschema:
 	go get github.com/atombender/go-jsonschema/...
 	go install github.com/atombender/go-jsonschema@latest
-
-.PHONY: tool-json-lint
-tool-json-lint:
-	go get github.com/santhosh-tekuri/jsonschema/cmd/jv
 
 .PHONY: test
 test:
@@ -77,15 +55,15 @@ test-functional:
 
 .PHONY: docker-up
 docker-up:
-	docker-compose up -d --build water_system
+	docker compose up -d --build water_system
 
 .PHONY: docker-down
 docker-down:
-	docker-compose down
+	docker compose down
 
 .PHONY: docker-ps
 docker-ps:
-	docker-compose ps
+	docker compose ps
 
 .PHONY: docker-exec
 docker-exec:
@@ -93,13 +71,17 @@ docker-exec:
 
 .PHONY: lint
 lint:
-	golangci-lint run
+	go tool golangci-lint run
 	devops/scripts/json-lint.sh
 	go mod tidy -v && git --no-pager diff --quiet go.mod go.sum
 
 .PHONY: clean
 clean:
 	go fmt ./...
+
+.PHONY: fumpt
+fumpt:
+	go tool gofumpt -w -l .
 
 .PHONY: import-jsonschema
 import-jsonschema:
