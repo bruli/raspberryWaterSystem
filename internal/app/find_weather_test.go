@@ -25,16 +25,16 @@ func TestFindWeatherHandle(t *testing.T) {
 		rain           bool
 	}{
 		{
-			name:        "and find temperature returns an error, then it returns same error",
-			tempErr:     errTest,
-			expectedErr: errTest,
+			name:           "and find temperature returns an error, then it returns zero temperature",
+			tempErr:        errTest,
+			expectedResult: weather.New(0, 0, false),
 		},
 		{
-			name:        "and find rain returns an error, then it returns same error",
-			rainErr:     errTest,
-			expectedErr: errTest,
-			temp:        temp,
-			hum:         hum,
+			name:           "and find rain returns an error, then it returns zero values",
+			rainErr:        errTest,
+			temp:           temp,
+			hum:            hum,
+			expectedResult: weather.New(temp, hum, false),
 		},
 		{
 			name:           "then it returns a valid result",
