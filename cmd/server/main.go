@@ -6,7 +6,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/config"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,8 +26,7 @@ import (
 )
 
 func main() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log := zerolog.New(os.Stdout).With().Timestamp().Logger()
+	log := buildLogger()
 	conf, err := config.NewConfig()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed building config")
@@ -91,43 +89,49 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	go updateStatusWorker(ctx, qhBus, chBus)
+	go updateStatusWorker(ctx, qhBus, chBus, &log)
 	go eventsWorker(ctx, eventsCh, eventBus, &log)
 	go executionInTimeWorker(ctx, qhBus, chBus, &log)
 
-	definitions, err := handlersDefinition(chBus, qhBus, conf.AuthToken())
-	if err != nil {
-		log.Fatal().Err(err)
-	}
+	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	httpHandlers := infrahttp.NewHandler(definitions)
-	if err = infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}); err != nil {
+	if err = infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
 		log.Fatal().Err(err).Msg("system error")
 	}
 }
 
+func buildLogger() zerolog.Logger {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log := zerolog.New(os.Stdout).With().Timestamp().Logger()
+	return log
+}
+
 func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {
+	logger.Info().Msg("[WORKER] Execution in time: started")
 	ticker := time.NewTicker(time.Minute)
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info().Msg("execution in time worker context done")
+			logger.Info().Msg("[WORKER] Execution in time: context done")
 			return
 		case <-ticker.C:
 			if err := worker.ExecutionInTime(ctx, qh, ch, vo.TimeNow()); err != nil {
-				logger.Err(err).Msg("failed execution in time worker")
+				logger.Err(err).Msg("[WORKER] failed execution in time")
 			}
 		}
 	}
 }
 
 func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, logger *zerolog.Logger) {
+	logger.Info().Msg("[WORKER] Events: started")
 	for {
 		select {
 		case <-ctx.Done():
+			logger.Info().Msg("[WORKER] Events: context done")
 			return
 		case event := <-ch:
 			if err := evBus.Dispatch(ctx, event); err != nil {
-				logger.Err(err).Msg(fmt.Sprintf("failed dispatching %q", event.EventName()))
+				logger.Err(err).Msg(fmt.Sprintf("[WORKER] Events: failed dispatching %q", event.EventName()))
 			}
 		}
 	}
@@ -142,27 +146,28 @@ func rainRepository(conf config.Config) app.RainRepository {
 	return rr
 }
 
-func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler) {
+func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {
+	logger.Info().Msg("[WORKER] Update status: started")
 	ticker := time.NewTicker(5 * time.Minute)
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("update status worker context done")
+			logger.Info().Msg("[WORKER] Update status: context done")
 			return
 		case <-ticker.C:
-			updateStatus(ctx, qh, ch)
+			updateStatus(ctx, qh, ch, logger)
 		}
 	}
 }
 
-func updateStatus(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler) {
+func updateStatus(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {
 	result, err := qh.Handle(ctx, app.FindWeatherQuery{})
 	if err != nil {
-		log.Fatalln(err)
+		logger.Fatal().Err(err).Msg("failed getting weather")
 	}
 	weath, _ := result.(weather.Weather)
 	if _, err = ch.Handle(ctx, app.UpdateStatusCmd{Weather: weath}); err != nil {
-		log.Fatalln(err)
+		logger.Fatal().Err(err).Msg("failed updating status")
 	}
 }
 
@@ -179,7 +184,7 @@ func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler)
 	return err
 }
 
-func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string) (infrahttp.HandlersDefinition, error) {
+func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string) infrahttp.HandlersDefinition {
 	authMdw := infrahttp.AuthMiddleware(authToken)
 	return infrahttp.HandlersDefinition{
 		{
@@ -232,5 +237,5 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(infrahttp.FindExecutionLogs(qhBus)),
 		},
-	}, nil
+	}
 }
