@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"

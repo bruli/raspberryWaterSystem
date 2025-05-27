@@ -10,16 +10,6 @@ import (
 	"time"
 )
 
-//func TestFunctional(t *testing.T) {
-//	runHomepage(t)
-//	runZones(t)
-//	runStatus(t)
-//	runWeather(t)
-//	runPrograms(t)
-//	runExecutionLogs(t)
-//	runPkg(t)
-//}
-
 const serverURL = "http://localhost:8083"
 
 var (

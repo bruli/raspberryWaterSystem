@@ -4,16 +4,15 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func CreateZone(ch cqs.CommandHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req CreateZoneRequestJson
-		if err := httpx.ReadRequest(w, r, &req); err != nil {
+		if err := ReadRequest(w, r, &req); err != nil {
 			return
 		}
 		if _, err := ch.Handle(r.Context(), app.CreateZoneCmd{
@@ -23,15 +22,15 @@ func CreateZone(ch cqs.CommandHandler) http.HandlerFunc {
 		}); err != nil {
 			switch {
 			case errors.As(err, &app.CreateZoneError{}):
-				httpx.WriteErrorResponse(w, http.StatusBadRequest, httpx.Error{
-					Code:    httpx.ErrorCodeInvalidRequest,
+				WriteErrorResponse(w, http.StatusBadRequest, Error{
+					Code:    ErrorCodeInvalidRequest,
 					Message: err.Error(),
 				})
 			default:
-				httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+				WriteErrorResponse(w, http.StatusInternalServerError)
 			}
 			return
 		}
-		httpx.WriteResponse(w, http.StatusOK, nil)
+		WriteResponse(w, http.StatusOK, nil)
 	}
 }

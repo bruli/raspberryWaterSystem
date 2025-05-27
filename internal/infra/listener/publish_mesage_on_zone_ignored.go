@@ -3,9 +3,9 @@ package listener
 import (
 	"context"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/davecgh/go-spew/spew"
 )
 

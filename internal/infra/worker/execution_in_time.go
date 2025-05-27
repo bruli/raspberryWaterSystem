@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, now vo.Time) error {

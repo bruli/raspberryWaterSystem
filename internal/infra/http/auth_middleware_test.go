@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/stretchr/testify/require"
 )
@@ -51,6 +50,6 @@ func TestAuthMiddleware(t *testing.T) {
 
 func nextHandler() http2.HandlerFunc {
 	return func(w http2.ResponseWriter, r *http2.Request) {
-		httpx.WriteResponse(w, http2.StatusOK, nil)
+		http.WriteResponse(w, http2.StatusOK, nil)
 	}
 }

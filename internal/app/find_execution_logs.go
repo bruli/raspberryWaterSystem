@@ -8,7 +8,7 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 const FindExecutionLogsQueryName = "findExecutionLogs"

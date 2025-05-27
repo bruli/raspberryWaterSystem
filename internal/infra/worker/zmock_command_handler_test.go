@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 // Ensure, that CommandHandlerMock does implement cqs.CommandHandler.

@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 const ActivateDeactivateServerCmdName = "activateDeactivateServer"

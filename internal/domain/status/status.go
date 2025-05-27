@@ -1,8 +1,8 @@
 package status
 
 import (
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
 type Status struct {

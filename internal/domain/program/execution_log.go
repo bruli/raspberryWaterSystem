@@ -3,7 +3,7 @@ package program
 import (
 	"errors"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
 var (

@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/google/uuid"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
 )
 

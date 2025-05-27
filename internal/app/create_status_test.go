@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 

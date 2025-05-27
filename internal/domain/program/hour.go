@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
 var ErrInvalidExecutionHour = errors.New("invalid execution hour")

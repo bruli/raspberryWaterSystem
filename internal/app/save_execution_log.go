@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )

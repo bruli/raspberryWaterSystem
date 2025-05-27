@@ -9,9 +9,9 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 
 	"github.com/stretchr/testify/require"
 

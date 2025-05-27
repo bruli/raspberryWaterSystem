@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/google/uuid"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"

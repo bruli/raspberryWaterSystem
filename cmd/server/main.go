@@ -3,23 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/bruli/raspberryWaterSystem/internal/config"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
-	"github.com/bruli/raspberryWaterSystem/config"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/fake"
-	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
+	infrahttp "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
@@ -100,8 +99,8 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err)
 	}
-	httpHandlers := httpx.NewHandler(definitions)
-	if err = httpx.RunServer(ctx, conf.ServerURL(), httpHandlers, &httpx.CORSOpt{}); err != nil {
+	httpHandlers := infrahttp.NewHandler(definitions)
+	if err = infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}); err != nil {
 		log.Fatal().Err(err).Msg("system error")
 	}
 }
@@ -180,58 +179,58 @@ func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler)
 	return err
 }
 
-func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string) (httpx.HandlersDefinition, error) {
-	authMdw := http2.AuthMiddleware(authToken)
-	return httpx.HandlersDefinition{
+func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string) (infrahttp.HandlersDefinition, error) {
+	authMdw := infrahttp.AuthMiddleware(authToken)
+	return infrahttp.HandlersDefinition{
 		{
 			Endpoint:    "/",
 			Method:      http.MethodGet,
-			HandlerFunc: http2.Homepage(),
+			HandlerFunc: infrahttp.Homepage(),
 		},
 		{
 			Endpoint:    "/zones",
 			Method:      http.MethodPut,
-			HandlerFunc: authMdw(http2.CreateZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.CreateZone(chBus)),
 		},
 		{
 			Endpoint:    "/zones/{id}/execute",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(http2.ExecuteZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.ExecuteZone(chBus)),
 		},
 		{
 			Endpoint:    "/zones/{id}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(http2.RemoveZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.RemoveZone(chBus)),
 		},
 		{
 			Endpoint:    "/status",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(http2.FindStatus(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindStatus(qhBus)),
 		},
 		{
 			Endpoint:    "/status/{action}",
 			Method:      http.MethodPatch,
-			HandlerFunc: authMdw(http2.ActivateDeactivateServer(chBus)),
+			HandlerFunc: authMdw(infrahttp.ActivateDeactivateServer(chBus)),
 		},
 		{
 			Endpoint:    "/weather",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(http2.FindWeather(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindWeather(qhBus)),
 		},
 		{
 			Endpoint:    "/programs",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(http2.FindAllPrograms(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindAllPrograms(qhBus)),
 		},
 		{
 			Endpoint:    "/programs",
 			Method:      http.MethodPut,
-			HandlerFunc: authMdw(http2.CreatePrograms(chBus)),
+			HandlerFunc: authMdw(infrahttp.CreatePrograms(chBus)),
 		},
 		{
 			Endpoint:    "/logs",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(http2.FindExecutionLogs(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindExecutionLogs(qhBus)),
 		},
 	}, nil
 }

@@ -4,17 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func FindWeather(qh cqs.QueryHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		result, err := qh.Handle(r.Context(), app.FindWeatherQuery{})
 		if err != nil {
-			httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
 		weath, _ := result.(weather.Weather)
@@ -24,6 +23,6 @@ func FindWeather(qh cqs.QueryHandler) http.HandlerFunc {
 			Temperature: float64(weath.Temp()),
 		}
 		data, _ := json.Marshal(resp)
-		httpx.WriteResponse(w, http.StatusOK, data)
+		WriteResponse(w, http.StatusOK, data)
 	}
 }

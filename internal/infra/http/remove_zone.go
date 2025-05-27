@@ -4,10 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -17,12 +16,12 @@ func RemoveZone(ch cqs.CommandHandler) http.HandlerFunc {
 		if _, err := ch.Handle(r.Context(), app.RemoveZoneCmd{ID: id}); err != nil {
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
-				httpx.WriteErrorResponse(w, http.StatusNotFound)
+				WriteErrorResponse(w, http.StatusNotFound)
 			default:
-				httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+				WriteErrorResponse(w, http.StatusInternalServerError)
 			}
 			return
 		}
-		httpx.WriteResponse(w, http.StatusOK, nil)
+		WriteResponse(w, http.StatusOK, nil)
 	}
 }

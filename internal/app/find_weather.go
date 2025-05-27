@@ -5,8 +5,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 const FindWeatherQueryName = "findWeather"

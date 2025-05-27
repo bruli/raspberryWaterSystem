@@ -3,9 +3,8 @@ package http
 import (
 	"net/http"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -24,16 +23,16 @@ func ActivateDeactivateServer(ch cqs.CommandHandler) http.HandlerFunc {
 		case DeactivateAction:
 			active = false
 		default:
-			httpx.WriteErrorResponse(w, http.StatusBadRequest, httpx.Error{
-				Code:    httpx.ErrorCodeInvalidRequest,
+			WriteErrorResponse(w, http.StatusBadRequest, Error{
+				Code:    ErrorCodeInvalidRequest,
 				Message: "invalid action name",
 			})
 			return
 		}
 		if _, err := ch.Handle(r.Context(), app.ActivateDeactivateServerCmd{Active: active}); err != nil {
-			httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
-		httpx.WriteResponse(w, http.StatusOK, nil)
+		WriteResponse(w, http.StatusOK, nil)
 	}
 }

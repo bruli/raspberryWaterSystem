@@ -3,31 +3,30 @@ package http
 import (
 	"net/http"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func CreatePrograms(ch cqs.CommandHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req CreateProgramsRequestJson
-		if err := httpx.ReadRequest(w, r, &req); err != nil {
+		if err := ReadRequest(w, r, &req); err != nil {
 			return
 		}
 		cmd, err := buildCreateProgramsCmd(req)
 		if err != nil {
-			httpx.WriteErrorResponse(w, http.StatusBadRequest, httpx.Error{
-				Code:    httpx.ErrorCodeInvalidRequest,
+			WriteErrorResponse(w, http.StatusBadRequest, Error{
+				Code:    ErrorCodeInvalidRequest,
 				Message: err.Error(),
 			})
 			return
 		}
 		if _, err := ch.Handle(r.Context(), cmd); err != nil {
-			httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
-		httpx.WriteResponse(w, http.StatusOK, nil)
+		WriteResponse(w, http.StatusOK, nil)
 	}
 }
 

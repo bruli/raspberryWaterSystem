@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
@@ -19,8 +18,8 @@ func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
 		if len(limitStr) > 0 {
 			limitValue, err := strconv.Atoi(limitStr)
 			if err != nil {
-				httpx.WriteErrorResponse(w, http.StatusBadRequest, httpx.Error{
-					Code:    httpx.ErrorCodeInvalidRequest,
+				WriteErrorResponse(w, http.StatusBadRequest, Error{
+					Code:    ErrorCodeInvalidRequest,
 					Message: "invalid limit value",
 				})
 				return
@@ -31,12 +30,12 @@ func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, app.ErrInvalidExecutionsLogLimit):
-				httpx.WriteErrorResponse(w, http.StatusBadRequest, httpx.Error{
-					Code:    httpx.ErrorCodeInvalidRequest,
+				WriteErrorResponse(w, http.StatusBadRequest, Error{
+					Code:    ErrorCodeInvalidRequest,
 					Message: err.Error(),
 				})
 			default:
-				httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+				WriteErrorResponse(w, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -50,6 +49,6 @@ func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
 			}
 		}
 		data, _ := json.Marshal(resp)
-		httpx.WriteResponse(w, http.StatusOK, data)
+		WriteResponse(w, http.StatusOK, data)
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
 type log struct {

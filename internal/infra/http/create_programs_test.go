@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func TestCreatePrograms(t *testing.T) {

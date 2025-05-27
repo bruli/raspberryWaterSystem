@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/vo"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 var ErrStatusAlreadyExist = errors.New("status already exist")

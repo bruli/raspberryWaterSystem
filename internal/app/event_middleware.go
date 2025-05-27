@@ -2,8 +2,7 @@ package app
 
 import (
 	"context"
-
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func NewEventMiddleware(evCh chan<- cqs.Event) cqs.CommandHandlerMiddleware {

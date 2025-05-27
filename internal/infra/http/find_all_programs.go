@@ -6,16 +6,15 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
-	"github.com/bruli/raspberryRainSensor/pkg/common/httpx"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 func FindAllPrograms(qh cqs.QueryHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		result, err := qh.Handle(r.Context(), app.FindAllProgramsQuery{})
 		if err != nil {
-			httpx.WriteErrorResponse(w, http.StatusInternalServerError)
+			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
 		programs, _ := result.(app.AllPrograms)
@@ -27,7 +26,7 @@ func FindAllPrograms(qh cqs.QueryHandler) http.HandlerFunc {
 			Weekly:      buildWeeklyProgramsResponse(programs.Weekly),
 		}
 		data, _ := json.Marshal(resp)
-		httpx.WriteResponse(w, http.StatusOK, data)
+		WriteResponse(w, http.StatusOK, data)
 	}
 }
 

@@ -5,11 +5,11 @@ package telegram_test
 
 import (
 	"context"
+	"github.com/bruli/raspberryWaterSystem/internal/config"
 	"strconv"
 	"testing"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/env"
-	"github.com/bruli/raspberryWaterSystem/config"
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 	"github.com/stretchr/testify/require"

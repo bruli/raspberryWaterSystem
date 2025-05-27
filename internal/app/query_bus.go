@@ -3,8 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-
-	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 type QueryBus struct {
