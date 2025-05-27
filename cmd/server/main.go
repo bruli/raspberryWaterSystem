@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/bruli/raspberryRainSensor/pkg/common/cqs"
@@ -87,6 +88,9 @@ func main() {
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.Fatal().Err(err)
 	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 
 	go updateStatusWorker(ctx, qhBus, chBus)
 	go eventsWorker(ctx, eventsCh, eventBus, &log)
