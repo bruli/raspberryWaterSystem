@@ -8,6 +8,7 @@ const (
 	ActivateCommandName   CommandName = "activate"
 	DeactivateCommandName CommandName = "deactivate"
 	WeatherCommandName    CommandName = "weather"
+	ZoneCommandName       CommandName = "zone"
 )
 
 type CommandName string
@@ -21,8 +22,8 @@ type Command struct {
 	syntax, description string
 }
 
-func initCommands() [7]Command {
-	return [7]Command{
+func initCommands() [8]Command {
+	return [8]Command{
 		{HelpCommandName, "/help", "Show available commands"},
 		{StatusCommandName, "/status", "Show current status"},
 		{LogCommandName, "/log [limit]", "Show last log entries"},
@@ -30,6 +31,7 @@ func initCommands() [7]Command {
 		{ActivateCommandName, "/activate", "Activate server"},
 		{DeactivateCommandName, "/deactivate", "Deactivate server"},
 		{WeatherCommandName, "/weather", "Check current weather"},
+		{ZoneCommandName, "/zone [id] [name] [relay1,relay2]", "Create a new zone"},
 	}
 
 }

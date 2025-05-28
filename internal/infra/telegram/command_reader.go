@@ -49,6 +49,8 @@ func (r CommandReader) Read(ctx context.Context, logger *zerolog.Logger) {
 			cmd = DeactivateCommand{}
 		case WaterCommandName.String():
 			cmd = waterCommand{arguments: update.Message.CommandArguments()}
+		case ZoneCommandName.String():
+			cmd = zoneCommand{arguments: update.Message.CommandArguments()}
 		default:
 			cmd = unknownCommand{}
 		}
@@ -90,6 +92,7 @@ func buildRunnerBus(qh cqs.QueryHandler, ch cqs.CommandHandler) *runnerBus {
 	bus.subscribe(ActivateCommandName, NewActivateRunner(ch))
 	bus.subscribe(DeactivateCommandName, NewDeactivateRunner(ch))
 	bus.subscribe(WaterCommandName, newWaterRunner(ch))
+	bus.subscribe(ZoneCommandName, newZoneRunner(ch))
 
 	return bus
 }
