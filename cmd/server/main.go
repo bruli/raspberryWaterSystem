@@ -93,9 +93,19 @@ func main() {
 	go eventsWorker(ctx, eventsCh, eventBus, &log)
 	go executionInTimeWorker(ctx, qhBus, chBus, &log)
 
+	go runHTTPServer(chBus, qhBus, conf, ctx, log)
+
+	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken(), qhBus, chBus)
+	if err != nil {
+		log.Fatal().Err(err).Msgf("[TELEGRAM SERVICE] failed building telegram server: %s", err)
+	}
+	telegramServer.Read(ctx, &log)
+}
+
+func runHTTPServer(chBus app.CommandBus, qhBus app.QueryBus, conf config.Config, ctx context.Context, log zerolog.Logger) {
 	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	httpHandlers := infrahttp.NewHandler(definitions)
-	if err = infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
+	if err := infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
 		log.Fatal().Err(err).Msg("system error")
 	}
 }

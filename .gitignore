@@ -20,3 +20,4 @@
 /devops/ansible/password
 /devops/ansible/assets/
 !/devops/ansible/assets/.gitkeep
+/.env

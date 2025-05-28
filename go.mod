@@ -9,6 +9,7 @@ require gopkg.in/yaml.v3 v3.0.1
 require (
 	github.com/bruli/raspberryRainSensor v0.0.0-20240323154628-890ec8a3de3e
 	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/google/uuid v1.6.0
 	github.com/rs/cors v1.10.1
 )

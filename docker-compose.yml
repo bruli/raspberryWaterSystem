@@ -7,19 +7,19 @@ services:
     volumes:
       - .:/app
     environment:
-      WS_SERVER_URL: ${RS_SERVER_URL:-:8080}
-      WS_ENVIRONMENT: ${RS_ENVIRONMENT:-development}
-      WS_ZONES_FILE: ${WS_ZONES_FILE:-/tmp/zones.yaml}
-      WS_AUTH_TOKEN: ${WS_AUTH_TOKEN:-WT7*P6Yn^2-Y*V*C-h&K6*b!@=HCzhd+}
-      WS_RAIN_SERVER_URL: ${WS_RAIN_SERVER_URL:-http://rain_sensor:8080}
-      WS_DAILY_PROGRAMS_FILE: ${WS_DAILY_PROGRAMS_FILE:-/tmp/daily_programs.yml}
-      WS_ODD_PROGRAMS_FILE: ${WS_ODD_PROGRAMS_FILE:-/tmp/odd_programs.yml}
-      WS_EVEN_PROGRAMS_FILE: ${WS_EVEN_PROGRAMS_FILE:-/tmp/even_programs.yml}
-      WS_WEEKLY_PROGRAMS_FILE: ${WS_WEEKLY_PROGRAMS_FILE:-/tmp/weekly_programs.yml}
-      WS_TEMPERATURE_PROGRAMS_FILE: ${WS_TEMPERATURE_PROGRAMS_FILE:-/tmp/temperature_programs.yml}
-      WS_EXECUTION_LOGS_FILE: ${WS_EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
-      WS_TELEGRAM_TOKEN: ${WS_TELEGRAM_TOKEN:-token}
-      WS_TELEGRAM_CHAT_ID: ${WS_TELEGRAM_CHAT_ID:-12345}
+      - WS_SERVER_URL=${WS_SERVER_URL:-:8080}
+      - WS_ENVIRONMENT=${WS_ENVIRONMENT:-development}
+      - WS_ZONES_FILE=${WS_ZONES_FILE:-/tmp/zones.yaml}
+      - WS_AUTH_TOKEN=${WS_AUTH_TOKEN:-auth}
+      - WS_RAIN_SERVER_URL=${WS_RAIN_SERVER_URL:-http://rain_sensor:8080}
+      - WS_DAILY_PROGRAMS_FILE=${WS_DAILY_PROGRAMS_FILE:-/tmp/daily_programs.yml}
+      - WS_ODD_PROGRAMS_FILE=${WS_ODD_PROGRAMS_FILE:-/tmp/odd_programs.yml}
+      - WS_EVEN_PROGRAMS_FILE=${WS_EVEN_PROGRAMS_FILE:-/tmp/even_programs.yml}
+      - WS_WEEKLY_PROGRAMS_FILE=${WS_WEEKLY_PROGRAMS_FILE:-/tmp/weekly_programs.yml}
+      - WS_TEMPERATURE_PROGRAMS_FILE=${WS_TEMPERATURE_PROGRAMS_FILE:-/tmp/temperature_programs.yml}
+      - WS_EXECUTION_LOGS_FILE=${WS_EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
+      - WS_TELEGRAM_TOKEN=${WS_TELEGRAM_TOKEN:-token default}
+      - WS_TELEGRAM_CHAT_ID=${WS_TELEGRAM_CHAT_ID:-12345}
     ports:
       - "8083:8080"
   builder:
