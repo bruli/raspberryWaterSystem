@@ -51,6 +51,15 @@ func TestZones(t *testing.T) {
 			savedZone = &zo
 		})
 	})
+	t.Run(`Given a find all zones endpoint
+	when a request is sent
+	then it returns a valid zones list`, func(t *testing.T) {
+		resp, err := buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodGet, "/zones", cl)
+		require.NoError(t, err)
+		require.Equal(t, http2.StatusOK, resp.StatusCode)
+		var schema []http.ZonesItemResponse
+		readResponse(t, resp, &schema)
+	})
 	t.Run(`Given an execute zone endpoint,
 	when a request is sent`, func(t *testing.T) {
 		t.Run(`without authorization,

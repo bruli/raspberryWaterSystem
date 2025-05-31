@@ -13,6 +13,7 @@ import (
 //go:generate go tool moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository StatusRepository ProgramRepository WeeklyProgramRepository TemperatureProgramRepository ExecutionLogRepository
 
 type ZoneRepository interface {
+	FindAll(ctx context.Context) ([]zone.Zone, error)
 	FindByID(ctx context.Context, id string) (zone.Zone, error)
 	Save(ctx context.Context, zo zone.Zone) error
 	Remove(ctx context.Context, zo zone.Zone) error

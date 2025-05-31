@@ -60,6 +60,7 @@ func main() {
 	qhBus.Subscribe(app.FindAllProgramsQueryName, logQHMdw(app.NewFindAllPrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	qhBus.Subscribe(app.FindProgramsInTimeQueryName, logQHMdw(app.NewFindProgramsInTime(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	qhBus.Subscribe(app.FindExecutionLogsQueryName, logQHMdw(app.NewFindExecutionLogs(execLogRepo)))
+	qhBus.Subscribe(app.FindZonesQueryName, logQHMdw(app.NewFindZones(zr)))
 
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
@@ -93,8 +94,15 @@ func main() {
 	go eventsWorker(ctx, eventsCh, eventBus, &log)
 	go executionInTimeWorker(ctx, qhBus, chBus, &log)
 
-	go runHTTPServer(chBus, qhBus, conf, ctx, log)
+	runTelegramBot(conf, qhBus, chBus, log, ctx)
+	runHTTPServer(chBus, qhBus, conf, ctx, log)
+}
 
+func runTelegramBot(conf config.Config, qhBus app.QueryBus, chBus app.CommandBus, log zerolog.Logger, ctx context.Context) {
+	if !conf.TelegramBotEnabled() {
+		log.Info().Msg("[TELEGRAM SERVICE] disabled")
+		return
+	}
 	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken(), qhBus, chBus)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("[TELEGRAM SERVICE] failed building telegram server: %s", err)
@@ -206,6 +214,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/zones",
 			Method:      http.MethodPut,
 			HandlerFunc: authMdw(infrahttp.CreateZone(chBus)),
+		},
+		{
+			Endpoint:    "/zones",
+			Method:      http.MethodGet,
+			HandlerFunc: authMdw(infrahttp.FinZones(qhBus)),
 		},
 		{
 			Endpoint:    "/zones/{id}/execute",

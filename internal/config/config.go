@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"net/url"
 	"strconv"
 
@@ -22,6 +23,7 @@ const (
 	ExecutionLogsFile       = ProjectPrefix + "EXECUTION_LOGS_FILE"
 	TelegramToken           = ProjectPrefix + "TELEGRAM_TOKEN"
 	TelegramChatID          = ProjectPrefix + "TELEGRAM_CHAT_ID"
+	TelegramBotEnabled      = ProjectPrefix + "TELEGRAM_BOT_ENABLED"
 )
 
 type Config struct {
@@ -33,9 +35,14 @@ type Config struct {
 	dailyProgramsFile, oddProgramsFile,
 	evenProgramsFile, weeklyProgramsFile,
 	temperatureProgramsFile string
-	executionLogsFile string
-	telegramToken     string
-	telegramChatID    int
+	executionLogsFile  string
+	telegramToken      string
+	telegramChatID     int
+	telegramBotEnabled bool
+}
+
+func (c Config) TelegramBotEnabled() bool {
+	return c.telegramBotEnabled
 }
 
 func (c Config) RainServerURL() url.URL {
@@ -124,6 +131,15 @@ func NewConfig() (Config, error) {
 		return Config{}, err
 	}
 	telegramToken, telegramChatID, err := telegram()
+	botEnabledStr, err := env.Value(TelegramBotEnabled)
+	if err != nil {
+		return Config{}, err
+	}
+	botEnabled, err := strconv.ParseBool(botEnabledStr)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to parse telegram bot enabled: %s", botEnabledStr)
+	}
+
 	if err != nil {
 		return Config{}, err
 	}
@@ -141,6 +157,7 @@ func NewConfig() (Config, error) {
 		executionLogsFile:       execLogs,
 		telegramToken:           telegramToken,
 		telegramChatID:          telegramChatID,
+		telegramBotEnabled:      botEnabled,
 	}, nil
 }
 

@@ -22,6 +22,9 @@ var _ app.ZoneRepository = &ZoneRepositoryMock{}
 //
 //		// make and configure a mocked app.ZoneRepository
 //		mockedZoneRepository := &ZoneRepositoryMock{
+//			FindAllFunc: func(ctx context.Context) ([]zone.Zone, error) {
+//				panic("mock out the FindAll method")
+//			},
 //			FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
 //				panic("mock out the FindByID method")
 //			},
@@ -38,6 +41,9 @@ var _ app.ZoneRepository = &ZoneRepositoryMock{}
 //
 //	}
 type ZoneRepositoryMock struct {
+	// FindAllFunc mocks the FindAll method.
+	FindAllFunc func(ctx context.Context) ([]zone.Zone, error)
+
 	// FindByIDFunc mocks the FindByID method.
 	FindByIDFunc func(ctx context.Context, id string) (zone.Zone, error)
 
@@ -49,6 +55,11 @@ type ZoneRepositoryMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// FindAll holds details about calls to the FindAll method.
+		FindAll []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+		}
 		// FindByID holds details about calls to the FindByID method.
 		FindByID []struct {
 			// Ctx is the ctx argument value.
@@ -71,9 +82,42 @@ type ZoneRepositoryMock struct {
 			Zo zone.Zone
 		}
 	}
+	lockFindAll  sync.RWMutex
 	lockFindByID sync.RWMutex
 	lockRemove   sync.RWMutex
 	lockSave     sync.RWMutex
+}
+
+// FindAll calls FindAllFunc.
+func (mock *ZoneRepositoryMock) FindAll(ctx context.Context) ([]zone.Zone, error) {
+	if mock.FindAllFunc == nil {
+		panic("ZoneRepositoryMock.FindAllFunc: method is nil but ZoneRepository.FindAll was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
+	mock.lockFindAll.Lock()
+	mock.calls.FindAll = append(mock.calls.FindAll, callInfo)
+	mock.lockFindAll.Unlock()
+	return mock.FindAllFunc(ctx)
+}
+
+// FindAllCalls gets all the calls that were made to FindAll.
+// Check the length with:
+//
+//	len(mockedZoneRepository.FindAllCalls())
+func (mock *ZoneRepositoryMock) FindAllCalls() []struct {
+	Ctx context.Context
+} {
+	var calls []struct {
+		Ctx context.Context
+	}
+	mock.lockFindAll.RLock()
+	calls = mock.calls.FindAll
+	mock.lockFindAll.RUnlock()
+	return calls
 }
 
 // FindByID calls FindByIDFunc.

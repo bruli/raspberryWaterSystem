@@ -19,6 +19,19 @@ type ZoneRepository struct {
 	filePath string
 }
 
+func (z ZoneRepository) FindAll(ctx context.Context) ([]zone.Zone, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		zones := make(zonesMap)
+		if err := readYamlFile(z.filePath, &zones); err != nil {
+			return nil, err
+		}
+		return z.buildZones(zones), nil
+	}
+}
+
 func (z ZoneRepository) Remove(ctx context.Context, zo zone.Zone) error {
 	select {
 	case <-ctx.Done():
@@ -92,4 +105,12 @@ func (z ZoneRepository) Save(ctx context.Context, zo zone.Zone) error {
 		}
 		return writeYamlFile(z.filePath, zones)
 	}
+}
+
+func (z ZoneRepository) buildZones(data zonesMap) []zone.Zone {
+	zones := make([]zone.Zone, 0, len(data))
+	for i, zo := range data {
+		zones = append(zones, buildZone(i, zo))
+	}
+	return zones
 }

@@ -20,6 +20,7 @@ services:
       - WS_EXECUTION_LOGS_FILE=${WS_EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
       - WS_TELEGRAM_TOKEN=${WS_TELEGRAM_TOKEN:-token default}
       - WS_TELEGRAM_CHAT_ID=${WS_TELEGRAM_CHAT_ID:-12345}
+      - WS_TELEGRAM_BOT_ENABLED=${WS_TELEGRAM_BOT_ENABLED:-false}
     ports:
       - "8083:8080"
   builder:
