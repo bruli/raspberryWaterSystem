@@ -29,7 +29,7 @@ func TestZones(t *testing.T) {
 				Name:   zo.Name(),
 				Relays: relays,
 			}
-			resp, err := buildRequestAndSend(ctx, req, nil, http2.MethodPut, "/zones", cl)
+			resp, err := buildRequestAndSend(ctx, req, nil, http2.MethodPost, "/zones", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
@@ -45,20 +45,27 @@ func TestZones(t *testing.T) {
 				Name:   zo.Name(),
 				Relays: relays,
 			}
-			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/zones", cl)
+			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, "/zones", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 			savedZone = &zo
 		})
 	})
-	t.Run(`Given a find all zones endpoint
-	when a request is sent
-	then it returns a valid zones list`, func(t *testing.T) {
-		resp, err := buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodGet, "/zones", cl)
-		require.NoError(t, err)
-		require.Equal(t, http2.StatusOK, resp.StatusCode)
-		var schema []http.ZonesItemResponse
-		readResponse(t, resp, &schema)
+	t.Run(`Given a find zone endpoint`, func(t *testing.T) {
+		t.Run(`when a request without authorization is sent
+		then it returns an unauthorized`, func(t *testing.T) {
+			resp, err := buildRequestAndSend(ctx, nil, nil, http2.MethodGet, "/zones", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
+		})
+		t.Run(`when a request is sent with authorization,
+		then it returns a valid zones list`, func(t *testing.T) {
+			resp, err := buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodGet, "/zones", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
+			var schema []http.ZonesItemResponse
+			readResponse(t, resp, &schema)
+		})
 	})
 	t.Run(`Given an execute zone endpoint,
 	when a request is sent`, func(t *testing.T) {
@@ -76,6 +83,42 @@ func TestZones(t *testing.T) {
 			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, url, cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
+		})
+	})
+	t.Run(`Given an Update zone endpoint`, func(t *testing.T) {
+		t.Run(`when a request is sent without authorization,
+		then it returns an unauthorized`, func(t *testing.T) {
+			zo := fixtures.ZoneBuilder{}.Build()
+			relays := make([]int, len(zo.Relays()))
+			for i, r := range zo.Relays() {
+				relays[i] = r.Id().Int()
+			}
+			req := http.UpdateZoneRequestJson{
+				Name:   zo.Name(),
+				Relays: relays,
+			}
+			url := fmt.Sprintf("/zones/%s", savedZone.Id())
+			resp, err := buildRequestAndSend(ctx, req, nil, http2.MethodPut, url, cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
+		})
+		t.Run(`when a request is sent with authorization,
+		then it returns an ok`, func(t *testing.T) {
+			zo := fixtures.ZoneBuilder{}.Build()
+			relays := make([]int, len(zo.Relays()))
+			for i, r := range zo.Relays() {
+				relays[i] = r.Id().Int()
+			}
+			req := http.CreateZoneRequestJson{
+				Id:     zo.Id(),
+				Name:   zo.Name(),
+				Relays: relays,
+			}
+			url := fmt.Sprintf("/zones/%s", savedZone.Id())
+			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, url, cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
+			savedZone = &zo
 		})
 	})
 	t.Run(`Given a Remove zone endpoint,
@@ -98,7 +141,7 @@ func TestZones(t *testing.T) {
 				Name:   zo.Name(),
 				Relays: relays,
 			}
-			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/zones", cl)
+			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, "/zones", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 			resp, err = buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodDelete, "/zones/"+zo.Id(), cl)

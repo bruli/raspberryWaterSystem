@@ -29,7 +29,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		command cqs.Command
 		expectedErr, findErr,
 		stErr error
-		zone          zone.Zone
+		zone          *zone.Zone
 		expectedEvent string
 		st            status.Status
 	}{
@@ -47,20 +47,20 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name:        "and status repository returns an error, then it returns same error",
 			command:     cmd,
-			zone:        zo,
+			zone:        &zo,
 			stErr:       errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and execute returns an error, then it returns an execute zone with status error",
-			zone:        zo,
+			zone:        &zo,
 			st:          st,
 			expectedErr: app.ExecuteZoneWithStatusError{},
 			command:     cmd,
 		},
 		{
 			name: "and execute nil, then it returns an executed event",
-			zone: zo,
+			zone: &zo,
 			st:   st,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
@@ -70,7 +70,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		},
 		{
 			name: "and its raining, then it returns an ignored event",
-			zone: zo,
+			zone: &zo,
 			st:   fixtures.StatusBuilder{Weather: &rainingWeather}.Build(),
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
@@ -80,7 +80,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		},
 		{
 			name: "and system is deactivated, then it returns an ignored event",
-			zone: zo,
+			zone: &zo,
 			st:   fixtures.StatusBuilder{Active: false}.Build(),
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
@@ -90,12 +90,11 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(`Given an executeZone command handler,
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			zr := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
+				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
 				},
 			}

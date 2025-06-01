@@ -25,14 +25,17 @@ var _ app.ZoneRepository = &ZoneRepositoryMock{}
 //			FindAllFunc: func(ctx context.Context) ([]zone.Zone, error) {
 //				panic("mock out the FindAll method")
 //			},
-//			FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
+//			FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 //				panic("mock out the FindByID method")
 //			},
-//			RemoveFunc: func(ctx context.Context, zo zone.Zone) error {
+//			RemoveFunc: func(ctx context.Context, zo *zone.Zone) error {
 //				panic("mock out the Remove method")
 //			},
-//			SaveFunc: func(ctx context.Context, zo zone.Zone) error {
+//			SaveFunc: func(ctx context.Context, zo *zone.Zone) error {
 //				panic("mock out the Save method")
+//			},
+//			UpdateFunc: func(ctx context.Context, zo *zone.Zone) error {
+//				panic("mock out the Update method")
 //			},
 //		}
 //
@@ -45,13 +48,16 @@ type ZoneRepositoryMock struct {
 	FindAllFunc func(ctx context.Context) ([]zone.Zone, error)
 
 	// FindByIDFunc mocks the FindByID method.
-	FindByIDFunc func(ctx context.Context, id string) (zone.Zone, error)
+	FindByIDFunc func(ctx context.Context, id string) (*zone.Zone, error)
 
 	// RemoveFunc mocks the Remove method.
-	RemoveFunc func(ctx context.Context, zo zone.Zone) error
+	RemoveFunc func(ctx context.Context, zo *zone.Zone) error
 
 	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, zo zone.Zone) error
+	SaveFunc func(ctx context.Context, zo *zone.Zone) error
+
+	// UpdateFunc mocks the Update method.
+	UpdateFunc func(ctx context.Context, zo *zone.Zone) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -72,20 +78,28 @@ type ZoneRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Zo is the zo argument value.
-			Zo zone.Zone
+			Zo *zone.Zone
 		}
 		// Save holds details about calls to the Save method.
 		Save []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Zo is the zo argument value.
-			Zo zone.Zone
+			Zo *zone.Zone
+		}
+		// Update holds details about calls to the Update method.
+		Update []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Zo is the zo argument value.
+			Zo *zone.Zone
 		}
 	}
 	lockFindAll  sync.RWMutex
 	lockFindByID sync.RWMutex
 	lockRemove   sync.RWMutex
 	lockSave     sync.RWMutex
+	lockUpdate   sync.RWMutex
 }
 
 // FindAll calls FindAllFunc.
@@ -121,7 +135,7 @@ func (mock *ZoneRepositoryMock) FindAllCalls() []struct {
 }
 
 // FindByID calls FindByIDFunc.
-func (mock *ZoneRepositoryMock) FindByID(ctx context.Context, id string) (zone.Zone, error) {
+func (mock *ZoneRepositoryMock) FindByID(ctx context.Context, id string) (*zone.Zone, error) {
 	if mock.FindByIDFunc == nil {
 		panic("ZoneRepositoryMock.FindByIDFunc: method is nil but ZoneRepository.FindByID was just called")
 	}
@@ -157,13 +171,13 @@ func (mock *ZoneRepositoryMock) FindByIDCalls() []struct {
 }
 
 // Remove calls RemoveFunc.
-func (mock *ZoneRepositoryMock) Remove(ctx context.Context, zo zone.Zone) error {
+func (mock *ZoneRepositoryMock) Remove(ctx context.Context, zo *zone.Zone) error {
 	if mock.RemoveFunc == nil {
 		panic("ZoneRepositoryMock.RemoveFunc: method is nil but ZoneRepository.Remove was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Zo  zone.Zone
+		Zo  *zone.Zone
 	}{
 		Ctx: ctx,
 		Zo:  zo,
@@ -180,11 +194,11 @@ func (mock *ZoneRepositoryMock) Remove(ctx context.Context, zo zone.Zone) error 
 //	len(mockedZoneRepository.RemoveCalls())
 func (mock *ZoneRepositoryMock) RemoveCalls() []struct {
 	Ctx context.Context
-	Zo  zone.Zone
+	Zo  *zone.Zone
 } {
 	var calls []struct {
 		Ctx context.Context
-		Zo  zone.Zone
+		Zo  *zone.Zone
 	}
 	mock.lockRemove.RLock()
 	calls = mock.calls.Remove
@@ -193,13 +207,13 @@ func (mock *ZoneRepositoryMock) RemoveCalls() []struct {
 }
 
 // Save calls SaveFunc.
-func (mock *ZoneRepositoryMock) Save(ctx context.Context, zo zone.Zone) error {
+func (mock *ZoneRepositoryMock) Save(ctx context.Context, zo *zone.Zone) error {
 	if mock.SaveFunc == nil {
 		panic("ZoneRepositoryMock.SaveFunc: method is nil but ZoneRepository.Save was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Zo  zone.Zone
+		Zo  *zone.Zone
 	}{
 		Ctx: ctx,
 		Zo:  zo,
@@ -216,15 +230,51 @@ func (mock *ZoneRepositoryMock) Save(ctx context.Context, zo zone.Zone) error {
 //	len(mockedZoneRepository.SaveCalls())
 func (mock *ZoneRepositoryMock) SaveCalls() []struct {
 	Ctx context.Context
-	Zo  zone.Zone
+	Zo  *zone.Zone
 } {
 	var calls []struct {
 		Ctx context.Context
-		Zo  zone.Zone
+		Zo  *zone.Zone
 	}
 	mock.lockSave.RLock()
 	calls = mock.calls.Save
 	mock.lockSave.RUnlock()
+	return calls
+}
+
+// Update calls UpdateFunc.
+func (mock *ZoneRepositoryMock) Update(ctx context.Context, zo *zone.Zone) error {
+	if mock.UpdateFunc == nil {
+		panic("ZoneRepositoryMock.UpdateFunc: method is nil but ZoneRepository.Update was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Zo  *zone.Zone
+	}{
+		Ctx: ctx,
+		Zo:  zo,
+	}
+	mock.lockUpdate.Lock()
+	mock.calls.Update = append(mock.calls.Update, callInfo)
+	mock.lockUpdate.Unlock()
+	return mock.UpdateFunc(ctx, zo)
+}
+
+// UpdateCalls gets all the calls that were made to Update.
+// Check the length with:
+//
+//	len(mockedZoneRepository.UpdateCalls())
+func (mock *ZoneRepositoryMock) UpdateCalls() []struct {
+	Ctx context.Context
+	Zo  *zone.Zone
+} {
+	var calls []struct {
+		Ctx context.Context
+		Zo  *zone.Zone
+	}
+	mock.lockUpdate.RLock()
+	calls = mock.calls.Update
+	mock.lockUpdate.RUnlock()
 	return calls
 }
 

@@ -14,9 +14,10 @@ import (
 
 type ZoneRepository interface {
 	FindAll(ctx context.Context) ([]zone.Zone, error)
-	FindByID(ctx context.Context, id string) (zone.Zone, error)
-	Save(ctx context.Context, zo zone.Zone) error
-	Remove(ctx context.Context, zo zone.Zone) error
+	FindByID(ctx context.Context, id string) (*zone.Zone, error)
+	Save(ctx context.Context, zo *zone.Zone) error
+	Remove(ctx context.Context, zo *zone.Zone) error
+	Update(ctx context.Context, zo *zone.Zone) error
 }
 
 type TemperatureRepository interface {

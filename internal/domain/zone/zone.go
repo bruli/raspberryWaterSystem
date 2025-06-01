@@ -28,19 +28,19 @@ type Zone struct {
 	relays   []Relay
 }
 
-func (z Zone) Id() string {
+func (z *Zone) Id() string {
 	return z.id
 }
 
-func (z Zone) Name() string {
+func (z *Zone) Name() string {
 	return z.name
 }
 
-func (z Zone) Relays() []Relay {
+func (z *Zone) Relays() []Relay {
 	return z.relays
 }
 
-func New(id, name string, relays []Relay) (Zone, error) {
+func New(id, name string, relays []Relay) (*Zone, error) {
 	z := Zone{
 		BasicAggregateRoot: cqs.NewBasicAggregateRoot(),
 		id:                 id,
@@ -48,9 +48,9 @@ func New(id, name string, relays []Relay) (Zone, error) {
 		relays:             relays,
 	}
 	if err := z.validate(); err != nil {
-		return Zone{}, err
+		return nil, err
 	}
-	return z, nil
+	return &z, nil
 }
 
 func (z *Zone) Hydrate(id, name string, relays []Relay) {
@@ -59,7 +59,7 @@ func (z *Zone) Hydrate(id, name string, relays []Relay) {
 	z.relays = relays
 }
 
-func (z Zone) validate() error {
+func (z *Zone) validate() error {
 	if len(z.id) == 0 {
 		return ErrInvalidZoneID
 	}

@@ -23,7 +23,7 @@ func TestPrograms(t *testing.T) {
 		Name:   zo.Name(),
 		Relays: relays,
 	}
-	resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/zones", cl)
+	resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, "/zones", cl)
 	require.NoError(t, err)
 	require.Equal(t, http2.StatusOK, resp.StatusCode)
 	t.Run(`Given a create programs endpoint,

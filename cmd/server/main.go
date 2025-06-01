@@ -74,6 +74,7 @@ func main() {
 	chBus.Subscribe(app.RemoveZoneCmdName, logCHMdw(app.NewRemoveZone(zr)))
 	chBus.Subscribe(app.ActivateDeactivateServerCmdName, logCHMdw(app.NewActivateDeactivateServer(sr)))
 	chBus.Subscribe(app.ExecuteZoneWithStatusCmdName, eventsMultiCHMdw(app.NewExecuteZoneWithStatus(zr, sr)))
+	chBus.Subscribe(app.UpdateZoneCommandName, logCHMdw(app.NewUpdateZone(zr)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
@@ -212,7 +213,7 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		},
 		{
 			Endpoint:    "/zones",
-			Method:      http.MethodPut,
+			Method:      http.MethodPost,
 			HandlerFunc: authMdw(infrahttp.CreateZone(chBus)),
 		},
 		{
@@ -229,6 +230,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/zones/{id}",
 			Method:      http.MethodDelete,
 			HandlerFunc: authMdw(infrahttp.RemoveZone(chBus)),
+		},
+		{
+			Endpoint:    "/zones/{id}",
+			Method:      http.MethodPut,
+			HandlerFunc: authMdw(infrahttp.UpdateZone(chBus)),
 		},
 		{
 			Endpoint:    "/status",

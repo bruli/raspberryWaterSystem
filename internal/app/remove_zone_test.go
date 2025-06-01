@@ -23,7 +23,7 @@ func TestRemoveZoneHandle(t *testing.T) {
 		name string
 		expectedErr, findErr,
 		removeErr error
-		zone zone.Zone
+		zone *zone.Zone
 		cmd  cqs.Command
 	}{
 		{
@@ -39,14 +39,14 @@ func TestRemoveZoneHandle(t *testing.T) {
 		},
 		{
 			name:        "and remove method returns an error, then it returns same error",
-			zone:        zo,
+			zone:        &zo,
 			removeErr:   errTest,
 			expectedErr: errTest,
 			cmd:         cmd,
 		},
 		{
 			name: "then it returns any error",
-			zone: zo,
+			zone: &zo,
 			cmd:  cmd,
 		},
 	}
@@ -56,10 +56,10 @@ func TestRemoveZoneHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			zr := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
+				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
 				},
-				RemoveFunc: func(ctx context.Context, zo zone.Zone) error {
+				RemoveFunc: func(ctx context.Context, zo *zone.Zone) error {
 					return tt.removeErr
 				},
 			}

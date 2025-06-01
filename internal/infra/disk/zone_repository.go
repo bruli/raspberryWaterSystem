@@ -19,6 +19,23 @@ type ZoneRepository struct {
 	filePath string
 }
 
+func (z ZoneRepository) Update(ctx context.Context, zo *zone.Zone) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		zones := make(zonesMap)
+		if err := readYamlFile(z.filePath, &zones); err != nil {
+			return err
+		}
+		zones[zo.Id()] = zoneData{
+			Name:   zo.Name(),
+			Relays: z.buildRelaysForYaml(zo.Relays()),
+		}
+		return writeYamlFile(z.filePath, zones)
+	}
+}
+
 func (z ZoneRepository) FindAll(ctx context.Context) ([]zone.Zone, error) {
 	select {
 	case <-ctx.Done():
@@ -32,7 +49,7 @@ func (z ZoneRepository) FindAll(ctx context.Context) ([]zone.Zone, error) {
 	}
 }
 
-func (z ZoneRepository) Remove(ctx context.Context, zo zone.Zone) error {
+func (z ZoneRepository) Remove(ctx context.Context, zo *zone.Zone) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -50,31 +67,27 @@ func (z ZoneRepository) Remove(ctx context.Context, zo zone.Zone) error {
 	}
 }
 
-func NewZoneRepository(filePath string) ZoneRepository {
-	return ZoneRepository{filePath: filePath}
-}
-
-func (z ZoneRepository) FindByID(ctx context.Context, id string) (zone.Zone, error) {
+func (z ZoneRepository) FindByID(ctx context.Context, id string) (*zone.Zone, error) {
 	select {
 	case <-ctx.Done():
-		return zone.Zone{}, ctx.Err()
+		return nil, ctx.Err()
 	default:
 		zones := make(zonesMap)
 		if err := readYamlFile(z.filePath, &zones); err != nil {
-			return zone.Zone{}, err
+			return nil, err
 		}
 		zo, ok := zones[id]
 		if !ok {
-			return zone.Zone{}, vo.NewNotFoundError(id)
+			return nil, vo.NewNotFoundError(id)
 		}
 		return buildZone(id, zo), nil
 	}
 }
 
-func buildZone(id string, zo zoneData) zone.Zone {
+func buildZone(id string, zo zoneData) *zone.Zone {
 	var do zone.Zone
 	do.Hydrate(id, zo.Name, buildRelays(zo.Relays))
-	return do
+	return &do
 }
 
 func buildRelays(relays []int) []zone.Relay {
@@ -86,7 +99,7 @@ func buildRelays(relays []int) []zone.Relay {
 	return rel
 }
 
-func (z ZoneRepository) Save(ctx context.Context, zo zone.Zone) error {
+func (z ZoneRepository) Save(ctx context.Context, zo *zone.Zone) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -95,22 +108,30 @@ func (z ZoneRepository) Save(ctx context.Context, zo zone.Zone) error {
 		if err := readYamlFile(z.filePath, &zones); err != nil {
 			return err
 		}
-		relays := make([]int, len(zo.Relays()))
-		for i, re := range zo.Relays() {
-			relays[i] = re.Id().Int()
-		}
 		zones[zo.Id()] = zoneData{
 			Name:   zo.Name(),
-			Relays: relays,
+			Relays: z.buildRelaysForYaml(zo.Relays()),
 		}
 		return writeYamlFile(z.filePath, zones)
 	}
 }
 
+func (z ZoneRepository) buildRelaysForYaml(rel []zone.Relay) []int {
+	relays := make([]int, len(rel))
+	for i, re := range rel {
+		relays[i] = re.Id().Int()
+	}
+	return relays
+}
+
 func (z ZoneRepository) buildZones(data zonesMap) []zone.Zone {
 	zones := make([]zone.Zone, 0, len(data))
 	for i, zo := range data {
-		zones = append(zones, buildZone(i, zo))
+		zones = append(zones, *buildZone(i, zo))
 	}
 	return zones
+}
+
+func NewZoneRepository(filePath string) ZoneRepository {
+	return ZoneRepository{filePath: filePath}
 }

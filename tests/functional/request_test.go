@@ -30,7 +30,7 @@ func buildRequestAndSend(ctx context.Context, requestBody interface{}, headers m
 }
 
 func authorizationHeader() map[string]string {
-	const token = "WT7*P6Yn^2-Y*V*C-h&K6*b!@=HCzhd+"
+	const token = "token"
 	return map[string]string{
 		"Authorization": token,
 	}

@@ -24,7 +24,7 @@ func TestExecuteZoneHandle(t *testing.T) {
 		name                 string
 		command              cqs.Command
 		expectedErr, findErr error
-		zone                 zone.Zone
+		zone                 *zone.Zone
 	}{
 		{
 			name:        "with invalid command, then it returns an invalid command error",
@@ -39,13 +39,13 @@ func TestExecuteZoneHandle(t *testing.T) {
 		},
 		{
 			name:        "and execute returns an error, then it returns an execute zone error",
-			zone:        zo,
+			zone:        &zo,
 			expectedErr: app.ExecuteZoneError{},
 			command:     cmd,
 		},
 		{
 			name: "and execute nil, then it returns a valid event",
-			zone: zo,
+			zone: &zo,
 			command: app.ExecuteZoneCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -58,7 +58,7 @@ func TestExecuteZoneHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			zr := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
+				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
 				},
 			}

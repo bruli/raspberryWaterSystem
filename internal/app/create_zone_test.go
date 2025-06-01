@@ -27,7 +27,7 @@ func TestCreateZoneHandle(t *testing.T) {
 		cmd  cqs.Command
 		expectedErr, relayErr,
 		zoneErr, saveErr, updateErr error
-		zone zone.Zone
+		zone *zone.Zone
 	}{
 		{
 			name:        "with an invalid command, then it returns an invalid command error",
@@ -80,10 +80,10 @@ func TestCreateZoneHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			zr := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (zone.Zone, error) {
+				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 					return tt.zone, tt.zoneErr
 				},
-				SaveFunc: func(ctx context.Context, zo zone.Zone) error {
+				SaveFunc: func(ctx context.Context, zo *zone.Zone) error {
 					return tt.saveErr
 				},
 			}
