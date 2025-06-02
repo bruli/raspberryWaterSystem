@@ -49,6 +49,6 @@ func (s *Status) Deactivate() {
 	s.active = false
 }
 
-func New(systemStartedAt vo.Time, weather weather.Weather) Status {
-	return Status{systemStartedAt: systemStartedAt, weather: weather, active: true}
+func New(systemStartedAt vo.Time, weather weather.Weather) *Status {
+	return &Status{systemStartedAt: systemStartedAt, weather: weather, active: true}
 }

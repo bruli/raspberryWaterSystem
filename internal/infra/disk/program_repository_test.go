@@ -19,7 +19,7 @@ func TestProgramRepository(t *testing.T) {
 	t.Run(`Given a ProgramRepository, `, func(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/programs.yml"
-		populateFile(t, path)
+		defer populateFile(t, path)
 		repo := disk.NewProgramRepository(path)
 		t.Run(`when Save method is called,
 		then it save programs`, func(t *testing.T) {
@@ -37,8 +37,11 @@ func TestProgramRepository(t *testing.T) {
 				fixtures.ProgramBuilder{Hour: &hour2}.Build(),
 				fixtures.ProgramBuilder{}.Build(),
 			}
-			err = repo.Save(ctx, programs)
-			require.NoError(t, err)
+			for _, p := range programs {
+				err = repo.Save(ctx, &p)
+				require.NoError(t, err)
+
+			}
 		})
 		t.Run(`when FindAll method is called,
 		then it returns a programs slice`, func(t *testing.T) {
@@ -51,14 +54,14 @@ func TestProgramRepository(t *testing.T) {
 			then it returns a not found error`, func(t *testing.T) {
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
-				_, err = repo.FindByHour(ctx, hour)
+				_, err = repo.FindByHour(ctx, &hour)
 				require.ErrorAs(t, err, &vo.NotFoundError{})
 			})
 			t.Run(`with an existent hour,
 			then it returns valid program`, func(t *testing.T) {
 				hour, err := program.ParseHour("12:15")
 				require.NoError(t, err)
-				prg, err := repo.FindByHour(ctx, hour)
+				prg, err := repo.FindByHour(ctx, &hour)
 				require.NoError(t, err)
 				require.Equal(t, hour, prg.Hour())
 				require.Len(t, prg.Executions(), 3)

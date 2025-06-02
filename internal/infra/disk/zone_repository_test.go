@@ -29,7 +29,7 @@ func TestZoneRepository(t *testing.T) {
 		t.Run(`when Save method is called,
 		then it save a zone`, func(t *testing.T) {
 			zo := fixtures.ZoneBuilder{}.Build()
-			err := repo.Save(ctx, zo)
+			err := repo.Save(ctx, &zo)
 			require.NoError(t, err)
 			savedZone = &zo
 		})
@@ -49,12 +49,13 @@ func TestZoneRepository(t *testing.T) {
 		t.Run(`when Remove method is called`, func(t *testing.T) {
 			t.Run(`with an invalid zone,
 			then it returns a not found error`, func(t *testing.T) {
-				err := repo.Remove(ctx, fixtures.ZoneBuilder{}.Build())
+				zo := fixtures.ZoneBuilder{}.Build()
+				err := repo.Remove(ctx, &zo)
 				require.ErrorAs(t, err, &vo.NotFoundError{})
 			})
 			t.Run(`with a valid zone,
 			then it returns nil`, func(t *testing.T) {
-				err := repo.Remove(ctx, *savedZone)
+				err := repo.Remove(ctx, savedZone)
 				require.NoError(t, err)
 				_, errFind := repo.FindByID(ctx, savedZone.Id())
 				require.ErrorAs(t, errFind, &vo.NotFoundError{})

@@ -66,7 +66,6 @@ func main() {
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
-	chBus.Subscribe(app.CreateProgramsCmdName, logCHMdw(app.NewCreatePrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))
 	chBus.Subscribe(app.SaveExecutionLogCmdName, logCHMdw(app.NewSaveExecutionLog(execLogRepo)))
@@ -255,11 +254,6 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/programs",
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(infrahttp.FindAllPrograms(qhBus)),
-		},
-		{
-			Endpoint:    "/programs",
-			Method:      http.MethodPut,
-			HandlerFunc: authMdw(infrahttp.CreatePrograms(chBus)),
 		},
 		{
 			Endpoint:    "/logs",

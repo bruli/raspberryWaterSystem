@@ -15,15 +15,15 @@ type Program struct {
 	executions []Execution
 }
 
-func (p Program) Hour() Hour {
+func (p *Program) Hour() Hour {
 	return p.hour
 }
 
-func (p Program) Executions() []Execution {
+func (p *Program) Executions() []Execution {
 	return p.executions
 }
 
-func (p Program) validate() error {
+func (p *Program) validate() error {
 	if len(p.executions) == 0 {
 		return ErrEmptyPrograms
 	}

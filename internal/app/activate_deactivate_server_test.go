@@ -22,7 +22,7 @@ func TestActivateDeactivateServerHandle(t *testing.T) {
 		cmd  cqs.Command
 		expectedErr, findErr,
 		updateErr error
-		status status.Status
+		status *status.Status
 	}{
 		{
 			name:        "with an invalid command, then it returns an invalid command error",
@@ -38,14 +38,14 @@ func TestActivateDeactivateServerHandle(t *testing.T) {
 		{
 			name:        "with a valid command and update method returns an error, then it returns same error",
 			cmd:         app.ActivateDeactivateServerCmd{Active: true},
-			status:      st,
+			status:      &st,
 			updateErr:   errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:   "with a valid command and update method returns nil, then it update status",
 			cmd:    app.ActivateDeactivateServerCmd{Active: false},
-			status: st,
+			status: &st,
 		},
 	}
 	for _, tt := range tests {
@@ -54,10 +54,10 @@ func TestActivateDeactivateServerHandle(t *testing.T) {
 		when handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			stRepo := &StatusRepositoryMock{}
-			stRepo.FindFunc = func(ctx context.Context) (status.Status, error) {
+			stRepo.FindFunc = func(ctx context.Context) (*status.Status, error) {
 				return tt.status, tt.findErr
 			}
-			stRepo.UpdateFunc = func(ctx context.Context, st status.Status) error {
+			stRepo.UpdateFunc = func(ctx context.Context, st *status.Status) error {
 				return tt.updateErr
 			}
 			handler := app.NewActivateDeactivateServer(stRepo)

@@ -24,6 +24,8 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 	}
 	st := fixtures.StatusBuilder{Active: true}.Build()
 	rainingWeather := fixtures.WeatherBuilder{Raining: true}.Build()
+	statusRaining := fixtures.StatusBuilder{Weather: &rainingWeather}.Build()
+	statusDeactivated := fixtures.StatusBuilder{Active: false}.Build()
 	tests := []struct {
 		name    string
 		command cqs.Command
@@ -31,7 +33,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		stErr error
 		zone          *zone.Zone
 		expectedEvent string
-		st            status.Status
+		st            *status.Status
 	}{
 		{
 			name:        "with invalid command, then it returns an invalid command error",
@@ -54,14 +56,14 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name:        "and execute returns an error, then it returns an execute zone with status error",
 			zone:        &zo,
-			st:          st,
+			st:          &st,
 			expectedErr: app.ExecuteZoneWithStatusError{},
 			command:     cmd,
 		},
 		{
 			name: "and execute nil, then it returns an executed event",
 			zone: &zo,
-			st:   st,
+			st:   &st,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -71,7 +73,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name: "and its raining, then it returns an ignored event",
 			zone: &zo,
-			st:   fixtures.StatusBuilder{Weather: &rainingWeather}.Build(),
+			st:   &statusRaining,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -81,7 +83,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name: "and system is deactivated, then it returns an ignored event",
 			zone: &zo,
-			st:   fixtures.StatusBuilder{Active: false}.Build(),
+			st:   &statusDeactivated,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -92,14 +94,13 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(`Given an executeZone command handler,
 		when Handle method is called `+tt.name, func(t *testing.T) {
-			t.Parallel()
 			zr := &ZoneRepositoryMock{
 				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
 				},
 			}
 			sr := &StatusRepositoryMock{}
-			sr.FindFunc = func(ctx context.Context) (status.Status, error) {
+			sr.FindFunc = func(ctx context.Context) (*status.Status, error) {
 				return tt.st, tt.stErr
 			}
 			handler := app.NewExecuteZoneWithStatus(zr, sr)

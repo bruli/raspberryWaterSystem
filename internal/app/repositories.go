@@ -29,15 +29,15 @@ type RainRepository interface {
 }
 
 type StatusRepository interface {
-	Save(ctx context.Context, st status.Status) error
-	Find(ctx context.Context) (status.Status, error)
-	Update(ctx context.Context, st status.Status) error
+	Save(ctx context.Context, st *status.Status) error
+	Find(ctx context.Context) (*status.Status, error)
+	Update(ctx context.Context, st *status.Status) error
 }
 
 type ProgramRepository interface {
-	Save(ctx context.Context, programs []program.Program) error
+	Save(ctx context.Context, programs *program.Program) error
 	FindAll(ctx context.Context) ([]program.Program, error)
-	FindByHour(ctx context.Context, hour program.Hour) (program.Program, error)
+	FindByHour(ctx context.Context, hour *program.Hour) (*program.Program, error)
 }
 
 type WeeklyProgramRepository interface {

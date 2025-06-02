@@ -75,7 +75,7 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 	}
 }
 
-func buildProgramTemperature(temperature float32, hour program.Hour, prgms []programData) program.Temperature {
+func buildProgramTemperature(temperature float32, hour program.Hour, prgms []executions) program.Temperature {
 	programs := make([]program.Program, len(prgms))
 	var temp program.Temperature
 	var pg program.Program
@@ -87,7 +87,7 @@ func buildProgramTemperature(temperature float32, hour program.Hour, prgms []pro
 	return temp
 }
 
-func buildExecutions(pd programData) []program.Execution {
+func buildExecutions(pd executions) []program.Execution {
 	executions := make([]program.Execution, 1)
 	var execution program.Execution
 	sec, _ := program.ParseSeconds(pd.Seconds)

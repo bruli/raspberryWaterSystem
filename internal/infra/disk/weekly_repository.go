@@ -35,7 +35,7 @@ func (w WeeklyRepository) FindByDayAndHour(ctx context.Context, day program.Week
 	}
 }
 
-func buildProgramWeekly(day program.WeekDay, hour program.Hour, prgms []programData) program.Weekly {
+func buildProgramWeekly(day program.WeekDay, hour program.Hour, prgms []executions) program.Weekly {
 	programs := make([]program.Program, 0, len(prgms))
 	var weekly program.Weekly
 	var pg program.Program
@@ -91,9 +91,9 @@ func buildWeeklyPrograms(weekly weeklyMap) []program.Weekly {
 
 func buildPrograms(w programMap) []program.Program {
 	pgs := make([]program.Program, 0, len(w))
-	for hour, pg := range w {
-		pgs = append(pgs, buildProgram(pg, hour))
-	}
+	//for hour, pg := range w {
+	//	pgs = append(pgs, buildProgram(pg, hour))
+	//}
 	return pgs
 }
 

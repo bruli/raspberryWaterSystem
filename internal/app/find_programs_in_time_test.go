@@ -29,7 +29,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 		oddErr, evenErr,
 		weeklyErr, tempErr error
 		expectedResult   any
-		daily, odd, even program.Program
+		daily, odd, even *program.Program
 		weekly           program.Weekly
 		temp             program.Temperature
 		query            cqs.Query
@@ -49,41 +49,41 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			name:        "and odd repository returns an error, then it returns same error",
 			oddErr:      errTest,
 			expectedErr: errTest,
-			daily:       daily,
+			daily:       &daily,
 			query:       queryTest,
 		},
 		{
 			name:        "and even repository returns an error, then it returns same error",
 			evenErr:     errTest,
 			expectedErr: errTest,
-			daily:       daily,
-			odd:         odd,
+			daily:       &daily,
+			odd:         &odd,
 			query:       queryTest,
 		},
 		{
 			name:        "and weekly repository returns an error, then it returns same error",
 			weeklyErr:   errTest,
 			expectedErr: errTest,
-			daily:       daily,
-			odd:         odd,
-			even:        even,
+			daily:       &daily,
+			odd:         &odd,
+			even:        &even,
 			query:       queryTest,
 		},
 		{
 			name:        "and temperature repository returns an error, then it returns same error",
 			tempErr:     errTest,
 			expectedErr: errTest,
-			daily:       daily,
-			odd:         odd,
-			even:        even,
+			daily:       &daily,
+			odd:         &odd,
+			even:        &even,
 			weekly:      weekly,
 			query:       queryTest,
 		},
 		{
 			name:   "then it returns a valid result",
-			daily:  daily,
-			odd:    odd,
-			even:   even,
+			daily:  &daily,
+			odd:    &odd,
+			even:   &even,
 			weekly: weekly,
 			temp:   temp,
 			expectedResult: app.ProgramsInTime{
@@ -102,17 +102,17 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			daily := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Program, error) {
+				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 					return tt.daily, tt.dailyErr
 				},
 			}
 			odd := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Program, error) {
+				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 					return tt.odd, tt.oddErr
 				},
 			}
 			even := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour program.Hour) (program.Program, error) {
+				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 					return tt.even, tt.evenErr
 				},
 			}

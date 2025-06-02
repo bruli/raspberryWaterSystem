@@ -33,15 +33,15 @@ func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, e
 		return nil, cqs.NewInvalidQueryError(FindProgramsInTimeQueryName, query.Name())
 	}
 	hour, _ := program.ParseHour(q.On.HourStr())
-	daily, err := f.findDaily(ctx, hour)
+	daily, err := f.findDaily(ctx, &hour)
 	if err != nil {
 		return nil, err
 	}
-	odd, err := f.findOdd(ctx, hour)
+	odd, err := f.findOdd(ctx, &hour)
 	if err != nil {
 		return nil, err
 	}
-	even, err := f.findEven(ctx, hour)
+	even, err := f.findEven(ctx, &hour)
 	if err != nil {
 		return nil, err
 	}
@@ -62,26 +62,26 @@ func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, e
 	}, nil
 }
 
-func (f FindProgramsInTime) findDaily(ctx context.Context, hour program.Hour) (*program.Program, error) {
+func (f FindProgramsInTime) findDaily(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 	daily, err := f.Daily.FindByHour(ctx, hour)
 	return f.findProgram(err, daily)
 }
 
-func (f FindProgramsInTime) findProgram(err error, prgInTime program.Program) (*program.Program, error) {
+func (f FindProgramsInTime) findProgram(err error, prgInTime *program.Program) (*program.Program, error) {
 	if err != nil {
 		if !errors.As(err, &vo.NotFoundError{}) {
 			return nil, err
 		}
 	}
-	return &prgInTime, nil
+	return prgInTime, nil
 }
 
-func (f FindProgramsInTime) findOdd(ctx context.Context, hour program.Hour) (*program.Program, error) {
+func (f FindProgramsInTime) findOdd(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 	odd, err := f.Odd.FindByHour(ctx, hour)
 	return f.findProgram(err, odd)
 }
 
-func (f FindProgramsInTime) findEven(ctx context.Context, hour program.Hour) (*program.Program, error) {
+func (f FindProgramsInTime) findEven(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 	even, err := f.Even.FindByHour(ctx, hour)
 	return f.findProgram(err, even)
 }

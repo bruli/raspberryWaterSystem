@@ -28,7 +28,7 @@ func TestStatusRepository(t *testing.T) {
 		t.Run(`when Save method is called,
 		then it save status and not return any error`, func(t *testing.T) {
 			st := fixtures.StatusBuilder{Active: true}.Build()
-			err := repo.Save(ctx, st)
+			err := repo.Save(ctx, &st)
 			require.NoError(t, err)
 			current = &st
 			require.True(t, st.IsActive())
@@ -37,7 +37,7 @@ func TestStatusRepository(t *testing.T) {
 		then it returns the current status`, func(t *testing.T) {
 			currStatus, err := repo.Find(ctx)
 			require.NoError(t, err)
-			require.Equal(t, *current, currStatus)
+			require.Equal(t, current, currStatus)
 			require.True(t, currStatus.IsActive())
 		})
 		t.Run(`when update method is called,
@@ -45,11 +45,11 @@ func TestStatusRepository(t *testing.T) {
 			updated := *current
 			updated.Update(fixtures.WeatherBuilder{Raining: true}.Build())
 			updated.Deactivate()
-			err := repo.Update(ctx, updated)
+			err := repo.Update(ctx, &updated)
 			require.NoError(t, err)
 			currUpdated, err := repo.Find(ctx)
 			require.NoError(t, err)
-			require.Equal(t, updated, currUpdated)
+			require.Equal(t, updated, *currUpdated)
 			require.False(t, currUpdated.IsActive())
 		})
 	})
