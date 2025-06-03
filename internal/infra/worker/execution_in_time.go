@@ -86,17 +86,17 @@ func executeWeekly(ctx context.Context, prgms app.ProgramsInTime, ch cqs.Command
 
 func executeOddEven(ctx context.Context, now vo.Time, prgms app.ProgramsInTime, ch cqs.CommandHandler) error {
 	var oddEvenPrgms *program.Program
-	if isEven(time.Time(now)) {
-		if prgms.Even != nil {
-			oddEvenPrgms = prgms.Even
-		}
-	} else {
-		if prgms.Odd != nil {
-			oddEvenPrgms = prgms.Odd
-		}
+
+	switch {
+	case isEven(time.Time(now)) && prgms.Even != nil:
+		oddEvenPrgms = prgms.Even
+	default:
+		oddEvenPrgms = prgms.Odd
 	}
-	if err := executeProgram(ctx, ch, *oddEvenPrgms, now); err != nil {
-		return ExecuteOddEvenError{err: err}
+	if oddEvenPrgms != nil {
+		if err := executeProgram(ctx, ch, *oddEvenPrgms, now); err != nil {
+			return ExecuteOddEvenError{err: err}
+		}
 	}
 	return nil
 }

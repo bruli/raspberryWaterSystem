@@ -112,7 +112,6 @@ func TestExecutionInTime(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(`Given a ExecutionInTime function,
 		when is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -144,7 +143,7 @@ func TestExecutionInTime(t *testing.T) {
 					return nil, nil
 				}
 			}
-			err := worker.ExecutionInTime(context.Background(), qh, ch, tt.now)
+			err = worker.ExecutionInTime(context.Background(), qh, ch, tt.now)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)
 				return

@@ -68,7 +68,7 @@ func TestSaveExecutionLogHandle(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a SaveExecutionLog command handler,
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

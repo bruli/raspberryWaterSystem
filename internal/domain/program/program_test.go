@@ -33,7 +33,7 @@ func TestNew(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a Program struct,
 		when New function is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -67,7 +67,7 @@ func TestNewWeekly(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a Weekly struct,
 		when NewWeekly function is called, `+tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -114,7 +114,7 @@ func TestNewTemperature(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a Temperature struct,
 		when NewTemperature method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

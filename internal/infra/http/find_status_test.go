@@ -42,7 +42,7 @@ func TestFindStatus(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a FindStatus query handler,
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()

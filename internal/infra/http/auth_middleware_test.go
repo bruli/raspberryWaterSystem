@@ -30,7 +30,7 @@ func TestAuthMiddleware(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given an AuthMiddleware,
 		when is used and a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()

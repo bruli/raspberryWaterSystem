@@ -40,7 +40,7 @@ func TestExecutePinsOnExecuteZoneListen(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a ExecutePinsOnExecuteZone listener,
 		when Listen method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

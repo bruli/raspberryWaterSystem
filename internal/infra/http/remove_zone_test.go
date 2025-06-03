@@ -37,7 +37,7 @@ func TestRemoveZone(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a Remove zone http handler,
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()

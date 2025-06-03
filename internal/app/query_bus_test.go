@@ -43,7 +43,7 @@ func TestQueryBusHandle(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
+
 		t.Run(`Given a QueryBus,
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
