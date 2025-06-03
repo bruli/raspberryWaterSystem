@@ -35,12 +35,12 @@ func (p *Program) Hydrate(hour Hour, executions []Execution) {
 	p.executions = executions
 }
 
-func New(hour Hour, executions []Execution) (Program, error) {
+func New(hour Hour, executions []Execution) (*Program, error) {
 	pr := Program{hour: hour, executions: executions}
 	if err := pr.validate(); err != nil {
-		return Program{}, err
+		return nil, err
 	}
-	return pr, nil
+	return &pr, nil
 }
 
 type Weekly struct {

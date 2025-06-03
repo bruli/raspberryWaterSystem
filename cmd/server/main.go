@@ -43,7 +43,7 @@ func main() {
 
 	tr := temperatureRepository()
 	rr := rainRepository(conf)
-	sr := memory.StatusRepository{}
+	sr := memory.NewStatusRepository()
 	zr := disk.NewZoneRepository(conf.ZonesFile())
 	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile())
 	oddRepo := disk.NewProgramRepository(conf.OddProgramsFile())
@@ -74,6 +74,7 @@ func main() {
 	chBus.Subscribe(app.ActivateDeactivateServerCmdName, logCHMdw(app.NewActivateDeactivateServer(sr)))
 	chBus.Subscribe(app.ExecuteZoneWithStatusCmdName, eventsMultiCHMdw(app.NewExecuteZoneWithStatus(zr, sr)))
 	chBus.Subscribe(app.UpdateZoneCommandName, logCHMdw(app.NewUpdateZone(zr)))
+	chBus.Subscribe(app.CreateDailyProgramCommandName, logCHMdw(app.NewCreateDailyProgram(dailyRepo)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
@@ -254,6 +255,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/programs",
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(infrahttp.FindAllPrograms(qhBus)),
+		},
+		{
+			Endpoint:    "/programs/daily",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(infrahttp.CreateDailyProgram(chBus)),
 		},
 		{
 			Endpoint:    "/logs",

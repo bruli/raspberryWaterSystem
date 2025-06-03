@@ -78,15 +78,20 @@ func buildDailyPrograms(pr programMap) []program.Program {
 }
 
 func (d ProgramRepository) FindByHour(ctx context.Context, hour *program.Hour) (*program.Program, error) {
-	dailyPgrms := make(programMap)
-	if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		dailyPgrms := make(programMap)
+		if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
+			return nil, err
+		}
+		pgr, ok := dailyPgrms[hour.String()]
+		if !ok {
+			return nil, vo.NewNotFoundError(hour.String())
+		}
+		return buildProgram(pgr, hour.String()), nil
 	}
-	pgr, ok := dailyPgrms[hour.String()]
-	if !ok {
-		return nil, vo.NewNotFoundError(hour.String())
-	}
-	return buildProgram(pgr, hour.String()), nil
 }
 
 func buildProgram(pgr []executions, hour string) *program.Program {

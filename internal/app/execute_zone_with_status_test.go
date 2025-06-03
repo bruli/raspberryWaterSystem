@@ -33,7 +33,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		stErr error
 		zone          *zone.Zone
 		expectedEvent string
-		st            *status.Status
+		st            status.Status
 	}{
 		{
 			name:        "with invalid command, then it returns an invalid command error",
@@ -56,14 +56,14 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name:        "and execute returns an error, then it returns an execute zone with status error",
 			zone:        &zo,
-			st:          &st,
+			st:          st,
 			expectedErr: app.ExecuteZoneWithStatusError{},
 			command:     cmd,
 		},
 		{
 			name: "and execute nil, then it returns an executed event",
 			zone: &zo,
-			st:   &st,
+			st:   st,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -73,7 +73,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name: "and its raining, then it returns an ignored event",
 			zone: &zo,
-			st:   &statusRaining,
+			st:   statusRaining,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -83,7 +83,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name: "and system is deactivated, then it returns an ignored event",
 			zone: &zo,
-			st:   &statusDeactivated,
+			st:   statusDeactivated,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
 				ZoneID:  "name",
@@ -100,7 +100,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 				},
 			}
 			sr := &StatusRepositoryMock{}
-			sr.FindFunc = func(ctx context.Context) (*status.Status, error) {
+			sr.FindFunc = func(ctx context.Context) (status.Status, error) {
 				return tt.st, tt.stErr
 			}
 			handler := app.NewExecuteZoneWithStatus(zr, sr)

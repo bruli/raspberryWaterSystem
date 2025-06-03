@@ -21,7 +21,7 @@ func TestUpdateStatusHandle(t *testing.T) {
 		name string
 		expectedErr, findErr,
 		updateErr error
-		st  *status.Status
+		st  status.Status
 		cmd cqs.Command
 	}{
 		{
@@ -37,14 +37,14 @@ func TestUpdateStatusHandle(t *testing.T) {
 		},
 		{
 			name:        "and update status returns an error, then it returns same error",
-			st:          &currentSt,
+			st:          currentSt,
 			updateErr:   errTest,
 			expectedErr: errTest,
 			cmd:         cmd,
 		},
 		{
 			name: "and update status returns nil, then it returns nil",
-			st:   &currentSt,
+			st:   currentSt,
 			cmd:  cmd,
 		},
 	}
@@ -54,10 +54,10 @@ func TestUpdateStatusHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			sr := &StatusRepositoryMock{
-				FindFunc: func(ctx context.Context) (*status.Status, error) {
+				FindFunc: func(ctx context.Context) (status.Status, error) {
 					return tt.st, tt.findErr
 				},
-				UpdateFunc: func(ctx context.Context, st *status.Status) error {
+				UpdateFunc: func(ctx context.Context, st status.Status) error {
 					return tt.updateErr
 				},
 			}

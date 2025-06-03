@@ -18,7 +18,7 @@ func TestFindStatusHandle(t *testing.T) {
 	tests := []struct {
 		name                 string
 		expectedErr, findErr error
-		status               *status.Status
+		status               status.Status
 		expectedResult       any
 	}{
 		{
@@ -28,8 +28,8 @@ func TestFindStatusHandle(t *testing.T) {
 		},
 		{
 			name:           "and find method returns a status, then it returns a valid result",
-			status:         &st,
-			expectedResult: &st,
+			status:         st,
+			expectedResult: st,
 		},
 	}
 	for _, tt := range tests {
@@ -38,7 +38,7 @@ func TestFindStatusHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			sr := &StatusRepositoryMock{
-				FindFunc: func(ctx context.Context) (*status.Status, error) {
+				FindFunc: func(ctx context.Context) (status.Status, error) {
 					return tt.status, tt.findErr
 				},
 			}

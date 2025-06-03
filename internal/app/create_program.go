@@ -9,39 +9,32 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
-const CreateProgramCommandName = "createProgram"
+const CreateDailyProgramCommandName = "createDailyProgram"
 
-type CreateProgramCommand struct {
+type CreateDailyProgramCommand struct {
 	Program *program.Program
 }
 
-func (c CreateProgramCommand) Name() string {
-	return CreateProgramCommandName
+func (c CreateDailyProgramCommand) Name() string {
+	return CreateDailyProgramCommandName
 }
 
-type CreateProgram struct {
-	repo ProgramRepository
+type CreateDailyProgram struct {
+	CreateProgram
 }
 
-func (c CreateProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
-	co, ok := cmd.(CreateProgramCommand)
+func (c CreateDailyProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	co, ok := cmd.(CreateDailyProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateProgramCommandName, cmd.Name())
+		return nil, cqs.NewInvalidCommandError(CreateDailyProgramCommandName, cmd.Name())
 	}
-	hour := co.Program.Hour()
-	_, err := c.repo.FindByHour(ctx, &hour)
-	switch {
-	case err == nil:
-		return nil, CreateProgramError{msg: fmt.Sprintf("a program with hour %s, already exists", hour.String())}
-	case errors.As(err, &vo.NotFoundError{}):
-		return nil, c.repo.Save(ctx, co.Program)
-	default:
-		return nil, err
-	}
+	return nil, c.Create(ctx, co.Program)
 }
 
-func NewCreateProgram(repo ProgramRepository) *CreateProgram {
-	return &CreateProgram{repo: repo}
+func NewCreateDailyProgram(repo ProgramRepository) *CreateDailyProgram {
+	return &CreateDailyProgram{
+		CreateProgram: CreateProgram{repo: repo},
+	}
 }
 
 type CreateProgramError struct {
@@ -50,4 +43,21 @@ type CreateProgramError struct {
 
 func (c CreateProgramError) Error() string {
 	return fmt.Sprintf("failed to create program: %s", c.msg)
+}
+
+type CreateProgram struct {
+	repo ProgramRepository
+}
+
+func (p CreateProgram) Create(ctx context.Context, program *program.Program) error {
+	hour := program.Hour()
+	_, err := p.repo.FindByHour(ctx, &hour)
+	switch {
+	case err == nil:
+		return CreateProgramError{msg: fmt.Sprintf("a program with hour %s, already exists", hour.String())}
+	case errors.As(err, &vo.NotFoundError{}):
+		return p.repo.Save(ctx, program)
+	default:
+		return err
+	}
 }

@@ -44,7 +44,7 @@ func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event,
 	switch {
 	case errors.As(err, &vo.NotFoundError{}):
 		st := status.New(co.StartedAt, co.Weather)
-		return nil, c.sr.Save(ctx, st)
+		return nil, c.sr.Save(ctx, *st)
 	default:
 		return nil, err
 	}
