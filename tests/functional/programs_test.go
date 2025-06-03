@@ -26,84 +26,26 @@ func TestPrograms(t *testing.T) {
 	resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, "/zones", cl)
 	require.NoError(t, err)
 	require.Equal(t, http2.StatusOK, resp.StatusCode)
-	t.Run(`Given a create programs endpoint,
+	t.Run(`Given a create daily program endpoint,
 	when a request is sent`, func(t *testing.T) {
 		t.Run(`without authorization,
 		then it returns unauthorized`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, nil, http2.MethodPut, "/programs", cl)
+			resp, err = buildRequestAndSend(ctx, nil, nil, http2.MethodPost, "/programs/daily", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
 		t.Run(`with authorization,
 		then it returns unauthorized`, func(t *testing.T) {
-			req := http.CreateProgramsRequestJson{
-				Daily: []http.ProgramItemRequest{
+			createPrReq := http.CreateProgramRequestJson{
+				Executions: []http.ExecutionRequest{
 					{
-						Executions: []http.ExecutionItemRequest{
-							{
-								Seconds: 20,
-								Zones:   []string{zo.Id()},
-							},
-						},
-						Hour: "16:13",
+						Seconds: 10,
+						Zones:   []string{zo.Id()},
 					},
 				},
-				Odd: []http.ProgramItemRequest{
-					{
-						Executions: []http.ExecutionItemRequest{
-							{
-								Seconds: 20,
-								Zones:   []string{zo.Id()},
-							},
-						},
-						Hour: "15:10",
-					},
-				},
-				Even: []http.ProgramItemRequest{
-					{
-						Executions: []http.ExecutionItemRequest{
-							{
-								Seconds: 20,
-								Zones:   []string{zo.Id()},
-							},
-						},
-						Hour: "15:10",
-					},
-				},
-				Weekly: []http.WeeklyItemRequest{
-					{
-						Programs: []http.ProgramItemRequest{
-							{
-								Executions: []http.ExecutionItemRequest{
-									{
-										Seconds: 15,
-										Zones:   []string{zo.Id()},
-									},
-								},
-								Hour: "08:00",
-							},
-						},
-						WeekDay: "Friday",
-					},
-				},
-				Temperature: []http.TemperatureItemRequest{
-					{
-						Programs: []http.ProgramItemRequest{
-							{
-								Executions: []http.ExecutionItemRequest{
-									{
-										Seconds: 15,
-										Zones:   []string{zo.Id()},
-									},
-								},
-								Hour: "08:00",
-							},
-						},
-						Temperature: float64(25.3),
-					},
-				},
+				Hour: "12:45",
 			}
-			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, "/programs", cl)
+			resp, err = buildRequestAndSend(ctx, createPrReq, authorizationHeader(), http2.MethodPost, "/programs/daily", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 		})
