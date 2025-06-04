@@ -1,5 +1,4 @@
 //go:build infra
-// +build infra
 
 package disk_test
 
@@ -21,10 +20,10 @@ func TestProgramRepository(t *testing.T) {
 		path := "/tmp/programs.yml"
 		defer populateFile(t, path)
 		repo := disk.NewProgramRepository(path)
+		hour, err := program.ParseHour("12:15")
+		require.NoError(t, err)
 		t.Run(`when Save method is called,
 		then it save programs`, func(t *testing.T) {
-			hour, err := program.ParseHour("12:15")
-			require.NoError(t, err)
 			hour2, err := program.ParseHour("10:30")
 			require.NoError(t, err)
 			exec := []program.Execution{
@@ -59,13 +58,18 @@ func TestProgramRepository(t *testing.T) {
 			})
 			t.Run(`with an existent hour,
 			then it returns valid program`, func(t *testing.T) {
-				hour, err := program.ParseHour("12:15")
-				require.NoError(t, err)
 				prg, err := repo.FindByHour(ctx, &hour)
 				require.NoError(t, err)
 				require.Equal(t, hour, prg.Hour())
 				require.Len(t, prg.Executions(), 3)
 			})
+		})
+		t.Run(`when Remove method is called,
+		then it returns no error`, func(t *testing.T) {
+			err = repo.Remove(ctx, &hour)
+			require.NoError(t, err)
+			_, err = repo.FindByHour(ctx, &hour)
+			require.ErrorAs(t, err, &vo.NotFoundError{})
 		})
 	})
 }

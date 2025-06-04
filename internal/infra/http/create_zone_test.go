@@ -49,7 +49,6 @@ func TestCreateZone(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a CreateZone http handler,
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()

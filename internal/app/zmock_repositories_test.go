@@ -592,6 +592,9 @@ var _ app.ProgramRepository = &ProgramRepositoryMock{}
 //			FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 //				panic("mock out the FindByHour method")
 //			},
+//			RemoveFunc: func(ctx context.Context, hour *program.Hour) error {
+//				panic("mock out the Remove method")
+//			},
 //			SaveFunc: func(ctx context.Context, programs *program.Program) error {
 //				panic("mock out the Save method")
 //			},
@@ -607,6 +610,9 @@ type ProgramRepositoryMock struct {
 
 	// FindByHourFunc mocks the FindByHour method.
 	FindByHourFunc func(ctx context.Context, hour *program.Hour) (*program.Program, error)
+
+	// RemoveFunc mocks the Remove method.
+	RemoveFunc func(ctx context.Context, hour *program.Hour) error
 
 	// SaveFunc mocks the Save method.
 	SaveFunc func(ctx context.Context, programs *program.Program) error
@@ -625,6 +631,13 @@ type ProgramRepositoryMock struct {
 			// Hour is the hour argument value.
 			Hour *program.Hour
 		}
+		// Remove holds details about calls to the Remove method.
+		Remove []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Hour is the hour argument value.
+			Hour *program.Hour
+		}
 		// Save holds details about calls to the Save method.
 		Save []struct {
 			// Ctx is the ctx argument value.
@@ -635,6 +648,7 @@ type ProgramRepositoryMock struct {
 	}
 	lockFindAll    sync.RWMutex
 	lockFindByHour sync.RWMutex
+	lockRemove     sync.RWMutex
 	lockSave       sync.RWMutex
 }
 
@@ -703,6 +717,42 @@ func (mock *ProgramRepositoryMock) FindByHourCalls() []struct {
 	mock.lockFindByHour.RLock()
 	calls = mock.calls.FindByHour
 	mock.lockFindByHour.RUnlock()
+	return calls
+}
+
+// Remove calls RemoveFunc.
+func (mock *ProgramRepositoryMock) Remove(ctx context.Context, hour *program.Hour) error {
+	if mock.RemoveFunc == nil {
+		panic("ProgramRepositoryMock.RemoveFunc: method is nil but ProgramRepository.Remove was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		Hour *program.Hour
+	}{
+		Ctx:  ctx,
+		Hour: hour,
+	}
+	mock.lockRemove.Lock()
+	mock.calls.Remove = append(mock.calls.Remove, callInfo)
+	mock.lockRemove.Unlock()
+	return mock.RemoveFunc(ctx, hour)
+}
+
+// RemoveCalls gets all the calls that were made to Remove.
+// Check the length with:
+//
+//	len(mockedProgramRepository.RemoveCalls())
+func (mock *ProgramRepositoryMock) RemoveCalls() []struct {
+	Ctx  context.Context
+	Hour *program.Hour
+} {
+	var calls []struct {
+		Ctx  context.Context
+		Hour *program.Hour
+	}
+	mock.lockRemove.RLock()
+	calls = mock.calls.Remove
+	mock.lockRemove.RUnlock()
 	return calls
 }
 

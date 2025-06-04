@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/bruli/raspberryWaterSystem/internal/config"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/bruli/raspberryWaterSystem/internal/config"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
@@ -75,6 +76,11 @@ func main() {
 	chBus.Subscribe(app.ExecuteZoneWithStatusCmdName, eventsMultiCHMdw(app.NewExecuteZoneWithStatus(zr, sr)))
 	chBus.Subscribe(app.UpdateZoneCommandName, logCHMdw(app.NewUpdateZone(zr)))
 	chBus.Subscribe(app.CreateDailyProgramCommandName, logCHMdw(app.NewCreateDailyProgram(dailyRepo, zr)))
+	chBus.Subscribe(app.CreateOddProgramCommandName, logCHMdw(app.NewCreateOddProgram(oddRepo, zr)))
+	chBus.Subscribe(app.CreateEvenProgramCommandName, logCHMdw(app.NewCreateEvenProgram(evenRepo, zr)))
+	chBus.Subscribe(app.RemoveDailyProgramCommandName, logCHMdw(app.NewRemoveDailyProgram(dailyRepo)))
+	chBus.Subscribe(app.RemoveOddProgramCommandName, logCHMdw(app.NewRemoveOddProgram(oddRepo)))
+	chBus.Subscribe(app.RemoveEvenProgramCommandName, logCHMdw(app.NewRemoveEvenProgram(evenRepo)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
@@ -259,7 +265,32 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		{
 			Endpoint:    "/programs/daily",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateDailyProgram(chBus)),
+			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.DailyProgram)),
+		},
+		{
+			Endpoint:    "/programs/daily/{hour}",
+			Method:      http.MethodDelete,
+			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.DailyProgram)),
+		},
+		{
+			Endpoint:    "/programs/odd",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.OddProgram)),
+		},
+		{
+			Endpoint:    "/programs/odd/{hour}",
+			Method:      http.MethodDelete,
+			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.OddProgram)),
+		},
+		{
+			Endpoint:    "/programs/even",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.EvenProgram)),
+		},
+		{
+			Endpoint:    "/programs/even/{hour}",
+			Method:      http.MethodDelete,
+			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.EvenProgram)),
 		},
 		{
 			Endpoint:    "/logs",

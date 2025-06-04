@@ -3,10 +3,11 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/rs/zerolog"
-	"strconv"
 )
 
 type unknownCommand struct{}

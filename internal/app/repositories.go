@@ -38,6 +38,7 @@ type ProgramRepository interface {
 	Save(ctx context.Context, programs *program.Program) error
 	FindAll(ctx context.Context) ([]program.Program, error)
 	FindByHour(ctx context.Context, hour *program.Hour) (*program.Program, error)
+	Remove(ctx context.Context, hour *program.Hour) error
 }
 
 type WeeklyProgramRepository interface {

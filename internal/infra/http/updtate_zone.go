@@ -2,11 +2,12 @@ package http
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
-	"net/http"
 )
 
 func UpdateZone(ch cqs.CommandHandler) http.HandlerFunc {

@@ -2,13 +2,20 @@ package http
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"net/http"
 )
 
-func CreateDailyProgram(ch cqs.CommandHandler) http.HandlerFunc {
+const (
+	DailyProgram = "daily"
+	OddProgram   = "odd"
+	EvenProgram  = "even"
+)
+
+func CreateProgram(ch cqs.CommandHandler, programType string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req CreateProgramRequestJson
 		if err := ReadRequest(w, r, &req); err != nil {
@@ -18,7 +25,7 @@ func CreateDailyProgram(ch cqs.CommandHandler) http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		if _, err = ch.Handle(r.Context(), app.CreateDailyProgramCommand{Program: prog}); err != nil {
+		if _, err = ch.Handle(r.Context(), buildCreateProgramCommand(programType, prog)); err != nil {
 			switch {
 			case errors.As(err, &app.CreateProgramError{}):
 				WriteErrorResponse(w, http.StatusBadRequest, Error{
@@ -32,6 +39,19 @@ func CreateDailyProgram(ch cqs.CommandHandler) http.HandlerFunc {
 		}
 		WriteErrorResponse(w, http.StatusOK)
 	}
+}
+
+func buildCreateProgramCommand(programType string, prog *program.Program) cqs.Command {
+	switch programType {
+	case DailyProgram:
+		return app.CreateDailyProgramCommand{Program: prog}
+	case OddProgram:
+		return app.CreateOddProgramCommand{Program: prog}
+	case EvenProgram:
+		return app.CreateEvenProgramCommand{Program: prog}
+	default:
+	}
+	return nil
 }
 
 func buildProgram(w http.ResponseWriter, req CreateProgramRequestJson) (*program.Program, error) {

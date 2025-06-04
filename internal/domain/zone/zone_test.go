@@ -43,7 +43,6 @@ func TestNew(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a Zone struct,
 		when the constructor is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -80,7 +79,6 @@ func TestZoneExecute(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a built zone struct,
 		when Execute method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

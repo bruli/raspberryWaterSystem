@@ -114,7 +114,6 @@ func TestExecutionInTime(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(`Given a ExecutionInTime function,
 		when is called `+tt.name, func(t *testing.T) {
-			t.Parallel()
 			qh := &QueryHandlerMock{
 				HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
 					_, findStatus := query.(app.FindStatusQuery)

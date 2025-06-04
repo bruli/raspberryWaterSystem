@@ -24,7 +24,6 @@ func TestParseRelay(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a ParseRelay function,
 		when is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

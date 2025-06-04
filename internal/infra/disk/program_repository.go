@@ -20,6 +20,20 @@ type ProgramRepository struct {
 	filePath string
 }
 
+func (d ProgramRepository) Remove(ctx context.Context, hour *program.Hour) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		savedData := make(programMap)
+		if err := readYamlFile(d.filePath, &savedData); err != nil {
+			return err
+		}
+		delete(savedData, hour.String())
+		return writeYamlFile(d.filePath, savedData)
+	}
+}
+
 func (d ProgramRepository) Save(ctx context.Context, prg *program.Program) error {
 	select {
 	case <-ctx.Done():

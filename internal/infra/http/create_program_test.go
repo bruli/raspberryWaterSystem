@@ -3,16 +3,17 @@ package http_test
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
-func TestCreateDailyProgram(t *testing.T) {
+func TestCreateProgram(t *testing.T) {
 	hour := "15:30"
 	zones := []string{"1", "2"}
 	exec := []http2.ExecutionRequest{
@@ -81,7 +82,7 @@ func TestCreateDailyProgram(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(`Given a CreateDailyProgram http handler,
+		t.Run(`Given a CreateProgram http handler,
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			ch := &CommandHandlerMock{
@@ -89,7 +90,7 @@ func TestCreateDailyProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http2.CreateDailyProgram(ch)
+			handler := http2.CreateProgram(ch, http2.DailyProgram)
 			req := httptest.NewRequest(http.MethodPost, "/programs", buildRequestBody(tt.body))
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)

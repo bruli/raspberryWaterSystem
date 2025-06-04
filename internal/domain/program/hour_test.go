@@ -21,7 +21,6 @@ func TestParseHour(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a Hour type,
 		when ParseHour function is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

@@ -3,10 +3,11 @@ package http
 import (
 	"context"
 	"errors"
-	corsx "github.com/rs/cors"
-	"github.com/rs/zerolog"
 	"net"
 	"net/http"
+
+	corsx "github.com/rs/cors"
+	"github.com/rs/zerolog"
 )
 
 // newServer returns a http.Server configured with the provided handler and a

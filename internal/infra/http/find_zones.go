@@ -2,10 +2,11 @@ package http
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"net/http"
 )
 
 func FinZones(qh cqs.QueryHandler) http.HandlerFunc {

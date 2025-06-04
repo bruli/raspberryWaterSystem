@@ -24,7 +24,7 @@ var enabledRelays = map[RelayID]string{
 	TwoRelayID:   "24",
 	ThreeRelayID: "23",
 	FourRelayID:  "25",
-	FiveRelayID:  "17", //Todo, COMPROBAR Y BORRAR 5 Y 6
+	FiveRelayID:  "17", // Todo, COMPROBAR Y BORRAR 5 Y 6
 	SixRelayID:   "27",
 }
 

@@ -46,7 +46,6 @@ func TestNewExecutionLog(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a executionLog struct,
 		when NewExecutionLog function is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

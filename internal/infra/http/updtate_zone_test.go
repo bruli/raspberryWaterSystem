@@ -3,14 +3,15 @@ package http_test
 import (
 	"context"
 	"errors"
+	http2 "net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
-	http2 "net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestUpdateZone(t *testing.T) {

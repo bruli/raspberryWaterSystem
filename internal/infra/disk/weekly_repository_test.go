@@ -1,5 +1,4 @@
 //go:build infra
-// +build infra
 
 package disk_test
 

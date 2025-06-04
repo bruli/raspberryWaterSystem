@@ -49,7 +49,6 @@ func TestActivateDeactivateServerHandle(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given ActivateDeactivateServer command handler,
 		when handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

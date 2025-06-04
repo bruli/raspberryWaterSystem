@@ -3,10 +3,11 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"strings"
 )
 
 type programsCommand struct{}

@@ -26,7 +26,6 @@ func TestParseFromTime(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given a parseFromTime function,
 		when is called `+tt.name, func(t *testing.T) {
 			t.Parallel()

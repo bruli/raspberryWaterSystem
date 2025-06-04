@@ -35,5 +35,4 @@ func initCommands() [9]Command {
 		{ZoneCommandName, "/zone [id] [name] [relay1,relay2]", "Create a new zone"},
 		{ProgramsCommandName, "/programs", "List all existing programs"},
 	}
-
 }

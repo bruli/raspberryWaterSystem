@@ -2,8 +2,9 @@ package memory
 
 import (
 	"context"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"sync"
+
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 )

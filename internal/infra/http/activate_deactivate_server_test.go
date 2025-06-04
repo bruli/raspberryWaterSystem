@@ -39,7 +39,6 @@ func TestActivateDeactivateServer(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(`Given an ActivateDeactivateServer http handler,
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()
