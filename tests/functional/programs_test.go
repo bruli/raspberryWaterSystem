@@ -50,21 +50,65 @@ func TestPrograms(t *testing.T) {
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 		})
 	})
+	t.Run(`Given a create weekly program endpoint,
+	when a request is sent`, func(t *testing.T) {
+		createWeekly := http.CreateWeeklyProgramRequestJson{
+			Programs: []http.ProgramWeeklyRequest{
+				{
+					Executions: []http.ExecutionWeeklyRequest{
+						{
+							Seconds: 10,
+							Zones:   []string{zo.Id()},
+						},
+					},
+					Hour: "10:00",
+				},
+			},
+			WeekDay: "Monday",
+		}
+		t.Run(`without authorization,
+		then it returns an unauthorized`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, createWeekly, nil, http2.MethodPost, "/programs/weekly", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
+		})
+		t.Run(`with authorization,
+		then it returns ok`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, createWeekly, authorizationHeader(), http2.MethodPost, "/programs/weekly", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
+		})
+	})
 	t.Run(`Given a find all programs endpoint,
 	when a request is sent`, func(t *testing.T) {
 		t.Run(`without authorization,
 		then it returns an unauthorized`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, nil, http2.MethodGet, "/programs", cl)
+			resp, err = buildRequestAndSend(ctx, nil, nil, http2.MethodGet, "/programs", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
 		t.Run(`with authorization,
 		then it returns a valid response`, func(t *testing.T) {
-			resp, err := buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodGet, "/programs", cl)
+			resp, err = buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodGet, "/programs", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 			var schema http.ProgramsResponseJson
 			readResponse(t, resp, &schema)
+		})
+	})
+	t.Run(`Given a remove weekly program endpoint,
+	when a request is sent`, func(t *testing.T) {
+		t.Run(`without authorization,
+		then it returns an unauthorized`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, nil, nil, http2.MethodDelete, "/programs/weekly/Monday", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
+		})
+		t.Run(`with authorization,
+		then it returns ok`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodDelete, "/programs/weekly/Monday", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
 		})
 	})
 }
