@@ -30,7 +30,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 		weeklyErr, tempErr error
 		expectedResult   any
 		daily, odd, even *program.Program
-		weekly           program.Weekly
+		weekly           *program.Weekly
 		temp             program.Temperature
 		query            cqs.Query
 	}{
@@ -76,7 +76,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			daily:       &daily,
 			odd:         &odd,
 			even:        &even,
-			weekly:      weekly,
+			weekly:      &weekly,
 			query:       queryTest,
 		},
 		{
@@ -84,7 +84,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 			daily:  &daily,
 			odd:    &odd,
 			even:   &even,
-			weekly: weekly,
+			weekly: &weekly,
 			temp:   temp,
 			expectedResult: app.ProgramsInTime{
 				Daily:       &daily,
@@ -116,7 +116,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 				},
 			}
 			weekly := &WeeklyProgramRepositoryMock{
-				FindByDayAndHourFunc: func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
+				FindByDayAndHourFunc: func(ctx context.Context, day *program.WeekDay, hour *program.Hour) (*program.Weekly, error) {
 					return tt.weekly, tt.weeklyErr
 				},
 			}

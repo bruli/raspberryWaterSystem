@@ -42,9 +42,11 @@ type ProgramRepository interface {
 }
 
 type WeeklyProgramRepository interface {
-	Save(ctx context.Context, programs []program.Weekly) error
+	Save(ctx context.Context, program *program.Weekly) error
 	FindAll(ctx context.Context) ([]program.Weekly, error)
-	FindByDayAndHour(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error)
+	FindByDay(ctx context.Context, day *program.WeekDay) (*program.Weekly, error)
+	FindByDayAndHour(ctx context.Context, day *program.WeekDay, hour *program.Hour) (*program.Weekly, error)
+	Remove(ctx context.Context, day *program.WeekDay) error
 }
 
 type TemperatureProgramRepository interface {

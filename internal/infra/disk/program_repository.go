@@ -79,10 +79,10 @@ func (d ProgramRepository) FindAll(ctx context.Context) ([]program.Program, erro
 	if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
 		return nil, err
 	}
-	return buildDailyPrograms(dailyPgrms), nil
+	return buildPrograms(dailyPgrms), nil
 }
 
-func buildDailyPrograms(pr programMap) []program.Program {
+func buildPrograms(pr programMap) []program.Program {
 	dailies := make([]program.Program, 0, len(pr))
 	for hour, pg := range pr {
 		p := buildProgram(pg, hour)

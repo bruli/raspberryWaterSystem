@@ -87,13 +87,14 @@ func (f FindProgramsInTime) findEven(ctx context.Context, hour *program.Hour) (*
 }
 
 func (f FindProgramsInTime) findWeekly(ctx context.Context, hour program.Hour, day time.Weekday) (*program.Weekly, error) {
-	weekly, err := f.Weekly.FindByDayAndHour(ctx, program.WeekDay(day), hour)
+	weekDay := program.WeekDay(day)
+	weekly, err := f.Weekly.FindByDayAndHour(ctx, &weekDay, &hour)
 	if err != nil {
 		if !errors.As(err, &vo.NotFoundError{}) {
 			return nil, err
 		}
 	}
-	return &weekly, nil
+	return weekly, nil
 }
 
 func (f FindProgramsInTime) findTemperature(ctx context.Context, hour program.Hour, temperature float32) (*program.Temperature, error) {

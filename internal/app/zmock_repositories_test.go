@@ -805,10 +805,16 @@ var _ app.WeeklyProgramRepository = &WeeklyProgramRepositoryMock{}
 //			FindAllFunc: func(ctx context.Context) ([]program.Weekly, error) {
 //				panic("mock out the FindAll method")
 //			},
-//			FindByDayAndHourFunc: func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
+//			FindByDayFunc: func(ctx context.Context, day *program.WeekDay) (*program.Weekly, error) {
+//				panic("mock out the FindByDay method")
+//			},
+//			FindByDayAndHourFunc: func(ctx context.Context, day *program.WeekDay, hour *program.Hour) (*program.Weekly, error) {
 //				panic("mock out the FindByDayAndHour method")
 //			},
-//			SaveFunc: func(ctx context.Context, programs []program.Weekly) error {
+//			RemoveFunc: func(ctx context.Context, day *program.WeekDay) error {
+//				panic("mock out the Remove method")
+//			},
+//			SaveFunc: func(ctx context.Context, programMoqParam *program.Weekly) error {
 //				panic("mock out the Save method")
 //			},
 //		}
@@ -821,11 +827,17 @@ type WeeklyProgramRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func(ctx context.Context) ([]program.Weekly, error)
 
+	// FindByDayFunc mocks the FindByDay method.
+	FindByDayFunc func(ctx context.Context, day *program.WeekDay) (*program.Weekly, error)
+
 	// FindByDayAndHourFunc mocks the FindByDayAndHour method.
-	FindByDayAndHourFunc func(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error)
+	FindByDayAndHourFunc func(ctx context.Context, day *program.WeekDay, hour *program.Hour) (*program.Weekly, error)
+
+	// RemoveFunc mocks the Remove method.
+	RemoveFunc func(ctx context.Context, day *program.WeekDay) error
 
 	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, programs []program.Weekly) error
+	SaveFunc func(ctx context.Context, programMoqParam *program.Weekly) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -834,25 +846,41 @@ type WeeklyProgramRepositoryMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 		}
+		// FindByDay holds details about calls to the FindByDay method.
+		FindByDay []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Day is the day argument value.
+			Day *program.WeekDay
+		}
 		// FindByDayAndHour holds details about calls to the FindByDayAndHour method.
 		FindByDayAndHour []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 			// Day is the day argument value.
-			Day program.WeekDay
+			Day *program.WeekDay
 			// Hour is the hour argument value.
-			Hour program.Hour
+			Hour *program.Hour
+		}
+		// Remove holds details about calls to the Remove method.
+		Remove []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Day is the day argument value.
+			Day *program.WeekDay
 		}
 		// Save holds details about calls to the Save method.
 		Save []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Programs is the programs argument value.
-			Programs []program.Weekly
+			// ProgramMoqParam is the programMoqParam argument value.
+			ProgramMoqParam *program.Weekly
 		}
 	}
 	lockFindAll          sync.RWMutex
+	lockFindByDay        sync.RWMutex
 	lockFindByDayAndHour sync.RWMutex
+	lockRemove           sync.RWMutex
 	lockSave             sync.RWMutex
 }
 
@@ -888,15 +916,51 @@ func (mock *WeeklyProgramRepositoryMock) FindAllCalls() []struct {
 	return calls
 }
 
+// FindByDay calls FindByDayFunc.
+func (mock *WeeklyProgramRepositoryMock) FindByDay(ctx context.Context, day *program.WeekDay) (*program.Weekly, error) {
+	if mock.FindByDayFunc == nil {
+		panic("WeeklyProgramRepositoryMock.FindByDayFunc: method is nil but WeeklyProgramRepository.FindByDay was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Day *program.WeekDay
+	}{
+		Ctx: ctx,
+		Day: day,
+	}
+	mock.lockFindByDay.Lock()
+	mock.calls.FindByDay = append(mock.calls.FindByDay, callInfo)
+	mock.lockFindByDay.Unlock()
+	return mock.FindByDayFunc(ctx, day)
+}
+
+// FindByDayCalls gets all the calls that were made to FindByDay.
+// Check the length with:
+//
+//	len(mockedWeeklyProgramRepository.FindByDayCalls())
+func (mock *WeeklyProgramRepositoryMock) FindByDayCalls() []struct {
+	Ctx context.Context
+	Day *program.WeekDay
+} {
+	var calls []struct {
+		Ctx context.Context
+		Day *program.WeekDay
+	}
+	mock.lockFindByDay.RLock()
+	calls = mock.calls.FindByDay
+	mock.lockFindByDay.RUnlock()
+	return calls
+}
+
 // FindByDayAndHour calls FindByDayAndHourFunc.
-func (mock *WeeklyProgramRepositoryMock) FindByDayAndHour(ctx context.Context, day program.WeekDay, hour program.Hour) (program.Weekly, error) {
+func (mock *WeeklyProgramRepositoryMock) FindByDayAndHour(ctx context.Context, day *program.WeekDay, hour *program.Hour) (*program.Weekly, error) {
 	if mock.FindByDayAndHourFunc == nil {
 		panic("WeeklyProgramRepositoryMock.FindByDayAndHourFunc: method is nil but WeeklyProgramRepository.FindByDayAndHour was just called")
 	}
 	callInfo := struct {
 		Ctx  context.Context
-		Day  program.WeekDay
-		Hour program.Hour
+		Day  *program.WeekDay
+		Hour *program.Hour
 	}{
 		Ctx:  ctx,
 		Day:  day,
@@ -914,13 +978,13 @@ func (mock *WeeklyProgramRepositoryMock) FindByDayAndHour(ctx context.Context, d
 //	len(mockedWeeklyProgramRepository.FindByDayAndHourCalls())
 func (mock *WeeklyProgramRepositoryMock) FindByDayAndHourCalls() []struct {
 	Ctx  context.Context
-	Day  program.WeekDay
-	Hour program.Hour
+	Day  *program.WeekDay
+	Hour *program.Hour
 } {
 	var calls []struct {
 		Ctx  context.Context
-		Day  program.WeekDay
-		Hour program.Hour
+		Day  *program.WeekDay
+		Hour *program.Hour
 	}
 	mock.lockFindByDayAndHour.RLock()
 	calls = mock.calls.FindByDayAndHour
@@ -928,22 +992,58 @@ func (mock *WeeklyProgramRepositoryMock) FindByDayAndHourCalls() []struct {
 	return calls
 }
 
+// Remove calls RemoveFunc.
+func (mock *WeeklyProgramRepositoryMock) Remove(ctx context.Context, day *program.WeekDay) error {
+	if mock.RemoveFunc == nil {
+		panic("WeeklyProgramRepositoryMock.RemoveFunc: method is nil but WeeklyProgramRepository.Remove was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Day *program.WeekDay
+	}{
+		Ctx: ctx,
+		Day: day,
+	}
+	mock.lockRemove.Lock()
+	mock.calls.Remove = append(mock.calls.Remove, callInfo)
+	mock.lockRemove.Unlock()
+	return mock.RemoveFunc(ctx, day)
+}
+
+// RemoveCalls gets all the calls that were made to Remove.
+// Check the length with:
+//
+//	len(mockedWeeklyProgramRepository.RemoveCalls())
+func (mock *WeeklyProgramRepositoryMock) RemoveCalls() []struct {
+	Ctx context.Context
+	Day *program.WeekDay
+} {
+	var calls []struct {
+		Ctx context.Context
+		Day *program.WeekDay
+	}
+	mock.lockRemove.RLock()
+	calls = mock.calls.Remove
+	mock.lockRemove.RUnlock()
+	return calls
+}
+
 // Save calls SaveFunc.
-func (mock *WeeklyProgramRepositoryMock) Save(ctx context.Context, programs []program.Weekly) error {
+func (mock *WeeklyProgramRepositoryMock) Save(ctx context.Context, programMoqParam *program.Weekly) error {
 	if mock.SaveFunc == nil {
 		panic("WeeklyProgramRepositoryMock.SaveFunc: method is nil but WeeklyProgramRepository.Save was just called")
 	}
 	callInfo := struct {
-		Ctx      context.Context
-		Programs []program.Weekly
+		Ctx             context.Context
+		ProgramMoqParam *program.Weekly
 	}{
-		Ctx:      ctx,
-		Programs: programs,
+		Ctx:             ctx,
+		ProgramMoqParam: programMoqParam,
 	}
 	mock.lockSave.Lock()
 	mock.calls.Save = append(mock.calls.Save, callInfo)
 	mock.lockSave.Unlock()
-	return mock.SaveFunc(ctx, programs)
+	return mock.SaveFunc(ctx, programMoqParam)
 }
 
 // SaveCalls gets all the calls that were made to Save.
@@ -951,12 +1051,12 @@ func (mock *WeeklyProgramRepositoryMock) Save(ctx context.Context, programs []pr
 //
 //	len(mockedWeeklyProgramRepository.SaveCalls())
 func (mock *WeeklyProgramRepositoryMock) SaveCalls() []struct {
-	Ctx      context.Context
-	Programs []program.Weekly
+	Ctx             context.Context
+	ProgramMoqParam *program.Weekly
 } {
 	var calls []struct {
-		Ctx      context.Context
-		Programs []program.Weekly
+		Ctx             context.Context
+		ProgramMoqParam *program.Weekly
 	}
 	mock.lockSave.RLock()
 	calls = mock.calls.Save

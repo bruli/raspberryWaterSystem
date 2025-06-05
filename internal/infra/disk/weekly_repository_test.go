@@ -41,8 +41,10 @@ func TestWeeklyRepository(t *testing.T) {
 				fixtures.WeeklyBuilder{WeekDay: &tuesday, Programs: programs}.Build(),
 				fixtures.WeeklyBuilder{}.Build(),
 			}
-			err = repo.Save(ctx, weeklies)
-			require.NoError(t, err)
+			for _, w := range weeklies {
+				err = repo.Save(ctx, &w)
+				require.NoError(t, err)
+			}
 		})
 		t.Run(`when FindAll method is called,
 		then it returns a weekly programs slice`, func(t *testing.T) {
@@ -56,7 +58,7 @@ func TestWeeklyRepository(t *testing.T) {
 				day := program.WeekDay(time.Saturday)
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
-				_, err = repo.FindByDayAndHour(ctx, day, hour)
+				_, err = repo.FindByDayAndHour(ctx, &day, &hour)
 				require.ErrorAs(t, err, &vo.NotFoundError{})
 			})
 			t.Run(`with an invalid hour,
@@ -64,7 +66,7 @@ func TestWeeklyRepository(t *testing.T) {
 				day := program.WeekDay(time.Friday)
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
-				_, err = repo.FindByDayAndHour(ctx, day, hour)
+				_, err = repo.FindByDayAndHour(ctx, &day, &hour)
 				require.ErrorAs(t, err, &vo.NotFoundError{})
 			})
 			t.Run(`with a valid day and hour,
@@ -72,11 +74,36 @@ func TestWeeklyRepository(t *testing.T) {
 				day := program.WeekDay(time.Friday)
 				hour, err := program.ParseHour("15:10")
 				require.NoError(t, err)
-				weekly, err := repo.FindByDayAndHour(ctx, day, hour)
+				weekly, err := repo.FindByDayAndHour(ctx, &day, &hour)
 				require.NoError(t, err)
 				require.Equal(t, day, weekly.WeekDay())
 				require.Equal(t, hour, weekly.Programs()[0].Hour())
 			})
+		})
+		t.Run(`when FindByDay method is called`, func(t *testing.T) {
+			t.Run(`with an invalid day,
+			then returns a not found error`, func(t *testing.T) {
+				day := program.WeekDay(time.Sunday)
+				_, err := repo.FindByDay(ctx, &day)
+				require.ErrorAs(t, err, &vo.NotFoundError{})
+			})
+			t.Run(`with a valid day,
+			then it returns a valid program`, func(t *testing.T) {
+				day := program.WeekDay(time.Friday)
+				found, err := repo.FindByDay(ctx, &day)
+				require.NoError(t, err)
+				require.Equal(t, day, found.WeekDay())
+			})
+
+		})
+		t.Run(`when Remove method is called,
+		then it remove the weekly program`, func(t *testing.T) {
+			day := program.WeekDay(time.Friday)
+			err := repo.Remove(ctx, &day)
+			require.NoError(t, err)
+			list, err := repo.FindAll(ctx)
+			require.NoError(t, err)
+			require.Len(t, list, 2)
 		})
 	})
 }

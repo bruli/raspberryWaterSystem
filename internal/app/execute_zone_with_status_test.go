@@ -94,6 +94,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(`Given an executeZone command handler,
 		when Handle method is called `+tt.name, func(t *testing.T) {
+			t.Parallel()
 			zr := &ZoneRepositoryMock{
 				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
