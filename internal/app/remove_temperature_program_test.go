@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRemoveWeekly_Handle(t *testing.T) {
+func TestRemoveTemperature_Handle(t *testing.T) {
 	errTest := errors.New("")
 	type args struct {
 		ctx context.Context
@@ -19,7 +19,7 @@ func TestRemoveWeekly_Handle(t *testing.T) {
 	}
 	defaultArgs := args{
 		ctx: t.Context(),
-		cmd: app.RemoveWeeklyProgramCommand{},
+		cmd: app.RemoveTemperatureProgramCommand{},
 	}
 	tests := []struct {
 		name string
@@ -42,7 +42,7 @@ func TestRemoveWeekly_Handle(t *testing.T) {
 			expectedErr: errTest,
 		},
 		{
-			name:        "and remove program returns an error, then it returns same error",
+			name:        "and Temperature remove program returns an error, then it returns same error",
 			args:        defaultArgs,
 			removeErr:   errTest,
 			expectedErr: errTest,
@@ -53,18 +53,18 @@ func TestRemoveWeekly_Handle(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(`Given a RemoveWeeklyProgram command handler,
+		t.Run(`Given a RemoveTemperatureProgram command handler,
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
-			repo := &WeeklyProgramRepositoryMock{
-				FindByDayFunc: func(ctx context.Context, day *program.WeekDay) (*program.Weekly, error) {
+			repo := &TemperatureProgramRepositoryMock{
+				FindByTemperatureFunc: func(ctx context.Context, temperature float32) (*program.Temperature, error) {
 					return nil, tt.findErr
 				},
-				RemoveFunc: func(ctx context.Context, day *program.WeekDay) error {
+				RemoveFunc: func(ctx context.Context, temperature float32) error {
 					return tt.removeErr
 				},
 			}
-			handler := app.NewRemoveWeeklyProgram(repo)
+			handler := app.NewRemoveTemperatureProgram(repo)
 			_, err := handler.Handle(tt.args.ctx, tt.args.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

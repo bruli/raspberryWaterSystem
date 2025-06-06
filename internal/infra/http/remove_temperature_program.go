@@ -3,26 +3,25 @@ package http
 import (
 	"errors"
 	"net/http"
-	"unicode"
+	"strconv"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
-	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
 )
 
-func RemoveWeeklyProgram(ch cqs.CommandHandler) http.HandlerFunc {
+func RemoveTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		day, err := program.ParseWeekDay(capitalizeDay(chi.URLParam(r, "day")))
+		temp, err := strconv.ParseFloat(chi.URLParam(r, "temperature"), 32)
 		if err != nil {
 			WriteErrorResponse(w, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
-				Message: err.Error(),
+				Message: "invalid temperature value, must be a number",
 			})
 			return
 		}
-		if _, err = ch.Handle(r.Context(), app.RemoveWeeklyProgramCommand{Day: &day}); err != nil {
+		if _, err = ch.Handle(r.Context(), app.RemoveTemperatureProgramCommand{Temperature: float32(temp)}); err != nil {
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
@@ -33,13 +32,4 @@ func RemoveWeeklyProgram(ch cqs.CommandHandler) http.HandlerFunc {
 		}
 		WriteResponse(w, http.StatusOK, nil)
 	}
-}
-
-func capitalizeDay(s string) string {
-	if s == "" {
-		return s
-	}
-	r := []rune(s)
-	r[0] = unicode.ToUpper(r[0])
-	return string(r)
 }

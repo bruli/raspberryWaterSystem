@@ -3,13 +3,14 @@ package http_test
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestCreateWeeklyProgram(t *testing.T) {
@@ -25,7 +26,7 @@ func TestCreateWeeklyProgram(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name: "with an invalid day in the request, then it returns a bad request",
+			name: "with an invalid temp in the request, then it returns a bad request",
 			body: buildRequestJsonToString(t, http2.CreateWeeklyProgramRequestJson{
 				Programs: []http2.ProgramWeeklyRequest{
 					{

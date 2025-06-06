@@ -21,7 +21,7 @@ func TestZoneRepository(t *testing.T) {
 	t.Run(`Given a ZoneRepository, `, func(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/zones.yml"
-		populateFile(t, path)
+		defer populateFile(t, path)
 		repo := disk.NewZoneRepository(path)
 		var savedZone *zone.Zone
 		_ = savedZone
@@ -42,7 +42,7 @@ func TestZoneRepository(t *testing.T) {
 			then it returns the zone`, func(t *testing.T) {
 				zo, err := repo.FindByID(ctx, savedZone.Id())
 				require.NoError(t, err)
-				require.Equal(t, *savedZone, zo)
+				require.Equal(t, savedZone, zo)
 			})
 		})
 		t.Run(`when Remove method is called`, func(t *testing.T) {

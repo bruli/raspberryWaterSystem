@@ -113,5 +113,13 @@ func TestTemperatureRepository(t *testing.T) {
 				require.NotNil(t, find)
 			})
 		})
+		t.Run(`when Remove method is called,
+		then it returns no error`, func(t *testing.T) {
+			temp := float32(20.3)
+			err := repo.Remove(ctx, temp)
+			require.NoError(t, err)
+			_, err = repo.FindByTemperature(ctx, temp)
+			require.ErrorAs(t, err, &vo.NotFoundError{})
+		})
 	})
 }

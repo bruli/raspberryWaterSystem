@@ -52,7 +52,7 @@ type WeeklyProgramRepository interface {
 type TemperatureProgramRepository interface {
 	Save(ctx context.Context, program *program.Temperature) error
 	FindByTemperature(ctx context.Context, temperature float32) (*program.Temperature, error)
-	Remove(ctx context.Context, program *program.Temperature) error
+	Remove(ctx context.Context, temperature float32) error
 	FindAll(ctx context.Context) ([]program.Temperature, error)
 	FindByTemperatureAndHour(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error)
 }

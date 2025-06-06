@@ -3,13 +3,14 @@ package http_test
 import (
 	"context"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestCreateTemperatureProgram(t *testing.T) {

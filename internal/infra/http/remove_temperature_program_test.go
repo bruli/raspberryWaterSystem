@@ -15,39 +15,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRemoveWeeklyProgram(t *testing.T) {
-	day := "monday"
+func TestRemoveTemperatureProgram(t *testing.T) {
+	temp := "23"
 	tests := []struct {
 		name         string
-		day          string
+		temp         string
 		chErr        error
 		expectedCode int
 	}{
 		{
-			name:         "with an invalid day, then it returns a bad request",
-			day:          "invalid",
+			name:         "with an invalid temp, then it returns a bad request",
+			temp:         "invalid",
 			expectedCode: http2.StatusBadRequest,
 		},
 		{
 			name:         "and command handler returns a not found error, then it returns a not found",
-			day:          day,
+			temp:         temp,
 			chErr:        vo.NotFoundError{},
 			expectedCode: http2.StatusNotFound,
 		},
 		{
 			name:         "and command handler returns an error, then it returns an internal server error",
-			day:          day,
+			temp:         temp,
 			chErr:        errors.New(""),
 			expectedCode: http2.StatusInternalServerError,
 		},
 		{
 			name:         "and command handler returns nil, then it returns ok status",
-			day:          day,
+			temp:         temp,
 			expectedCode: http2.StatusOK,
 		},
 	}
 	for _, tt := range tests {
-		t.Run(`Given a RemoveWeeklyProgram http handler,
+		t.Run(`Given a RemoveTemperatureProgram http handler,
 		when a request is sent`+tt.name, func(t *testing.T) {
 			t.Parallel()
 			ch := &CommandHandlerMock{
@@ -55,10 +55,10 @@ func TestRemoveWeeklyProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.RemoveWeeklyProgram(ch)
+			handler := http.RemoveTemperatureProgram(ch)
 			server := chi.NewMux()
-			server.Delete("/programs/weekly/{day}", handler)
-			req := httptest.NewRequest(http2.MethodDelete, fmt.Sprintf("/programs/weekly/%s", tt.day), nil)
+			server.Delete("/programs/temperature/{temperature}", handler)
+			req := httptest.NewRequest(http2.MethodDelete, fmt.Sprintf("/programs/temperature/%s", tt.temp), nil)
 			writer := httptest.NewRecorder()
 			server.ServeHTTP(writer, req)
 			resp := writer.Result()

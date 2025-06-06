@@ -19,7 +19,7 @@ func TestWeeklyRepository(t *testing.T) {
 	t.Run(`Given a Weekly repository,`, func(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/weekly_programs.yml"
-		populateFile(t, path)
+		defer populateFile(t, path)
 		repo := disk.NewWeeklyRepository(path)
 		t.Run(`when Save method is called,
 		then it save weekly programs`, func(t *testing.T) {
@@ -94,7 +94,6 @@ func TestWeeklyRepository(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, day, found.WeekDay())
 			})
-
 		})
 		t.Run(`when Remove method is called,
 		then it remove the weekly program`, func(t *testing.T) {

@@ -2,8 +2,9 @@ package disk
 
 import (
 	"context"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"strconv"
+
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -37,9 +38,21 @@ func buildTemperatureProgram(temperature float32, prgms programMap) *program.Tem
 	return &tempPrgm
 }
 
-func (t TemperatureProgramRepository) Remove(ctx context.Context, program *program.Temperature) error {
-	//TODO implement me
-	panic("implement me")
+func (t TemperatureProgramRepository) Remove(ctx context.Context, temperature float32) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		temp := make(temperatureMap)
+		if err := readYamlFile(t.path, &temp); err != nil {
+			return err
+		}
+		delete(temp, temperature)
+		if err := writeYamlFile(t.path, &temp); err != nil {
+			return err
+		}
+		return nil
+	}
 }
 
 func (t TemperatureProgramRepository) Save(ctx context.Context, programs *program.Temperature) error {

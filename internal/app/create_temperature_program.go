@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
@@ -41,7 +42,6 @@ func (c CreateTemperatureProgram) Handle(ctx context.Context, cmd cqs.Command) (
 
 func NewCreateTemperatureProgram(repo TemperatureProgramRepository) *CreateTemperatureProgram {
 	return &CreateTemperatureProgram{repo: repo}
-
 }
 
 type CreateTemperatureProgramError struct {

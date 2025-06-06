@@ -3,13 +3,14 @@ package app_test
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestCreateTemperatureProgram_Handle(t *testing.T) {

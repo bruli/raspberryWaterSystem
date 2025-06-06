@@ -18,7 +18,7 @@ func TestExecutionLogRepository(t *testing.T) {
 	t.Run(`Given a ExecutionLogRepository,`, func(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/execution_logs.json"
-		populateFile(t, path)
+		defer populateFile(t, path)
 		repo := disk.NewExecutionLogRepository(path)
 		t.Run(`when Save method is called,
 		then it not returns error`, func(t *testing.T) {

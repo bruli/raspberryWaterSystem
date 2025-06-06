@@ -140,4 +140,19 @@ func TestPrograms(t *testing.T) {
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 		})
 	})
+	t.Run(`Given a remove temperature program endpoint,
+	when a request is sent`, func(t *testing.T) {
+		t.Run(`without authorization,
+		then it returns an unauthorized`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, nil, nil, http2.MethodDelete, "/programs/temperature/20", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
+		})
+		t.Run(`with authorization,
+		then it returns ok`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodDelete, "/programs/temperature/20", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusOK, resp.StatusCode)
+		})
+	})
 }

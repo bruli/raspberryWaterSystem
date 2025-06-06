@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
@@ -42,7 +43,6 @@ func (c CreateWeeklyProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs
 
 func NewCreateWeeklyProgram(repo WeeklyProgramRepository) *CreateWeeklyProgram {
 	return &CreateWeeklyProgram{repo: repo}
-
 }
 
 type CreateWeeklyProgramError struct {

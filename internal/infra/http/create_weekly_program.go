@@ -2,10 +2,11 @@ package http
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"net/http"
 )
 
 func CreateWeeklyProgram(ch cqs.CommandHandler) http.HandlerFunc {
