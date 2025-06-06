@@ -39,11 +39,11 @@ tool-jsonschema:
 
 .PHONY: test
 test:
-	go test -race ./...
+	go test -race ./... -json|go tool tparse -all
 
 .PHONY: test-with-infra
 test-with-infra:
-	go test -tags infra -race ./internal/infra/disk/... --count=1
+	go test -tags infra -race ./internal/infra/disk/... --count=1 -json|go tool tparse --all
 
 .PHONY: test-integration
 test-integration:
@@ -51,7 +51,7 @@ test-integration:
 
 .PHONY: test-functional
 test-functional:
-	go test -tags functional -race ./tests/functional/... --count=1
+	go test -tags functional -race ./tests/functional/... --count=1 -json|go tool tparse --all
 
 .PHONY: docker-up
 docker-up:

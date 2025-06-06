@@ -30,33 +30,7 @@ func (r CommandReader) Read(ctx context.Context, logger *zerolog.Logger) {
 			continue
 		}
 		chatID := update.Message.Chat.ID
-		var cmd runnerCommand
-		switch update.Message.Command() {
-		case HelpCommandName.String():
-			cmd = helCommand{}
-		case StatusCommandName.String():
-			cmd = statusCommand{}
-		case WeatherCommandName.String():
-			cmd = weatherCommand{}
-		case LogCommandName.String():
-			number, err := strconv.Atoi(update.Message.CommandArguments())
-			if err != nil {
-				number = 2
-			}
-			cmd = logCommand{Number: number}
-		case ActivateCommandName.String():
-			cmd = ActivateCommand{}
-		case DeactivateCommandName.String():
-			cmd = DeactivateCommand{}
-		case WaterCommandName.String():
-			cmd = waterCommand{arguments: update.Message.CommandArguments()}
-		case ZoneCommandName.String():
-			cmd = zoneCommand{arguments: update.Message.CommandArguments()}
-		case ProgramsCommandName.String():
-			cmd = programsCommand{}
-		default:
-			cmd = unknownCommand{}
-		}
+		cmd := r.readCommand(update)
 		if err := r.bus.handle(ctx, chatID, msgs, cmd); err != nil {
 			buildMessage(chatID, msgs, err.Error())
 		}
@@ -69,6 +43,37 @@ func (r CommandReader) Read(ctx context.Context, logger *zerolog.Logger) {
 		msgs.Clean()
 
 	}
+}
+
+func (r CommandReader) readCommand(update tgbotapi.Update) runnerCommand {
+	var cmd runnerCommand
+	switch update.Message.Command() {
+	case HelpCommandName.String():
+		cmd = helCommand{}
+	case StatusCommandName.String():
+		cmd = statusCommand{}
+	case WeatherCommandName.String():
+		cmd = weatherCommand{}
+	case LogCommandName.String():
+		number, err := strconv.Atoi(update.Message.CommandArguments())
+		if err != nil {
+			number = 2
+		}
+		cmd = logCommand{Number: number}
+	case ActivateCommandName.String():
+		cmd = ActivateCommand{}
+	case DeactivateCommandName.String():
+		cmd = DeactivateCommand{}
+	case WaterCommandName.String():
+		cmd = waterCommand{arguments: update.Message.CommandArguments()}
+	case ZoneCommandName.String():
+		cmd = zoneCommand{arguments: update.Message.CommandArguments()}
+	case ProgramsCommandName.String():
+		cmd = programsCommand{}
+	default:
+		cmd = unknownCommand{}
+	}
+	return cmd
 }
 
 func NewCommandReader(telegramToken string, cqh cqs.QueryHandler, ch cqs.CommandHandler) (*CommandReader, error) {

@@ -109,7 +109,7 @@ func main() {
 	runHTTPServer(chBus, qhBus, conf, ctx, log)
 }
 
-func runTelegramBot(conf config.Config, qhBus app.QueryBus, chBus app.CommandBus, log zerolog.Logger, ctx context.Context) {
+func runTelegramBot(conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log zerolog.Logger, ctx context.Context) {
 	if !conf.TelegramBotEnabled() {
 		log.Info().Msg("[TELEGRAM SERVICE] disabled")
 		return
@@ -121,7 +121,7 @@ func runTelegramBot(conf config.Config, qhBus app.QueryBus, chBus app.CommandBus
 	telegramServer.Read(ctx, &log)
 }
 
-func runHTTPServer(chBus app.CommandBus, qhBus app.QueryBus, conf config.Config, ctx context.Context, log zerolog.Logger) {
+func runHTTPServer(chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, ctx context.Context, log zerolog.Logger) {
 	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken())
 	httpHandlers := infrahttp.NewHandler(definitions)
 	if err := infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
@@ -166,7 +166,7 @@ func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, 
 	}
 }
 
-func rainRepository(conf config.Config) app.RainRepository {
+func rainRepository(conf *config.Config) app.RainRepository {
 	var rr app.RainRepository
 	rr = fake.RainRepository{}
 	if conf.Environment().IsProduction() {

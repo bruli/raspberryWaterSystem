@@ -97,53 +97,56 @@ func (c Config) Environment() env.Environment {
 	return c.environment
 }
 
-func NewConfig() (Config, error) {
+func NewConfig() (*Config, error) {
 	servUrl, err := env.Value(ServerURL)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	environ, err := environment()
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	zones, err := env.Value(ZonesFile)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	auth, err := env.Value(AuthToken)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	rain, err := env.Value(RainServerURL)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	rainUrl, err := url.Parse(rain)
 	if err != nil {
-		return Config{}, nil
+		return nil, nil
 	}
 	daily, odd, even, weekly, temp, err := programsFiles()
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	execLogs, err := env.Value(ExecutionLogsFile)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	telegramToken, telegramChatID, err := telegram()
+	if err != nil {
+		return nil, err
+	}
 	botEnabledStr, err := env.Value(TelegramBotEnabled)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
 	botEnabled, err := strconv.ParseBool(botEnabledStr)
 	if err != nil {
-		return Config{}, fmt.Errorf("failed to parse telegram bot enabled: %s", botEnabledStr)
+		return nil, fmt.Errorf("failed to parse telegram bot enabled: %s", botEnabledStr)
 	}
 
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
-	return Config{
+	return &Config{
 		serverURL:               servUrl,
 		environment:             environ,
 		zonesFile:               zones,
