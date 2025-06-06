@@ -48,11 +48,11 @@ type Weekly struct {
 	programs []Program
 }
 
-func (w Weekly) WeekDay() WeekDay {
+func (w *Weekly) WeekDay() WeekDay {
 	return w.weekDay
 }
 
-func (w Weekly) Programs() []Program {
+func (w *Weekly) Programs() []Program {
 	return w.programs
 }
 
@@ -73,15 +73,15 @@ type Temperature struct {
 	programs    []Program
 }
 
-func (t Temperature) Temperature() float32 {
+func (t *Temperature) Temperature() float32 {
 	return t.temperature
 }
 
-func (t Temperature) Programs() []Program {
+func (t *Temperature) Programs() []Program {
 	return t.programs
 }
 
-func (t Temperature) validate() error {
+func (t *Temperature) validate() error {
 	if len(t.programs) == 0 {
 		return ErrEmptyPrograms
 	}
@@ -91,12 +91,12 @@ func (t Temperature) validate() error {
 	return nil
 }
 
-func NewTemperature(temperature float32, programs []Program) (Temperature, error) {
+func NewTemperature(temperature float32, programs []Program) (*Temperature, error) {
 	temp := Temperature{temperature: temperature, programs: programs}
 	if err := temp.validate(); err != nil {
-		return Temperature{}, err
+		return nil, err
 	}
-	return temp, nil
+	return &temp, nil
 }
 
 func (t *Temperature) Hydrate(temperature float32, programs []Program) {

@@ -2,8 +2,8 @@ package disk
 
 import (
 	"context"
-
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"strconv"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -14,15 +14,44 @@ type TemperatureProgramRepository struct {
 	path string
 }
 
-func (t TemperatureProgramRepository) Save(ctx context.Context, programs []program.Temperature) error {
+func (t TemperatureProgramRepository) FindByTemperature(ctx context.Context, temperature float32) (*program.Temperature, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		temp := make(temperatureMap)
+		if err := readYamlFile(t.path, &temp); err != nil {
+			return nil, err
+		}
+		byTemp, ok := temp[temperature]
+		if !ok {
+			return nil, vo.NewNotFoundError(strconv.FormatFloat(float64(temperature), 'f', -1, 32))
+		}
+		return buildTemperatureProgram(temperature, byTemp), nil
+	}
+}
+
+func buildTemperatureProgram(temperature float32, prgms programMap) *program.Temperature {
+	var tempPrgm program.Temperature
+	tempPrgm.Hydrate(temperature, buildPrograms(prgms))
+	return &tempPrgm
+}
+
+func (t TemperatureProgramRepository) Remove(ctx context.Context, program *program.Temperature) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (t TemperatureProgramRepository) Save(ctx context.Context, programs *program.Temperature) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 		temp := make(temperatureMap)
-		for _, pr := range programs {
-			temp[pr.Temperature()] = buildProgramMap(pr.Programs())
+		if err := readYamlFile(t.path, &temp); err != nil {
+			return err
 		}
+		temp[programs.Temperature()] = buildProgramMap(programs.Programs())
 		return writeYamlFile(t.path, temp)
 	}
 }

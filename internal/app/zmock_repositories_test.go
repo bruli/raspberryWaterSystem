@@ -1077,10 +1077,16 @@ var _ app.TemperatureProgramRepository = &TemperatureProgramRepositoryMock{}
 //			FindAllFunc: func(ctx context.Context) ([]program.Temperature, error) {
 //				panic("mock out the FindAll method")
 //			},
+//			FindByTemperatureFunc: func(ctx context.Context, temperature float32) (*program.Temperature, error) {
+//				panic("mock out the FindByTemperature method")
+//			},
 //			FindByTemperatureAndHourFunc: func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
 //				panic("mock out the FindByTemperatureAndHour method")
 //			},
-//			SaveFunc: func(ctx context.Context, programs []program.Temperature) error {
+//			RemoveFunc: func(ctx context.Context, programMoqParam *program.Temperature) error {
+//				panic("mock out the Remove method")
+//			},
+//			SaveFunc: func(ctx context.Context, programMoqParam *program.Temperature) error {
 //				panic("mock out the Save method")
 //			},
 //		}
@@ -1093,11 +1099,17 @@ type TemperatureProgramRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
 	FindAllFunc func(ctx context.Context) ([]program.Temperature, error)
 
+	// FindByTemperatureFunc mocks the FindByTemperature method.
+	FindByTemperatureFunc func(ctx context.Context, temperature float32) (*program.Temperature, error)
+
 	// FindByTemperatureAndHourFunc mocks the FindByTemperatureAndHour method.
 	FindByTemperatureAndHourFunc func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error)
 
+	// RemoveFunc mocks the Remove method.
+	RemoveFunc func(ctx context.Context, programMoqParam *program.Temperature) error
+
 	// SaveFunc mocks the Save method.
-	SaveFunc func(ctx context.Context, programs []program.Temperature) error
+	SaveFunc func(ctx context.Context, programMoqParam *program.Temperature) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -1105,6 +1117,13 @@ type TemperatureProgramRepositoryMock struct {
 		FindAll []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
+		}
+		// FindByTemperature holds details about calls to the FindByTemperature method.
+		FindByTemperature []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Temperature is the temperature argument value.
+			Temperature float32
 		}
 		// FindByTemperatureAndHour holds details about calls to the FindByTemperatureAndHour method.
 		FindByTemperatureAndHour []struct {
@@ -1115,16 +1134,25 @@ type TemperatureProgramRepositoryMock struct {
 			// Hour is the hour argument value.
 			Hour program.Hour
 		}
+		// Remove holds details about calls to the Remove method.
+		Remove []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// ProgramMoqParam is the programMoqParam argument value.
+			ProgramMoqParam *program.Temperature
+		}
 		// Save holds details about calls to the Save method.
 		Save []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Programs is the programs argument value.
-			Programs []program.Temperature
+			// ProgramMoqParam is the programMoqParam argument value.
+			ProgramMoqParam *program.Temperature
 		}
 	}
 	lockFindAll                  sync.RWMutex
+	lockFindByTemperature        sync.RWMutex
 	lockFindByTemperatureAndHour sync.RWMutex
+	lockRemove                   sync.RWMutex
 	lockSave                     sync.RWMutex
 }
 
@@ -1157,6 +1185,42 @@ func (mock *TemperatureProgramRepositoryMock) FindAllCalls() []struct {
 	mock.lockFindAll.RLock()
 	calls = mock.calls.FindAll
 	mock.lockFindAll.RUnlock()
+	return calls
+}
+
+// FindByTemperature calls FindByTemperatureFunc.
+func (mock *TemperatureProgramRepositoryMock) FindByTemperature(ctx context.Context, temperature float32) (*program.Temperature, error) {
+	if mock.FindByTemperatureFunc == nil {
+		panic("TemperatureProgramRepositoryMock.FindByTemperatureFunc: method is nil but TemperatureProgramRepository.FindByTemperature was just called")
+	}
+	callInfo := struct {
+		Ctx         context.Context
+		Temperature float32
+	}{
+		Ctx:         ctx,
+		Temperature: temperature,
+	}
+	mock.lockFindByTemperature.Lock()
+	mock.calls.FindByTemperature = append(mock.calls.FindByTemperature, callInfo)
+	mock.lockFindByTemperature.Unlock()
+	return mock.FindByTemperatureFunc(ctx, temperature)
+}
+
+// FindByTemperatureCalls gets all the calls that were made to FindByTemperature.
+// Check the length with:
+//
+//	len(mockedTemperatureProgramRepository.FindByTemperatureCalls())
+func (mock *TemperatureProgramRepositoryMock) FindByTemperatureCalls() []struct {
+	Ctx         context.Context
+	Temperature float32
+} {
+	var calls []struct {
+		Ctx         context.Context
+		Temperature float32
+	}
+	mock.lockFindByTemperature.RLock()
+	calls = mock.calls.FindByTemperature
+	mock.lockFindByTemperature.RUnlock()
 	return calls
 }
 
@@ -1200,22 +1264,58 @@ func (mock *TemperatureProgramRepositoryMock) FindByTemperatureAndHourCalls() []
 	return calls
 }
 
+// Remove calls RemoveFunc.
+func (mock *TemperatureProgramRepositoryMock) Remove(ctx context.Context, programMoqParam *program.Temperature) error {
+	if mock.RemoveFunc == nil {
+		panic("TemperatureProgramRepositoryMock.RemoveFunc: method is nil but TemperatureProgramRepository.Remove was just called")
+	}
+	callInfo := struct {
+		Ctx             context.Context
+		ProgramMoqParam *program.Temperature
+	}{
+		Ctx:             ctx,
+		ProgramMoqParam: programMoqParam,
+	}
+	mock.lockRemove.Lock()
+	mock.calls.Remove = append(mock.calls.Remove, callInfo)
+	mock.lockRemove.Unlock()
+	return mock.RemoveFunc(ctx, programMoqParam)
+}
+
+// RemoveCalls gets all the calls that were made to Remove.
+// Check the length with:
+//
+//	len(mockedTemperatureProgramRepository.RemoveCalls())
+func (mock *TemperatureProgramRepositoryMock) RemoveCalls() []struct {
+	Ctx             context.Context
+	ProgramMoqParam *program.Temperature
+} {
+	var calls []struct {
+		Ctx             context.Context
+		ProgramMoqParam *program.Temperature
+	}
+	mock.lockRemove.RLock()
+	calls = mock.calls.Remove
+	mock.lockRemove.RUnlock()
+	return calls
+}
+
 // Save calls SaveFunc.
-func (mock *TemperatureProgramRepositoryMock) Save(ctx context.Context, programs []program.Temperature) error {
+func (mock *TemperatureProgramRepositoryMock) Save(ctx context.Context, programMoqParam *program.Temperature) error {
 	if mock.SaveFunc == nil {
 		panic("TemperatureProgramRepositoryMock.SaveFunc: method is nil but TemperatureProgramRepository.Save was just called")
 	}
 	callInfo := struct {
-		Ctx      context.Context
-		Programs []program.Temperature
+		Ctx             context.Context
+		ProgramMoqParam *program.Temperature
 	}{
-		Ctx:      ctx,
-		Programs: programs,
+		Ctx:             ctx,
+		ProgramMoqParam: programMoqParam,
 	}
 	mock.lockSave.Lock()
 	mock.calls.Save = append(mock.calls.Save, callInfo)
 	mock.lockSave.Unlock()
-	return mock.SaveFunc(ctx, programs)
+	return mock.SaveFunc(ctx, programMoqParam)
 }
 
 // SaveCalls gets all the calls that were made to Save.
@@ -1223,12 +1323,12 @@ func (mock *TemperatureProgramRepositoryMock) Save(ctx context.Context, programs
 //
 //	len(mockedTemperatureProgramRepository.SaveCalls())
 func (mock *TemperatureProgramRepositoryMock) SaveCalls() []struct {
-	Ctx      context.Context
-	Programs []program.Temperature
+	Ctx             context.Context
+	ProgramMoqParam *program.Temperature
 } {
 	var calls []struct {
-		Ctx      context.Context
-		Programs []program.Temperature
+		Ctx             context.Context
+		ProgramMoqParam *program.Temperature
 	}
 	mock.lockSave.RLock()
 	calls = mock.calls.Save

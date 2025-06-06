@@ -83,6 +83,7 @@ func main() {
 	chBus.Subscribe(app.RemoveEvenProgramCommandName, logCHMdw(app.NewRemoveEvenProgram(evenRepo)))
 	chBus.Subscribe(app.CreateWeeklyProgramCommandName, logCHMdw(app.NewCreateWeeklyProgram(weeklyRepo)))
 	chBus.Subscribe(app.RemoveWeeklyProgramCommandName, logCHMdw(app.NewRemoveWeeklyProgram(weeklyRepo)))
+	chBus.Subscribe(app.CreateTemperatureProgramCommandName, logCHMdw(app.NewCreateTemperatureProgram(tempProgRepo)))
 
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
@@ -303,6 +304,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/programs/weekly/{day}",
 			Method:      http.MethodDelete,
 			HandlerFunc: authMdw(infrahttp.RemoveWeeklyProgram(chBus)),
+		},
+		{
+			Endpoint:    "/programs/temperature",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(infrahttp.CreateTemperatureProgram(chBus)),
 		},
 		{
 			Endpoint:    "/logs",

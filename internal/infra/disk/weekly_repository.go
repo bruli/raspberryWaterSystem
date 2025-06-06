@@ -66,11 +66,11 @@ func (w WeeklyRepository) FindByDayAndHour(ctx context.Context, day *program.Wee
 		}
 		byDay, ok := weekly[day.String()]
 		if !ok {
-			return nil, vo.NotFoundError{}
+			return nil, vo.NewNotFoundError(day.String())
 		}
 		byHour, ok := byDay[hour.String()]
 		if !ok {
-			return nil, vo.NotFoundError{}
+			return nil, vo.NewNotFoundError(hour.String())
 		}
 		return buildProgramWeeklyByHour(day, hour, byHour), nil
 	}

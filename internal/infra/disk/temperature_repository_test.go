@@ -18,7 +18,7 @@ func TestTemperatureRepository(t *testing.T) {
 	t.Run(`Given a Temperature repository,`, func(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/temperature_programs.yml"
-		populateFile(t, path)
+		defer populateFile(t, path)
 		repo := disk.NewTemperatureProgramRepository(path)
 		t.Run(`when Save method is called,
 		then it save temperature programs`, func(t *testing.T) {
@@ -55,8 +55,11 @@ func TestTemperatureRepository(t *testing.T) {
 				fixtures.TemperatureBuilder{Programs: programs2, Temperature: vo.Float32Ptr(19.3)}.Build(),
 				fixtures.TemperatureBuilder{Programs: programs3, Temperature: vo.Float32Ptr(22.3)}.Build(),
 			}
-			err = repo.Save(ctx, temperatures)
-			require.NoError(t, err)
+			for _, temp := range temperatures {
+				err = repo.Save(ctx, &temp)
+				require.NoError(t, err)
+
+			}
 		})
 		t.Run(`when FindAll method is called,
 		then it returns a temperature programs slice`, func(t *testing.T) {
@@ -94,6 +97,20 @@ func TestTemperatureRepository(t *testing.T) {
 				require.Equal(t, []string{"2"}, temp.Programs()[1].Executions()[0].Zones())
 				require.Equal(t, 20, temp.Programs()[1].Executions()[0].Seconds().Int())
 				require.Equal(t, tempValue, temp.Temperature())
+			})
+		})
+		t.Run(`when FindByTemperature method is called,`, func(t *testing.T) {
+			t.Run(`with an invalid temperature,
+			then it returns a not found error`, func(t *testing.T) {
+				_, err := repo.FindByTemperature(ctx, float32(40))
+				require.ErrorAs(t, err, &vo.NotFoundError{})
+			})
+			t.Run(`with a valid temperature,
+			then it returns a valid temperature program`, func(t *testing.T) {
+				tempValue := float32(20.3)
+				find, err := repo.FindByTemperature(ctx, tempValue)
+				require.NoError(t, err)
+				require.NotNil(t, find)
 			})
 		})
 	})
