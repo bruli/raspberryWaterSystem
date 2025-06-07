@@ -105,7 +105,7 @@ func main() {
 	go eventsWorker(ctx, eventsCh, eventBus, &log)
 	go executionInTimeWorker(ctx, qhBus, chBus, &log)
 
-	runTelegramBot(conf, qhBus, chBus, log, ctx)
+	go runTelegramBot(conf, qhBus, chBus, log, ctx)
 	runHTTPServer(chBus, qhBus, conf, ctx, log)
 }
 
