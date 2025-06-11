@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
@@ -17,7 +19,7 @@ func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHan
 	if err != nil {
 		return err
 	}
-	temp := st.Weather().Temp()
+	temp := st.Weather().Temperature()
 	prgms, err := findingPrograms(ctx, qh, now, temp)
 	if err != nil {
 		return err
@@ -37,10 +39,10 @@ func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHan
 	return nil
 }
 
-func findingPrograms(ctx context.Context, qh cqs.QueryHandler, now vo.Time, temp float32) (app.ProgramsInTime, error) {
+func findingPrograms(ctx context.Context, qh cqs.QueryHandler, now vo.Time, temp weather.Temperature) (app.ProgramsInTime, error) {
 	resultPrmgs, err := qh.Handle(ctx, app.FindProgramsInTimeQuery{
 		On:          now,
-		Temperature: temp,
+		Temperature: temp.Float32(),
 	})
 	if err != nil {
 		return app.ProgramsInTime{}, FindProgramsError{err: err}
@@ -58,9 +60,9 @@ func readingCurrentStatus(ctx context.Context, qh cqs.QueryHandler) (status.Stat
 	return st, nil
 }
 
-func executeTemperature(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now vo.Time, currentTemp float32) error {
+func executeTemperature(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now vo.Time, currentTemp weather.Temperature) error {
 	if prgms.Temperature != nil {
-		if currentTemp >= prgms.Temperature.Temperature() {
+		if currentTemp.Float32() >= prgms.Temperature.Temperature() {
 			for _, pr := range prgms.Temperature.Programs() {
 				if err := executeProgram(ctx, ch, pr, now); err != nil {
 					return ExecuteTemperatureError{err: err}

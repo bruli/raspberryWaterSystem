@@ -8,6 +8,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
+	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"sync"
 )
@@ -288,7 +289,7 @@ var _ app.TemperatureRepository = &TemperatureRepositoryMock{}
 //
 //		// make and configure a mocked app.TemperatureRepository
 //		mockedTemperatureRepository := &TemperatureRepositoryMock{
-//			FindFunc: func(ctx context.Context) (float32, float32, error) {
+//			FindFunc: func(ctx context.Context) (weather.Temperature, weather.Humidity, error) {
 //				panic("mock out the Find method")
 //			},
 //		}
@@ -299,7 +300,7 @@ var _ app.TemperatureRepository = &TemperatureRepositoryMock{}
 //	}
 type TemperatureRepositoryMock struct {
 	// FindFunc mocks the Find method.
-	FindFunc func(ctx context.Context) (float32, float32, error)
+	FindFunc func(ctx context.Context) (weather.Temperature, weather.Humidity, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -313,7 +314,7 @@ type TemperatureRepositoryMock struct {
 }
 
 // Find calls FindFunc.
-func (mock *TemperatureRepositoryMock) Find(ctx context.Context) (float32, float32, error) {
+func (mock *TemperatureRepositoryMock) Find(ctx context.Context) (weather.Temperature, weather.Humidity, error) {
 	if mock.FindFunc == nil {
 		panic("TemperatureRepositoryMock.FindFunc: method is nil but TemperatureRepository.Find was just called")
 	}

@@ -142,10 +142,6 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse telegram bot enabled: %s", botEnabledStr)
 	}
-
-	if err != nil {
-		return nil, err
-	}
 	return &Config{
 		serverURL:               servUrl,
 		environment:             environ,

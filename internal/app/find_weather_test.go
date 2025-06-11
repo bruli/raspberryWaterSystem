@@ -13,15 +13,16 @@ import (
 
 func TestFindWeatherHandle(t *testing.T) {
 	errTest := errors.New("")
-	temp := float32(23.4)
-	hum := float32(45.7)
+	temp := weather.Temperature(23.4)
+	hum := weather.Humidity(45.7)
 	weath := weather.New(temp, hum, false)
 	tests := []struct {
 		name string
 		expectedErr, tempErr,
 		rainErr error
 		expectedResult any
-		temp, hum      float32
+		temp           weather.Temperature
+		hum            weather.Humidity
 		rain           bool
 	}{
 		{
@@ -48,7 +49,7 @@ func TestFindWeatherHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			tr := &TemperatureRepositoryMock{
-				FindFunc: func(ctx context.Context) (float32, float32, error) {
+				FindFunc: func(ctx context.Context) (weather.Temperature, weather.Humidity, error) {
 					return tt.temp, tt.hum, tt.tempErr
 				},
 			}

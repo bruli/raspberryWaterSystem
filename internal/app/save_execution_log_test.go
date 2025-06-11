@@ -27,7 +27,7 @@ func TestSaveExecutionLogHandle(t *testing.T) {
 	logs := make([]program.ExecutionLog, 25)
 	for i := 0; 25 > i; i++ {
 		logs[i] = fixtures.ExecutionLogBuilder{
-			ZoneName: vo.StringPtr(fmt.Sprintf("zone %v", i)),
+			ZoneName: vo.ToPointer(fmt.Sprintf("zone %v", i)),
 		}.Build()
 	}
 	tests := []struct {

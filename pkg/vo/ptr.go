@@ -1,16 +1,13 @@
 package vo
 
-func StringPtr(v string) *string {
-	return &v
+func ToPointer[T any](val T) *T {
+	return &val
 }
 
-func Float32Ptr(v float32) *float32 {
-	return &v
-}
-
-func StringValue(s *string) string {
-	if s == nil {
-		return ""
+func FromPointer[T any](ptr *T) T {
+	if ptr == nil {
+		var zeroValue T
+		return zeroValue
 	}
-	return *s
+	return *ptr
 }

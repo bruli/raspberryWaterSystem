@@ -33,7 +33,7 @@ func TestExecutionInTime(t *testing.T) {
 	weekly := fixtures.WeeklyBuilder{WeekDay: &day, Programs: []program.Program{
 		prog,
 	}}.Build()
-	temperature := fixtures.TemperatureBuilder{Temperature: vo.Float32Ptr(status.Weather().Temp()), Programs: []program.Program{
+	temperature := fixtures.TemperatureBuilder{Temperature: vo.ToPointer(status.Weather().Temperature().Float32()), Programs: []program.Program{
 		prog,
 	}}.Build()
 	progams := app.ProgramsInTime{

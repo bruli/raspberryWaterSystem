@@ -26,7 +26,7 @@ func (s statusRunner) Run(ctx context.Context, chatID int64, msgs *Messages, _ r
 	}
 	st, _ := result.(status.Status)
 	buildMessage(chatID, msgs, fmt.Sprintf("System started at: %s", st.SystemStartedAt().Date()))
-	buildMessage(chatID, msgs, fmt.Sprintf("Current temperature: %v *C", st.Weather().Temp()))
+	buildMessage(chatID, msgs, fmt.Sprintf("Current temperature: %v *C", st.Weather().Temperature()))
 	buildMessage(chatID, msgs, fmt.Sprintf("Current humidity: %v", st.Weather().Humidity()))
 	buildMessage(chatID, msgs, fmt.Sprintf("Is raining: %v", st.Weather().IsRaining()))
 	buildMessage(chatID, msgs, fmt.Sprintf("Active: %v", st.IsActive()))

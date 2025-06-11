@@ -25,7 +25,7 @@ func (w weatherRunner) Run(ctx context.Context, chatID int64, msgs *Messages, _ 
 		return fmt.Errorf("failed to find weather: %w", err)
 	}
 	weath, _ := result.(weather.Weather)
-	buildMessage(chatID, msgs, fmt.Sprintf("Current temperature: %v *C", weath.Temp()))
+	buildMessage(chatID, msgs, fmt.Sprintf("Current temperature: %v *C", weath.Temperature()))
 	buildMessage(chatID, msgs, fmt.Sprintf("Current humidity: %v", weath.Humidity()))
 	buildMessage(chatID, msgs, fmt.Sprintf("Is raining:  %v", weath.IsRaining()))
 	return nil

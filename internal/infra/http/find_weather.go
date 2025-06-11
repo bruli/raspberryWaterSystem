@@ -20,7 +20,7 @@ func FindWeather(qh cqs.QueryHandler) http.HandlerFunc {
 		resp := WeatherResponseJson{
 			Humidity:    float64(weath.Humidity()),
 			IsRaining:   weath.IsRaining(),
-			Temperature: float64(weath.Temp()),
+			Temperature: float64(weath.Temperature()),
 		}
 		data, _ := json.Marshal(resp)
 		WriteResponse(w, http.StatusOK, data)

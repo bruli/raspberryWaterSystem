@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 
+	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
@@ -21,7 +23,7 @@ type ZoneRepository interface {
 }
 
 type TemperatureRepository interface {
-	Find(ctx context.Context) (temp, hum float32, err error)
+	Find(ctx context.Context) (weather.Temperature, weather.Humidity, error)
 }
 
 type RainRepository interface {
