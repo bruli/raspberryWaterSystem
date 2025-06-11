@@ -15,9 +15,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
-	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
-	"github.com/bruli/raspberryWaterSystem/internal/infra/fake"
 	infrahttp "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
@@ -43,7 +41,7 @@ func main() {
 	logQHMdw := cqs.NewQueryHndErrorMiddleware(&log)
 
 	tr := temperatureRepository()
-	rr := rainRepository(conf)
+	rr := rainRepository()
 	sr := memory.NewStatusRepository()
 	zr := disk.NewZoneRepository(conf.ZonesFile())
 	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile())
@@ -164,15 +162,6 @@ func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, 
 			}
 		}
 	}
-}
-
-func rainRepository(conf *config.Config) app.RainRepository {
-	var rr app.RainRepository
-	rr = fake.RainRepository{}
-	if conf.Environment().IsProduction() {
-		rr = api.NewRainRepository(conf.RainServerURL())
-	}
-	return rr
 }
 
 func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {

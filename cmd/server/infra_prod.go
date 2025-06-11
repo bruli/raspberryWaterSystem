@@ -8,10 +8,14 @@ import (
 )
 
 func temperatureRepository() app.TemperatureRepository {
-	repo, _ := gpio.NewBme280TemperatureRepository()
+	repo, _ := gpio.NewBme280TemperatureSensor()
 	return repo
 }
 
 func pinsExecutor() app.PinExecutor {
 	return gpio.NewPinsExecutor()
+}
+
+func rainRepository() app.RainRepository {
+	return gpio.NewRainSensor()
 }

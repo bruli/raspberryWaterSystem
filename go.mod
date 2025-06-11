@@ -12,6 +12,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/google/uuid v1.6.0
 	github.com/rs/cors v1.10.1
+	github.com/stianeikeland/go-rpio/v4 v4.6.0
 	periph.io/x/conn/v3 v3.7.2
 	periph.io/x/devices/v3 v3.7.4
 	periph.io/x/host/v3 v3.8.5

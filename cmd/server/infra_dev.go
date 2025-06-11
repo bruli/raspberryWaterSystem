@@ -14,3 +14,7 @@ func temperatureRepository() app.TemperatureRepository {
 func pinsExecutor() app.PinExecutor {
 	return fake.NewPinsExecutor()
 }
+
+func rainRepository() app.RainRepository {
+	return fake.RainRepository{}
+}

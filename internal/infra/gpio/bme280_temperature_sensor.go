@@ -13,25 +13,25 @@ import (
 	"periph.io/x/host/v3"
 )
 
-type Bme280TemperatureRepository struct {
+type Bme280TemperatureSensor struct {
 	bus i2c.BusCloser
-	sync.Mutex
+	sync.RWMutex
 }
 
-func (b *Bme280TemperatureRepository) Find(ctx context.Context) (weather.Temperature, weather.Humidity, error) {
+func (b *Bme280TemperatureSensor) Find(ctx context.Context) (weather.Temperature, weather.Humidity, error) {
 	select {
 	case <-ctx.Done():
 		_ = b.bus.Close()
 		return 0, 0, ctx.Err()
 	default:
-		b.Lock()
+		b.RLock()
 		sensor, err := bmxx80.NewI2C(b.bus, 0x76, &bmxx80.DefaultOpts)
 		if err != nil {
 			return 0, 0, fmt.Errorf("failed to create temperature sensor: %w", err)
 		}
 		defer func() {
-			b.Unlock()
 			_ = sensor.Halt()
+			b.RUnlock()
 		}()
 		var env physic.Env
 		if err = sensor.Sense(&env); err != nil {
@@ -44,7 +44,7 @@ func (b *Bme280TemperatureRepository) Find(ctx context.Context) (weather.Tempera
 	}
 }
 
-func NewBme280TemperatureRepository() (*Bme280TemperatureRepository, error) {
+func NewBme280TemperatureSensor() (*Bme280TemperatureSensor, error) {
 	if _, err := host.Init(); err != nil {
 		return nil, fmt.Errorf("failed to initialize temperature sensor host: %v", err)
 	}
@@ -52,5 +52,5 @@ func NewBme280TemperatureRepository() (*Bme280TemperatureRepository, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open i2c bus: %v", err)
 	}
-	return &Bme280TemperatureRepository{bus: bus}, nil
+	return &Bme280TemperatureSensor{bus: bus}, nil
 }
