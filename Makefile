@@ -18,7 +18,6 @@ Commands:
    encryptVault:              Encrypt vault secret file
    decryptVault:              Decrypt vault secret file
    build:                     Compile the project
-   docker-exec-builder:       Start builder docker container and entry inside it. Build project here.
    deploy:                    Deploy the code to raspberry
 endef
 export help
@@ -98,13 +97,9 @@ decryptVault:
 .PHONY: build
 build:
 	@make clean
-	CC=arm-linux-gnueabi-gcc CGO_ENABLED=1 GOOS=linux GOARCH=arm GOARM=6 go build -a -ldflags "-s -w" -tags prod -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
-
-.PHONY: docker-exec-builder
-docker-exec-builder:
-	docker build -t builder .
-	docker run -it --rm -v $(shell pwd):/app builder bash
+	GOOS=linux GOARCH=arm GOARM=7 go build -a -ldflags "-s -w" -tags prod -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
 
 .PHONY: deploy
-deploy:
-	devops/scripts/deploy.sh
+deploy: build decryptVault
+	ansible-playbook -i devops/ansible/inventories/production/hosts devops/ansible/deploy.yml
+	@make encryptVault
