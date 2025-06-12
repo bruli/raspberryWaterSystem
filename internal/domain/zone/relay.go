@@ -7,8 +7,6 @@ const (
 	TwoRelayID
 	ThreeRelayID
 	FourRelayID
-	FiveRelayID
-	SixRelayID
 )
 
 type RelayID int
