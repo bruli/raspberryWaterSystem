@@ -21,11 +21,9 @@ var ErrUnknownRelay = errors.New("unknown relay")
 
 var enabledRelays = map[RelayID]string{
 	OneRelayID:   "18",
-	TwoRelayID:   "24",
+	TwoRelayID:   "17",
 	ThreeRelayID: "23",
-	FourRelayID:  "25",
-	FiveRelayID:  "17", // Todo, COMPROBAR Y BORRAR 5 Y 6
-	SixRelayID:   "27",
+	FourRelayID:  "24",
 }
 
 type Relay struct {

@@ -91,7 +91,7 @@ func TestZoneExecute(t *testing.T) {
 			}
 			ev := zo.Events()[0]
 			execEv, _ := ev.(zone.Executed)
-			require.Equal(t, []string{"18", "24"}, execEv.RelayPins)
+			require.Equal(t, []string{"18", "17"}, execEv.RelayPins)
 			require.Equal(t, uint(200), execEv.Seconds)
 		})
 	}

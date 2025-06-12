@@ -14,7 +14,7 @@ func NewPinsExecutor() *PinsExecutor {
 	return &PinsExecutor{relays: relays}
 }
 
-func (p PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string) error {
+func (p *PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -44,7 +44,7 @@ func (p *PinsExecutor) activatePin(piNumber string) (*pin, error) {
 	return pi, nil
 }
 
-func (p PinsExecutor) deActivatePin(pi *pin) {
+func (p *PinsExecutor) deActivatePin(pi *pin) {
 	pi.output().high()
 }
 
