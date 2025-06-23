@@ -103,3 +103,7 @@ func (t *Temperature) Hydrate(temperature float32, programs []Program) {
 	t.temperature = temperature
 	t.programs = programs
 }
+
+func (t *Temperature) Update(programs []Program) {
+	t.programs = programs
+}
