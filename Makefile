@@ -97,7 +97,7 @@ decryptVault:
 .PHONY: build
 build:
 	@make clean
-	GOOS=linux GOARCH=arm GOARM=7 go build -a -ldflags "-s -w" -tags prod -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
+	GOOS=linux GOARCH=arm64 go build -a -ldflags "-s -w" -tags prod -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
 
 .PHONY: deploy
 deploy: build decryptVault

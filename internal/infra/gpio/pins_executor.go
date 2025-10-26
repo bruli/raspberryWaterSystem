@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"periph.io/x/conn/v3/gpio"
 )
 
 type PinsExecutor struct {
-	relays map[string]*pin
+	relays map[string]gpio.PinIO
 }
 
 func NewPinsExecutor() *PinsExecutor {
@@ -19,7 +21,7 @@ func (p *PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string)
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		activatedPins := make([]*pin, len(pins))
+		activatedPins := make([]gpio.PinIO, len(pins))
 		for i, piNumber := range pins {
 			activatePin, err := p.activatePin(piNumber)
 			if err != nil {
@@ -29,23 +31,26 @@ func (p *PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string)
 		}
 		time.Sleep(time.Duration(seconds) * time.Second)
 		for _, act := range activatedPins {
-			p.deActivatePin(act)
+			if err := p.deActivatePin(act); err != nil {
+				return err
+			}
 		}
 		return nil
 	}
 }
 
-func (p *PinsExecutor) activatePin(piNumber string) (*pin, error) {
+func (p *PinsExecutor) activatePin(piNumber string) (gpio.PinIO, error) {
 	pi, ok := p.relays[piNumber]
 	if !ok {
 		return nil, InvalidPinToExecuteError{pinNumber: piNumber}
 	}
-	pi.output().low()
+	if err := pi.Out(gpio.Low); err != nil {
+	}
 	return pi, nil
 }
 
-func (p *PinsExecutor) deActivatePin(pi *pin) {
-	pi.output().high()
+func (p *PinsExecutor) deActivatePin(pi gpio.PinIO) error {
+	return pi.Out(gpio.High)
 }
 
 type InvalidPinToExecuteError struct {

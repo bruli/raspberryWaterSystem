@@ -1,8 +1,10 @@
-FROM ubuntu:20.04
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+FROM golang:1.25.2
+
 RUN mkdir /app
 WORKDIR /app
 
-RUN apt-get update && apt-get upgrade -y && apt install -y git make gcc gcc-arm-linux-gnueabi
-COPY --from=golang:1.24.2-bullseye /usr/local/go/ /usr/local/go/
-RUN echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.bashrc
+RUN apt-get update && apt-get upgrade -y && apt-get install -y make git
+
+RUN go install -v github.com/cespare/reflex@latest
+EXPOSE 8080
+ENTRYPOINT ["reflex", "-c", "./reflex.conf"]
