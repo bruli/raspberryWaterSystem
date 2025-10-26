@@ -1,3 +1,5 @@
+DOCKER_COMPOSE=COMPOSE_BAKE=true docker compose
+
 define help
 Usage: make <command>
 Commands:
@@ -54,15 +56,15 @@ test-functional:
 
 .PHONY: docker-up
 docker-up:
-	docker compose up -d --build water_system
+	${DOCKER_COMPOSE} up -d --build water_system
 
 .PHONY: docker-down
 docker-down:
-	docker compose down
+	${DOCKER_COMPOSE} down
 
 .PHONY: docker-ps
 docker-ps:
-	docker compose ps
+	${DOCKER_COMPOSE} ps
 
 .PHONY: docker-exec
 docker-exec:
