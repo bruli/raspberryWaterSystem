@@ -10,18 +10,17 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/config"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/env"
 	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 	"github.com/stretchr/testify/require"
 )
 
 func TestExecutionLogPublisherPublish(t *testing.T) {
-	token, err := env.Value(config.TelegramToken)
+	token, err := config.Value(config.TelegramToken)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	chatIDStr, err := env.Value(config.TelegramChatID)
+	chatIDStr, err := config.Value(config.TelegramChatID)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

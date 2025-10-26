@@ -3,14 +3,14 @@ package env_test
 import (
 	"testing"
 
-	"github.com/bruli/raspberryRainSensor/pkg/common/env"
+	"github.com/bruli/raspberryWaterSystem/internal/config"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParseEnvironment(t *testing.T) {
 	tests := []struct {
 		name, value  string
-		expected     env.Environment
+		expected     config.EnvironmentType
 		isProduction bool
 	}{
 		{
@@ -20,13 +20,13 @@ func TestParseEnvironment(t *testing.T) {
 		{
 			name:         "with a valid development value, then it returns a development environment",
 			value:        "development",
-			expected:     env.DevelopmentEnvironment,
+			expected:     config.DevelopmentEnvironment,
 			isProduction: false,
 		},
 		{
 			name:         "with a valid production value, then it returns a production environment",
 			value:        "production",
-			expected:     env.ProductionEnvironment,
+			expected:     config.ProductionEnvironment,
 			isProduction: true,
 		},
 	}
@@ -34,9 +34,9 @@ func TestParseEnvironment(t *testing.T) {
 		t.Run(`Given a ParseEnvironment function,
 		when is calle `+tt.name, func(t *testing.T) {
 			t.Parallel()
-			environment, err := env.ParseEnvironment(tt.value)
+			environment, err := config.ParseEnvironment(tt.value)
 			if err != nil {
-				require.ErrorIs(t, err, env.ErrInvalidEnvironment)
+				require.ErrorIs(t, err, config.ErrInvalidEnvironment)
 				return
 			}
 			require.Equal(t, tt.expected, environment)

@@ -2,6 +2,7 @@ package zone
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/google/uuid"
 
@@ -26,6 +27,7 @@ type Zone struct {
 	cqs.BasicAggregateRoot
 	id, name string
 	relays   []Relay
+	mutex    sync.RWMutex
 }
 
 func (z *Zone) Id() string {
@@ -46,6 +48,7 @@ func New(id, name string, relays []Relay) (*Zone, error) {
 		id:                 id,
 		name:               name,
 		relays:             relays,
+		mutex:              sync.RWMutex{},
 	}
 	if err := z.validate(); err != nil {
 		return nil, err
@@ -57,6 +60,7 @@ func (z *Zone) Hydrate(id, name string, relays []Relay) {
 	z.id = id
 	z.name = name
 	z.relays = relays
+	z.mutex = sync.RWMutex{}
 }
 
 func (z *Zone) validate() error {
@@ -91,6 +95,8 @@ func (z *Zone) Execute(seconds uint) error {
 }
 
 func (z *Zone) ExecuteWithStatus(active, raining bool, seconds uint) error {
+	z.mutex.Lock()
+	defer z.mutex.Unlock()
 	event := Ignored{
 		BasicEvent: cqs.NewBasicEvent(IgnoredEventName, uuid.New(), z.id),
 		ZoneName:   z.name,
