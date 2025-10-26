@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
-
-	"github.com/bruli/raspberryRainSensor/pkg/common/env"
 )
 
 const (
@@ -28,7 +26,7 @@ const (
 
 type Config struct {
 	serverURL     string
-	environment   env.Environment
+	environment   EnvironmentType
 	zonesFile     string
 	authToken     string
 	rainServerURL url.URL
@@ -93,12 +91,12 @@ func (c Config) ServerURL() string {
 	return c.serverURL
 }
 
-func (c Config) Environment() env.Environment {
+func (c Config) Environment() EnvironmentType {
 	return c.environment
 }
 
 func NewConfig() (*Config, error) {
-	servUrl, err := env.Value(ServerURL)
+	servUrl, err := Value(ServerURL)
 	if err != nil {
 		return nil, err
 	}
@@ -106,15 +104,15 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	zones, err := env.Value(ZonesFile)
+	zones, err := Value(ZonesFile)
 	if err != nil {
 		return nil, err
 	}
-	auth, err := env.Value(AuthToken)
+	auth, err := Value(AuthToken)
 	if err != nil {
 		return nil, err
 	}
-	rain, err := env.Value(RainServerURL)
+	rain, err := Value(RainServerURL)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +124,7 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	execLogs, err := env.Value(ExecutionLogsFile)
+	execLogs, err := Value(ExecutionLogsFile)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +132,7 @@ func NewConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	botEnabledStr, err := env.Value(TelegramBotEnabled)
+	botEnabledStr, err := Value(TelegramBotEnabled)
 	if err != nil {
 		return nil, err
 	}
@@ -160,12 +158,12 @@ func NewConfig() (*Config, error) {
 	}, nil
 }
 
-func environment() (env.Environment, error) {
-	envStr, err := env.Value(Environment)
+func environment() (EnvironmentType, error) {
+	envStr, err := Value(Environment)
 	if err != nil {
 		return 0, err
 	}
-	environ, err := env.ParseEnvironment(envStr)
+	environ, err := ParseEnvironment(envStr)
 	if err != nil {
 		return 0, err
 	}
@@ -173,11 +171,11 @@ func environment() (env.Environment, error) {
 }
 
 func telegram() (string, int, error) {
-	token, err := env.Value(TelegramToken)
+	token, err := Value(TelegramToken)
 	if err != nil {
 		return "", 0, err
 	}
-	chatIDStr, err := env.Value(TelegramChatID)
+	chatIDStr, err := Value(TelegramChatID)
 	if err != nil {
 		return "", 0, err
 	}
@@ -189,23 +187,23 @@ func telegram() (string, int, error) {
 }
 
 func programsFiles() (string, string, string, string, string, error) {
-	daily, err := env.Value(DailyProgramsFile)
+	daily, err := Value(DailyProgramsFile)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
-	odd, err := env.Value(OddProgramsFile)
+	odd, err := Value(OddProgramsFile)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
-	even, err := env.Value(EvenProgramsFile)
+	even, err := Value(EvenProgramsFile)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
-	weekly, err := env.Value(WeeklyProgramsFile)
+	weekly, err := Value(WeeklyProgramsFile)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
-	temp, err := env.Value(TemperatureProgramsFile)
+	temp, err := Value(TemperatureProgramsFile)
 	if err != nil {
 		return "", "", "", "", "", err
 	}
