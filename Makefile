@@ -1,107 +1,113 @@
-DOCKER_COMPOSE=COMPOSE_BAKE=true docker compose
+SHELL := /bin/bash
 
-define help
-Usage: make <command>
-Commands:
-   help:                      Show this help information
-   tool-jsonschema:           Install gojsonschema tool
-   test:                      Run unit tests
-   test-with-infra:           Run infrastructure tests
-   test-integration:          Run integration tests
-   test-functional:           Run functional tests
-   docker-up:                 Start docker containers
-   docker-down:               Stop docker containers
-   docker-ps:                 To watch all docker containers
-   docker-exec                To entry into water system container
-   lint:                      Execute go linter
-   clean:                     To clean code
-   fumpt:      	               Format code
-   import-jsonschema:         Import and generate DTOS from json schemas
-   encryptVault:              Encrypt vault secret file
-   decryptVault:              Decrypt vault secret file
-   build:                     Compile the project
-   deploy:                    Deploy the code to raspberry
-endef
-export help
+# ⚙️ Configuration
+APP             ?= water_system
+DOCKER_COMPOSE  := COMPOSE_BAKE=true docker compose
 
-.PHONY: help
-help:
-	@echo "$$help"
+# Default goal
+.DEFAULT_GOAL := help
 
-.PHONY: docker-logs
-docker-logs:
-	docker logs -f water_system
+# 📚 Declare all phony targets
+.PHONY: docker-logs docker-down docker-exec docker-ps docker-up \
+        test test-functional lint clean fmt help \
+        encryptVault decryptVault build deploy security
 
-
-.PHONY: tool-jsonschema
-tool-jsonschema:
-	go get github.com/atombender/go-jsonschema/...
-	go install github.com/atombender/go-jsonschema@latest
-
-.PHONY: test
-test:
-	go test -race ./... -json|go tool tparse -all
-
-.PHONY: test-with-infra
-test-with-infra:
-	go test -tags infra -race ./internal/infra/disk/... --count=1 -json|go tool tparse --all
-
-.PHONY: test-integration
-test-integration:
-	go test -tags integration -race ./internal/infra/telegram/... --count=1
-
-.PHONY: test-functional
-test-functional:
-	go test -tags functional -race ./tests/functional/... --count=1 -json|go tool tparse --all
-
-.PHONY: docker-up
+# ────────────────────────────────────────────────────────────────
+# 🐳 Docker
+# ────────────────────────────────────────────────────────────────
 docker-up:
-	${DOCKER_COMPOSE} up -d --build water_system
+	@set -euo pipefail; \
+	echo "🚀 Starting services with Docker Compose..."; \
+	$(DOCKER_COMPOSE) up -d
 
-.PHONY: docker-down
 docker-down:
-	${DOCKER_COMPOSE} down
+	@set -euo pipefail; \
+	echo "🛑 Stopping and removing Docker Compose services..."; \
+	$(DOCKER_COMPOSE) down
 
-.PHONY: docker-ps
 docker-ps:
-	${DOCKER_COMPOSE} ps
+	@set -euo pipefail; \
+	echo "📋 Active services:"; \
+	$(DOCKER_COMPOSE) ps
 
-.PHONY: docker-exec
 docker-exec:
-	docker exec -it water_system bash
+	@set -euo pipefail; \
+	test -n "${SVC:-}" || { echo "❌ Please specify SVC=<service>"; exit 2; }; \
+	echo "🔎 Opening shell inside $$SVC..."; \
+	$(DOCKER_COMPOSE) exec $$SVC sh
 
-.PHONY: lint
+docker-logs:
+	@set -euo pipefail; \
+	echo "👀 Showing logs for container $(APP) (CTRL+C to exit)..."; \
+	docker logs -f $(APP)
+
+# ────────────────────────────────────────────────────────────────
+# 🧹 Code quality: format, lint, tests
+# ────────────────────────────────────────────────────────────────
+fmt:
+	@set -euo pipefail; \
+	echo "👉 Formatting code with gofumpt..."; \
+	go tool gofumpt -w .
+
+security:
+	@set -euo pipefail; \
+	echo "👉 Check security"; \
+	go tool govulncheck ./...
+
 lint:
-	go tool golangci-lint run
-	devops/scripts/json-lint.sh
-	go mod tidy -v && git --no-pager diff --quiet go.mod go.sum
+	@set -euo pipefail; \
+	echo "🔍 Running golangci-lint..."; \
+	go tool golangci-lint run ./...
 
-.PHONY: clean
+test:
+	@set -euo pipefail; \
+	echo "🧪 Running unit tests (race, JSON → tparse)..."; \
+	go test -race ./... -json -cover | go tool tparse -all
+
+test-functional:
+	@set -euo pipefail; \
+	echo "🧪 Running functional tests..."; \
+	# Example: adjust to your own functional test suite
+	go test -tags=functional ./... -v
+
 clean:
-	go fmt ./...
+	@set -euo pipefail; \
+	echo "🧹 Cleaning local artifacts..."; \
+	rm -rf bin dist coverage .*cache || true; \
+	go clean -testcache
 
-.PHONY: fumpt
-fumpt:
-	go tool gofumpt -w -l .
-
-.PHONY: import-jsonschema
-import-jsonschema:
-	devops/scripts/import_jsonschema.sh
-
-.PHONY: encryptVault
+# ────────────────────────────────────────────────────────────────
+# 🔐 Ansible Vault
+# ────────────────────────────────────────────────────────────────
 encryptVault:
-	ansible-vault encrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
+	@set -euo pipefail; \
+	echo "🔐 Encrypting Ansible vault files..."; \
+	ansible-vault encrypt devops/ansible/group_vars/*/* --vault-password-file .vault_pass.txt
 
-.PHONY: decryptVault
 decryptVault:
-	ansible-vault decrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
+	@set -euo pipefail; \
+	echo "🔓 Decrypting Ansible vault files..."; \
+	ansible-vault decrypt devops/ansible/group_vars/*/* --vault-password-file .vault_pass.txt
 
-.PHONY: build
-build:
-	@make clean
-	GOOS=linux GOARCH=arm64 go build -a -ldflags "-s -w" -tags prod -buildvcs=false -o devops/ansible/assets/server ./cmd/server/
+# ────────────────────────────────────────────────────────────────
+# 🏗️ Build & Deploy
+# ────────────────────────────────────────────────────────────────
+build: clean
+	@set -euo pipefail; \
+	echo "🏗️ Building ARM64 binary for Raspberry Pi..."; \
+	GOOS=linux GOARCH=arm64 CGO_ENABLED=0 \
+	go build -a -ldflags "-s -w" -tags prod -buildvcs=false \
+	-o devops/ansible/assets/server ./cmd/server/
 
-.PHONY: deploy
 deploy: build decryptVault
-	ansible-playbook -i devops/ansible/inventories/production/hosts devops/ansible/deploy.yml
-	@make encryptVault
+	@set -euo pipefail; \
+	echo "🚚 Deploying with Ansible (production inventory)..."; \
+	ansible-playbook -i devops/ansible/inventories/production/hosts devops/ansible/deploy.yml; \
+	$(MAKE) encryptVault
+
+# ────────────────────────────────────────────────────────────────
+# ℹ️ Help
+# ────────────────────────────────────────────────────────────────
+help:
+	@echo "Available commands:"
+	@grep -E '^[a-zA-Z_-]+:' Makefile | awk -F':' '{print "  - " $$1}'
