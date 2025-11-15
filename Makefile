@@ -12,7 +12,7 @@ VAULT ?= ansible-vault
 # 📚 Declare all phony targets
 .PHONY: docker-logs docker-down docker-exec docker-ps docker-up \
         test test-functional lint clean fmt help \
-        build deploy security edit-vault
+        build deploy security edit-vault check
 
 # ────────────────────────────────────────────────────────────────
 # 🐳 Docker
@@ -71,6 +71,8 @@ test-functional:
 	echo "🧪 Running functional tests..."; \
 	# Example: adjust to your own functional test suite
 	go test -tags=functional ./... -v
+
+check: fmt security lint test
 
 clean:
 	@set -euo pipefail; \

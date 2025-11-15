@@ -44,5 +44,4 @@ func New() (*Config, error) {
 	}
 	co.environment = env
 	return &co, nil
-
 }

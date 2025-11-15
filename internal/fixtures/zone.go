@@ -10,7 +10,7 @@ type ZoneBuilder struct {
 	Relays   []zone.Relay
 }
 
-func (b ZoneBuilder) Build() zone.Zone {
+func (b ZoneBuilder) Build() *zone.Zone {
 	var z zone.Zone
 	id := uuid.NewString()
 	if b.ID != nil {
@@ -30,7 +30,7 @@ func (b ZoneBuilder) Build() zone.Zone {
 	}
 
 	z.Hydrate(id, name, relays)
-	return z
+	return &z
 }
 
 func RelayBuilder(i int) zone.Relay {

@@ -16,7 +16,7 @@ func FinZones(qh cqs.QueryHandler) http.HandlerFunc {
 			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
-		zones, _ := result.([]zone.Zone)
+		zones, _ := result.([]*zone.Zone)
 		resp := make([]ZonesItemResponse, len(zones))
 		for i, zon := range zones {
 			relays := make([]int, len(zon.Relays()))

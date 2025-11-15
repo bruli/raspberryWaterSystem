@@ -38,14 +38,14 @@ func TestRemoveZoneHandle(t *testing.T) {
 		},
 		{
 			name:        "and remove method returns an error, then it returns same error",
-			zone:        &zo,
+			zone:        zo,
 			removeErr:   errTest,
 			expectedErr: errTest,
 			cmd:         cmd,
 		},
 		{
 			name: "then it returns any error",
-			zone: &zo,
+			zone: zo,
 			cmd:  cmd,
 		},
 	}

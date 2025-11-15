@@ -23,7 +23,7 @@ var _ app.ZoneRepository = &ZoneRepositoryMock{}
 //
 //		// make and configure a mocked app.ZoneRepository
 //		mockedZoneRepository := &ZoneRepositoryMock{
-//			FindAllFunc: func(ctx context.Context) ([]zone.Zone, error) {
+//			FindAllFunc: func(ctx context.Context) ([]*zone.Zone, error) {
 //				panic("mock out the FindAll method")
 //			},
 //			FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
@@ -46,7 +46,7 @@ var _ app.ZoneRepository = &ZoneRepositoryMock{}
 //	}
 type ZoneRepositoryMock struct {
 	// FindAllFunc mocks the FindAll method.
-	FindAllFunc func(ctx context.Context) ([]zone.Zone, error)
+	FindAllFunc func(ctx context.Context) ([]*zone.Zone, error)
 
 	// FindByIDFunc mocks the FindByID method.
 	FindByIDFunc func(ctx context.Context, id string) (*zone.Zone, error)
@@ -104,7 +104,7 @@ type ZoneRepositoryMock struct {
 }
 
 // FindAll calls FindAllFunc.
-func (mock *ZoneRepositoryMock) FindAll(ctx context.Context) ([]zone.Zone, error) {
+func (mock *ZoneRepositoryMock) FindAll(ctx context.Context) ([]*zone.Zone, error) {
 	if mock.FindAllFunc == nil {
 		panic("ZoneRepositoryMock.FindAllFunc: method is nil but ZoneRepository.FindAll was just called")
 	}

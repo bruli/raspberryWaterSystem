@@ -48,7 +48,7 @@ func TestZones(t *testing.T) {
 			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPost, "/zones", cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
-			savedZone = &zo
+			savedZone = zo
 		})
 	})
 	t.Run(`Given a find zone endpoint`, func(t *testing.T) {
@@ -118,7 +118,7 @@ func TestZones(t *testing.T) {
 			resp, err := buildRequestAndSend(ctx, req, authorizationHeader(), http2.MethodPut, url, cl)
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
-			savedZone = &zo
+			savedZone = zo
 		})
 	})
 	t.Run(`Given a Remove zone endpoint,

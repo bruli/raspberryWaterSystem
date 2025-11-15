@@ -38,13 +38,13 @@ func TestExecuteZoneHandle(t *testing.T) {
 		},
 		{
 			name:        "and execute returns an error, then it returns an execute zone error",
-			zone:        &zo,
+			zone:        zo,
 			expectedErr: app.ExecuteZoneError{},
 			command:     cmd,
 		},
 		{
 			name: "and execute nil, then it returns a valid event",
-			zone: &zo,
+			zone: zo,
 			command: app.ExecuteZoneCmd{
 				Seconds: 36,
 				ZoneID:  "name",

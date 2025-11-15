@@ -18,7 +18,7 @@ type FindZones struct {
 	zr ZoneRepository
 }
 
-func (f FindZones) Handle(ctx context.Context, query cqs.Query) (any, error) {
+func (f FindZones) Handle(ctx context.Context, _ cqs.Query) (any, error) {
 	return f.zr.FindAll(ctx)
 }
 

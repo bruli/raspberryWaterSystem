@@ -36,7 +36,7 @@ func (z ZoneRepository) Update(ctx context.Context, zo *zone.Zone) error {
 	}
 }
 
-func (z ZoneRepository) FindAll(ctx context.Context) ([]zone.Zone, error) {
+func (z ZoneRepository) FindAll(ctx context.Context) ([]*zone.Zone, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -124,10 +124,10 @@ func (z ZoneRepository) buildRelaysForYaml(rel []zone.Relay) []int {
 	return relays
 }
 
-func (z ZoneRepository) buildZones(data zonesMap) []zone.Zone {
-	zones := make([]zone.Zone, 0, len(data))
+func (z ZoneRepository) buildZones(data zonesMap) []*zone.Zone {
+	zones := make([]*zone.Zone, 0, len(data))
 	for i, zo := range data {
-		zones = append(zones, *buildZone(i, zo))
+		zones = append(zones, buildZone(i, zo))
 	}
 	return zones
 }
