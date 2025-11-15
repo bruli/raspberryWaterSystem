@@ -4,13 +4,15 @@ SHELL := /bin/bash
 APP             ?= water_system
 DOCKER_COMPOSE  := COMPOSE_BAKE=true docker compose
 
+VAULT ?= ansible-vault
+
 # Default goal
 .DEFAULT_GOAL := help
 
 # 📚 Declare all phony targets
 .PHONY: docker-logs docker-down docker-exec docker-ps docker-up \
         test test-functional lint clean fmt help \
-        encryptVault decryptVault build deploy security
+        build deploy security edit-vault
 
 # ────────────────────────────────────────────────────────────────
 # 🐳 Docker
@@ -76,19 +78,10 @@ clean:
 	rm -rf bin dist coverage .*cache || true; \
 	go clean -testcache
 
-# ────────────────────────────────────────────────────────────────
-# 🔐 Ansible Vault
-# ────────────────────────────────────────────────────────────────
-encryptVault:
+edit-vault:
 	@set -euo pipefail; \
-	echo "🔐 Encrypting Ansible vault files..."; \
-	ansible-vault encrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
-
-decryptVault:
-	@set -euo pipefail; \
-	echo "🔓 Decrypting Ansible vault files..."; \
-	ansible-vault decrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
-
+    echo "🏗️  Editing vault file"; \
+   	$(VAULT) edit devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
 # ────────────────────────────────────────────────────────────────
 # 🏗️ Build & Deploy
 # ────────────────────────────────────────────────────────────────
@@ -99,11 +92,10 @@ build: clean
 	go build -a -ldflags "-s -w" -tags prod -buildvcs=false \
 	-o devops/ansible/assets/server ./cmd/server/
 
-deploy: build decryptVault
+deploy: build
 	@set -euo pipefail; \
 	echo "🚚 Deploying with Ansible (production inventory)..."; \
-	ansible-playbook -i devops/ansible/inventories/production/hosts devops/ansible/deploy.yml; \
-	$(MAKE) encryptVault
+	ansible-playbook -i devops/ansible/inventories/production/hosts devops/ansible/deploy.yml --ask-vault-pass
 
 # ────────────────────────────────────────────────────────────────
 # ℹ️ Help
