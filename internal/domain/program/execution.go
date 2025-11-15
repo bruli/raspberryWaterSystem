@@ -5,15 +5,15 @@ type Execution struct {
 	zones   []string
 }
 
-func (e Execution) Seconds() Seconds {
+func (e *Execution) Seconds() Seconds {
 	return e.seconds
 }
 
-func (e Execution) Zones() []string {
+func (e *Execution) Zones() []string {
 	return e.zones
 }
 
-func (e Execution) validate() error {
+func (e *Execution) validate() error {
 	if len(e.zones) == 0 {
 		return ErrEmptyExecutionZones
 	}

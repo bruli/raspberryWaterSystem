@@ -16,7 +16,6 @@ import (
 
 func TestExecuteZoneWithStatusHandle(t *testing.T) {
 	errTest := errors.New("")
-	zo := fixtures.ZoneBuilder{}.Build()
 	cmd := app.ExecuteZoneWithStatusCmd{
 		Seconds: 367,
 		ZoneID:  "name",
@@ -48,20 +47,20 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		{
 			name:        "and status repository returns an error, then it returns same error",
 			command:     cmd,
-			zone:        zo,
+			zone:        fixtures.ZoneBuilder{}.Build(),
 			stErr:       errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and execute returns an error, then it returns an execute zone with status error",
-			zone:        zo,
+			zone:        fixtures.ZoneBuilder{}.Build(),
 			st:          st,
 			expectedErr: app.ExecuteZoneWithStatusError{},
 			command:     cmd,
 		},
 		{
 			name: "and execute nil, then it returns an executed event",
-			zone: zo,
+			zone: fixtures.ZoneBuilder{}.Build(),
 			st:   st,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
@@ -71,7 +70,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		},
 		{
 			name: "and its raining, then it returns an ignored event",
-			zone: zo,
+			zone: fixtures.ZoneBuilder{}.Build(),
 			st:   statusRaining,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,
@@ -81,7 +80,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		},
 		{
 			name: "and system is deactivated, then it returns an ignored event",
-			zone: zo,
+			zone: fixtures.ZoneBuilder{}.Build(),
 			st:   statusDeactivated,
 			command: app.ExecuteZoneWithStatusCmd{
 				Seconds: 36,

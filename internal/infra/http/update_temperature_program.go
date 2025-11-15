@@ -61,15 +61,11 @@ func buildUpdateTempPrograms(req UpdateTemperatureProgramRequestJson) ([]program
 		}
 		exec := make([]program.Execution, len(p.Executions))
 		for n, ex := range p.Executions {
-			zo := make([]string, len(ex.Zones))
-			for j, z := range ex.Zones {
-				zo[j] = z
-			}
 			sec, err := program.ParseSeconds(ex.Seconds)
 			if err != nil {
 				return nil, err
 			}
-			exe, err := program.NewExecution(sec, zo)
+			exe, err := program.NewExecution(sec, ex.Zones)
 			if err != nil {
 				return nil, err
 			}
