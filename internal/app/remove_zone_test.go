@@ -5,9 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-
-	"github.com/bruli/raspberryWaterSystem/fixtures"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 

@@ -9,8 +9,6 @@ import (
 	"testing"
 
 	"github.com/bruli/raspberryWaterSystem/internal/config"
-
-	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 	"github.com/stretchr/testify/require"
 )
@@ -29,6 +27,6 @@ func TestExecutionLogPublisherPublish(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 	publisher := telegram.NewMessagePublisher(token, chatID)
-	err = publisher.Publish(context.Background(), fixtures.ExecutionLogBuilder{}.Build())
+	err = publisher.Publish(context.Background(), "message")
 	require.NoError(t, err)
 }

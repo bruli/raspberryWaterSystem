@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 
-	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/stretchr/testify/require"
 )

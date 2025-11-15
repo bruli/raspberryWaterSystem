@@ -45,6 +45,7 @@ func (p *PinsExecutor) activatePin(piNumber string) (gpio.PinIO, error) {
 		return nil, InvalidPinToExecuteError{pinNumber: piNumber}
 	}
 	if err := pi.Out(gpio.Low); err != nil {
+		return nil, err
 	}
 	return pi, nil
 }

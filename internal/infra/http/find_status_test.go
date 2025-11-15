@@ -7,8 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bruli/raspberryWaterSystem/fixtures"
-
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"

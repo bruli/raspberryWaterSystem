@@ -6,9 +6,9 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
-	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
 	"github.com/stretchr/testify/require"
@@ -51,9 +51,9 @@ func TestTemperatureRepository(t *testing.T) {
 				}}.Build(),
 			}
 			temperatures := []program.Temperature{
-				fixtures.TemperatureBuilder{Programs: programs1, Temperature: vo.Float32Ptr(20.3)}.Build(),
-				fixtures.TemperatureBuilder{Programs: programs2, Temperature: vo.Float32Ptr(19.3)}.Build(),
-				fixtures.TemperatureBuilder{Programs: programs3, Temperature: vo.Float32Ptr(22.3)}.Build(),
+				fixtures.TemperatureBuilder{Programs: programs1, Temperature: vo.ToPointer(float32(20.3))}.Build(),
+				fixtures.TemperatureBuilder{Programs: programs2, Temperature: vo.ToPointer(float32(19.3))}.Build(),
+				fixtures.TemperatureBuilder{Programs: programs3, Temperature: vo.ToPointer(float32(22.3))}.Build(),
 			}
 			for _, temp := range temperatures {
 				err = repo.Save(ctx, &temp)

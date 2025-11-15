@@ -4,11 +4,10 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
-
-	"github.com/bruli/raspberryWaterSystem/fixtures"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"

@@ -82,12 +82,12 @@ clean:
 encryptVault:
 	@set -euo pipefail; \
 	echo "🔐 Encrypting Ansible vault files..."; \
-	ansible-vault encrypt devops/ansible/group_vars/*/* --vault-password-file .vault_pass.txt
+	ansible-vault encrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
 
 decryptVault:
 	@set -euo pipefail; \
 	echo "🔓 Decrypting Ansible vault files..."; \
-	ansible-vault decrypt devops/ansible/group_vars/*/* --vault-password-file .vault_pass.txt
+	ansible-vault decrypt --vault-id raspberry_water_system@devops/ansible/password devops/ansible/inventories/production/group_vars/raspberry_water_system/vault.yml
 
 # ────────────────────────────────────────────────────────────────
 # 🏗️ Build & Deploy

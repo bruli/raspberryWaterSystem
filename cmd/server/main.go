@@ -8,11 +8,8 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/internal/config"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/config"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
@@ -21,12 +18,14 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/rs/zerolog"
 )
 
 func main() {
 	log := buildLogger()
-	conf, err := config.NewConfig()
+	conf, err := config.New()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed building config")
 	}
@@ -43,15 +42,15 @@ func main() {
 	tr := temperatureRepository()
 	rr := rainRepository()
 	sr := memory.NewStatusRepository()
-	zr := disk.NewZoneRepository(conf.ZonesFile())
-	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile())
-	oddRepo := disk.NewProgramRepository(conf.OddProgramsFile())
-	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile())
-	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile())
-	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile())
-	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile())
+	zr := disk.NewZoneRepository(conf.ZonesFile)
+	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile)
+	oddRepo := disk.NewProgramRepository(conf.OddProgramsFile)
+	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile)
+	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile)
+	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile)
+	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile)
 	pe := pinsExecutor()
-	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken(), conf.TelegramChatID())
+	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
@@ -108,11 +107,11 @@ func main() {
 }
 
 func runTelegramBot(conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log zerolog.Logger, ctx context.Context) {
-	if !conf.TelegramBotEnabled() {
+	if !conf.TelegramBotEnabled {
 		log.Info().Msg("[TELEGRAM SERVICE] disabled")
 		return
 	}
-	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken(), qhBus, chBus)
+	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken, qhBus, chBus)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("[TELEGRAM SERVICE] failed building telegram server: %s", err)
 	}
@@ -120,9 +119,9 @@ func runTelegramBot(conf *config.Config, qhBus app.QueryBus, chBus app.CommandBu
 }
 
 func runHTTPServer(chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, ctx context.Context, log zerolog.Logger) {
-	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken())
+	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken)
 	httpHandlers := infrahttp.NewHandler(definitions)
-	if err := infrahttp.RunServer(ctx, conf.ServerURL(), httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
+	if err := infrahttp.RunServer(ctx, conf.ServerURL, httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
 		log.Fatal().Err(err).Msg("system error")
 	}
 }
@@ -309,6 +308,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/logs",
 			Method:      http.MethodGet,
 			HandlerFunc: authMdw(infrahttp.FindExecutionLogs(qhBus)),
+		},
+		{
+			Endpoint:    "/metrics",
+			Method:      http.MethodGet,
+			HandlerFunc: infrahttp.Metrics(),
 		},
 	}
 }

@@ -4,9 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/fixtures"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/stretchr/testify/require"
 )
 
