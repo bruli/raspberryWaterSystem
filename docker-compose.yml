@@ -21,13 +21,9 @@ services:
       - WS_TELEGRAM_BOT_ENABLED=${WS_TELEGRAM_BOT_ENABLED:-false}
     ports:
       - "8083:8080"
-  builder:
-    build:
-      context: .
-    container_name: water_system_builder
-    volumes:
-      - .:/app
+    networks:
+        - water_system
 
 networks:
-  default:
-    name: water-system
+    water_system:
+        external: true
