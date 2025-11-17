@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
@@ -18,7 +19,7 @@ import (
 
 func TestFindExecutionLogsHandle(t *testing.T) {
 	errTest := errors.New("")
-	executedTime1 := vo.TimeNow()
+	executedTime1 := time.Now()
 	executedTime2 := executedTime1.AddDate(0, 0, -1)
 	executedTime3 := executedTime1.AddDate(0, 0, -2)
 	firstLog := fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 1"), ExecutedAt: &executedTime1}.Build()

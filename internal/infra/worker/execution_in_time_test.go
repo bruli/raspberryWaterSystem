@@ -19,16 +19,16 @@ import (
 )
 
 func TestExecutionInTime(t *testing.T) {
-	nowTime, _ := time.Parse("2006-01-02T15:04", "2022-08-05T21:00")
-	now := vo.Time(nowTime)
-	nowTimeEven, _ := time.Parse("2006-01-02T15:04", "2022-08-06T21:00")
-	nowEven := vo.Time(nowTimeEven)
-	hour, err := program.ParseHour(now.HourStr())
+	now, err := time.Parse("2006-01-02T15:04", "2022-08-05T21:00")
+	require.NoError(t, err)
+	nowEven, err := time.Parse("2006-01-02T15:04", "2022-08-06T21:00")
+	require.NoError(t, err)
+	hour, err := program.ParseHour(now.Format("04:05"))
 	require.NoError(t, err)
 	errTest := errors.New("")
 	status := fixtures.StatusBuilder{Active: true}.Build()
 	prog := fixtures.ProgramBuilder{Hour: &hour}.Build()
-	day := program.WeekDay(nowTime.Weekday())
+	day := program.WeekDay(now.Weekday())
 	weekly := fixtures.WeeklyBuilder{WeekDay: &day, Programs: []program.Program{
 		prog,
 	}}.Build()
@@ -48,7 +48,7 @@ func TestExecutionInTime(t *testing.T) {
 		findProgramsErr, dailyErr,
 		oddEvenErr, weeklyErr, tempErr error
 		statusResult, programsResult any
-		now                          vo.Time
+		now                          time.Time
 	}{
 		{
 			name:          "and find status returns an error, then it returns a read current status error",

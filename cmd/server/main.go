@@ -20,7 +20,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/rs/zerolog"
 )
 
@@ -145,7 +144,7 @@ func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.Comm
 			logger.Info().Msg("[WORKER] Execution in time: context done")
 			return
 		case <-ticker.C:
-			if err := worker.ExecutionInTime(ctx, qh, ch, vo.TimeNow()); err != nil {
+			if err := worker.ExecutionInTime(ctx, qh, ch, time.Now()); err != nil {
 				logger.Err(err).Msg("[WORKER] failed execution in time")
 			}
 		}
@@ -199,7 +198,7 @@ func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler)
 	}
 	weath, _ := result.(weather.Weather)
 	_, err = ch.Handle(ctx, app.CreateStatusCmd{
-		StartedAt: vo.TimeNow(),
+		StartedAt: time.Now(),
 		Weather:   weath,
 	})
 	return err

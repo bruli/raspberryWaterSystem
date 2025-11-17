@@ -2,10 +2,10 @@ package status_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +13,7 @@ func TestNew(t *testing.T) {
 	t.Run(`Given a Status struct,
 	when New function is called, 
 	then it returns a valid active status`, func(t *testing.T) {
-		start := vo.TimeNow()
+		start := time.Now()
 		weather := fixtures.WeatherBuilder{}.Build()
 		light := fixtures.LightBuilder{}.Build()
 		st := status.New(start, weather, light)

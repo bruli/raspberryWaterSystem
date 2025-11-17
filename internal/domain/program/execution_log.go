@@ -2,8 +2,7 @@ package program
 
 import (
 	"errors"
-
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"time"
 )
 
 var (
@@ -14,7 +13,7 @@ var (
 type ExecutionLog struct {
 	seconds    Seconds
 	zoneName   string
-	executedAt vo.Time
+	executedAt time.Time
 }
 
 func (e ExecutionLog) Seconds() Seconds {
@@ -25,7 +24,7 @@ func (e ExecutionLog) ZoneName() string {
 	return e.zoneName
 }
 
-func (e ExecutionLog) ExecutedAt() vo.Time {
+func (e ExecutionLog) ExecutedAt() time.Time {
 	return e.executedAt
 }
 
@@ -42,7 +41,7 @@ func (e ExecutionLog) validate() error {
 	return nil
 }
 
-func NewExecutionLog(seconds Seconds, zoneName string, executedAt vo.Time) (ExecutionLog, error) {
+func NewExecutionLog(seconds Seconds, zoneName string, executedAt time.Time) (ExecutionLog, error) {
 	exec := ExecutionLog{seconds: seconds, zoneName: zoneName, executedAt: executedAt}
 	if err := exec.validate(); err != nil {
 		return ExecutionLog{}, err
@@ -50,7 +49,7 @@ func NewExecutionLog(seconds Seconds, zoneName string, executedAt vo.Time) (Exec
 	return exec, nil
 }
 
-func (e *ExecutionLog) Hydrate(seconds Seconds, zoneName string, executedAt vo.Time) {
+func (e *ExecutionLog) Hydrate(seconds Seconds, zoneName string, executedAt time.Time) {
 	e.seconds = seconds
 	e.zoneName = zoneName
 	e.executedAt = executedAt

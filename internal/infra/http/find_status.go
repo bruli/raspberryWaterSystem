@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
@@ -27,14 +28,14 @@ func FindStatus(qh cqs.QueryHandler) http.HandlerFunc {
 		currenSt, _ := result.(status.Status)
 		var updated *string
 		if currenSt.UpdatedAt() != nil {
-			updated = vo.ToPointer(currenSt.UpdatedAt().EpochString())
+			updated = vo.ToPointer(strconv.Itoa(int(currenSt.UpdatedAt().Unix())))
 		}
 		resp := StatusResponseJson{
 			Active:          currenSt.IsActive(),
 			Humidity:        float64(currenSt.Weather().Humidity()),
 			IsDay:           currenSt.Light().IsDay(time.Now()),
 			IsRaining:       currenSt.Weather().IsRaining(),
-			SystemStartedAt: currenSt.SystemStartedAt().EpochString(),
+			SystemStartedAt: strconv.Itoa(int(currenSt.SystemStartedAt().Unix())),
 			Temperature:     float64(currenSt.Weather().Temperature()),
 			UpdatedAt:       updated,
 		}

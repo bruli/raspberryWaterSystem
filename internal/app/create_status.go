@@ -17,7 +17,7 @@ var ErrStatusAlreadyExist = errors.New("status already exist")
 const CreateStatusCmdName = "createStatus"
 
 type CreateStatusCmd struct {
-	StartedAt vo.Time
+	StartedAt time.Time
 	Weather   weather.Weather
 }
 

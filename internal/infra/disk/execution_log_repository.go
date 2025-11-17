@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
 type log struct {
@@ -53,8 +52,7 @@ func buildExecutionLogs(logs []log) []program.ExecutionLog {
 	for i, l := range logs {
 		var el program.ExecutionLog
 		sec, _ := program.ParseSeconds(l.Seconds)
-		execAt, _ := vo.ParseFromTime(l.ExecutedAt)
-		el.Hydrate(sec, l.ZoneName, execAt)
+		el.Hydrate(sec, l.ZoneName, l.ExecutedAt)
 		execLogs[i] = el
 	}
 	return execLogs

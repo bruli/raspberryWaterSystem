@@ -3,13 +3,11 @@ package program
 import (
 	"errors"
 	"time"
-
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 )
 
 var ErrInvalidExecutionHour = errors.New("invalid execution hour")
 
-type Hour vo.Time
+type Hour time.Time
 
 func (h Hour) String() string {
 	return time.Time(h).Format("15:04")

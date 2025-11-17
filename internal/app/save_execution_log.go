@@ -3,11 +3,10 @@ package app
 import (
 	"context"
 	"fmt"
-
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
 const SaveExecutionLogCmdName = "saveExecutionLog"
@@ -17,7 +16,7 @@ const maxExecutionLogs = 20
 type SaveExecutionLogCmd struct {
 	ZoneName   string
 	Seconds    program.Seconds
-	ExecutedAt vo.Time
+	ExecutedAt time.Time
 }
 
 func (s SaveExecutionLogCmd) Name() string {

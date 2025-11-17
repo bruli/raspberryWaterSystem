@@ -43,7 +43,7 @@ func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
 		resp := make([]ExecutionLogItemResponse, len(logs))
 		for i, log := range logs {
 			resp[i] = ExecutionLogItemResponse{
-				ExecutedAt: log.ExecutedAt().EpochString(),
+				ExecutedAt: strconv.Itoa(int(log.ExecutedAt().Unix())),
 				Seconds:    log.Seconds().Int(),
 				ZoneName:   log.ZoneName(),
 			}

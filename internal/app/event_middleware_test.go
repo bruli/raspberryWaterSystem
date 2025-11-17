@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/google/uuid"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
@@ -25,7 +23,7 @@ func TestNewEventMiddleware(t *testing.T) {
 		event1 := Event{
 			ID:        uuid.New(),
 			Name:      "eventito 1",
-			At:        vo.TimeNow(),
+			At:        time.Now(),
 			AggRootID: "dkdkdkd",
 		}
 		eventCh := make(chan cqs.Event)
@@ -56,7 +54,7 @@ func TestNewEventMiddleware(t *testing.T) {
 type Event struct {
 	ID        uuid.UUID
 	Name      string
-	At        vo.Time
+	At        time.Time
 	AggRootID string
 }
 
@@ -68,7 +66,7 @@ func (e Event) EventName() string {
 	return e.Name
 }
 
-func (e Event) EventAt() vo.Time {
+func (e Event) EventAt() time.Time {
 	return e.At
 }
 

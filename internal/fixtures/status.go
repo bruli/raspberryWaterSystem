@@ -3,22 +3,20 @@ package fixtures
 import (
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 )
 
 type StatusBuilder struct {
-	SystemStartedAt *vo.Time
+	SystemStartedAt *time.Time
 	Weather         *weather.Weather
-	UpdatedAt       *vo.Time
+	UpdatedAt       *time.Time
 	Active          bool
 }
 
 func (b StatusBuilder) Build() status.Status {
 	var st status.Status
-	start := setData(vo.TimeNow(), b.SystemStartedAt)
+	start := setData(time.Now(), b.SystemStartedAt)
 	weath := setData(WeatherBuilder{}.Build(), b.Weather)
 	updateAt := setData(start.Add(3*time.Hour), b.UpdatedAt)
 

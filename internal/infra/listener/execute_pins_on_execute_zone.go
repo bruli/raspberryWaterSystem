@@ -3,11 +3,10 @@ package listener
 import (
 	"context"
 	"fmt"
-
-	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
@@ -17,7 +16,7 @@ type ExecutePinsOnExecuteZone struct {
 }
 
 func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
-	now := vo.TimeNow()
+	now := time.Now()
 	event, _ := ev.(zone.Executed)
 	if _, err := e.ch.Handle(ctx, app.ExecutePinsCmd{
 		Seconds: event.Seconds,

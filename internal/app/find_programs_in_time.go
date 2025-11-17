@@ -13,7 +13,7 @@ import (
 const FindProgramsInTimeQueryName = "findProgramsInTime"
 
 type FindProgramsInTimeQuery struct {
-	On          vo.Time
+	On          time.Time
 	Temperature float32
 }
 
@@ -32,7 +32,7 @@ func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, e
 	if !ok {
 		return nil, cqs.NewInvalidQueryError(FindProgramsInTimeQueryName, query.Name())
 	}
-	hour, _ := program.ParseHour(q.On.HourStr())
+	hour, _ := program.ParseHour(q.On.Format("04:05"))
 	daily, err := f.findDaily(ctx, &hour)
 	if err != nil {
 		return nil, err

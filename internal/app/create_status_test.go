@@ -18,7 +18,7 @@ import (
 func TestCreateStatusHandle(t *testing.T) {
 	errTest := errors.New("")
 	cmd := app.CreateStatusCmd{
-		StartedAt: vo.TimeNow(),
+		StartedAt: time.Now(),
 		Weather:   weather.New(20, 40, false),
 	}
 	light := fixtures.LightBuilder{}.Build()
