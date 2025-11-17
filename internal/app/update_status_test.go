@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
@@ -15,13 +16,15 @@ import (
 func TestUpdateStatusHandle(t *testing.T) {
 	errTest := errors.New("")
 	currentSt := fixtures.StatusBuilder{}.Build()
+	light := fixtures.LightBuilder{}.Build()
 	cmd := app.UpdateStatusCmd{Weather: fixtures.WeatherBuilder{}.Build()}
 	tests := []struct {
 		name string
 		expectedErr, findErr,
-		updateErr error
-		st  status.Status
-		cmd cqs.Command
+		updateErr, lightErr error
+		light *status.Light
+		st    status.Status
+		cmd   cqs.Command
 	}{
 		{
 			name:        "with an invalid command, then it returns an invalid command error",
@@ -35,8 +38,15 @@ func TestUpdateStatusHandle(t *testing.T) {
 			cmd:         cmd,
 		},
 		{
+			name:        "and find light returns an error, then it returns same error",
+			lightErr:    errTest,
+			expectedErr: errTest,
+			cmd:         cmd,
+		},
+		{
 			name:        "and update status returns an error, then it returns same error",
 			st:          currentSt,
+			light:       light,
 			updateErr:   errTest,
 			expectedErr: errTest,
 			cmd:         cmd,
@@ -59,7 +69,12 @@ func TestUpdateStatusHandle(t *testing.T) {
 					return tt.updateErr
 				},
 			}
-			handler := app.NewUpdateStatus(sr)
+			lr := &LightRepositoryMock{
+				FindFunc: func(ctx context.Context, date time.Time) (*status.Light, error) {
+					return tt.light, tt.lightErr
+				},
+			}
+			handler := app.NewUpdateStatus(sr, lr)
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

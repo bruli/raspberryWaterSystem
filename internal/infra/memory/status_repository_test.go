@@ -42,7 +42,8 @@ func TestStatusRepository(t *testing.T) {
 		t.Run(`when update method is called,
 		then it update current status`, func(t *testing.T) {
 			updated := *current
-			updated.Update(fixtures.WeatherBuilder{Raining: true}.Build())
+			light := fixtures.LightBuilder{}.Build()
+			updated.Update(fixtures.WeatherBuilder{Raining: true}.Build(), light)
 			updated.Deactivate()
 			err := repo.Update(ctx, updated)
 			require.NoError(t, err)

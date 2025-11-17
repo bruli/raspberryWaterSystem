@@ -51,7 +51,7 @@ func main() {
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile)
 	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile)
 	lightRepo := api.NewSunriseSunsetRepository(5 * time.Second)
-	lightRepo.CleanYesterday(ctx)
+	go lightRepo.CleanYesterday(ctx)
 	pe := pinsExecutor()
 	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
 
@@ -65,7 +65,7 @@ func main() {
 
 	chBus := app.NewCommandBus()
 	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr, lightRepo)))
-	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
+	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr, lightRepo)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe)))

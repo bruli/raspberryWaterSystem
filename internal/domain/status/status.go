@@ -33,10 +33,11 @@ func (s *Status) UpdatedAt() *vo.Time {
 	return s.updatedAt
 }
 
-func (s *Status) Update(w weather.Weather) {
+func (s *Status) Update(w weather.Weather, light *Light) {
 	s.weather = w
 	now := vo.TimeNow()
 	s.updatedAt = &now
+	s.light = light
 }
 
 func (s *Status) Hydrate(start vo.Time, we weather.Weather, updated *vo.Time, active bool, light *Light) {

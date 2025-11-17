@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
@@ -19,10 +20,11 @@ func (u UpdateStatusCmd) Name() string {
 
 type UpdateStatus struct {
 	sr StatusRepository
+	lr LightRepository
 }
 
-func NewUpdateStatus(sr StatusRepository) UpdateStatus {
-	return UpdateStatus{sr: sr}
+func NewUpdateStatus(sr StatusRepository, lr LightRepository) UpdateStatus {
+	return UpdateStatus{sr: sr, lr: lr}
 }
 
 func (u UpdateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
@@ -34,6 +36,10 @@ func (u UpdateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event,
 	if err != nil {
 		return nil, err
 	}
-	current.Update(co.Weather)
+	li, err := u.lr.Find(ctx, time.Now())
+	if err != nil {
+		return nil, err
+	}
+	current.Update(co.Weather, li)
 	return nil, u.sr.Update(ctx, current)
 }
