@@ -15,7 +15,8 @@ func TestNew(t *testing.T) {
 	then it returns a valid active status`, func(t *testing.T) {
 		start := vo.TimeNow()
 		weather := fixtures.WeatherBuilder{}.Build()
-		st := status.New(start, weather)
+		light := fixtures.LightBuilder{}.Build()
+		st := status.New(start, weather, light)
 		require.Equal(t, start, st.SystemStartedAt())
 		require.Equal(t, weather, st.Weather())
 		require.True(t, st.IsActive())

@@ -12,6 +12,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/config"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
 	infrahttp "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
@@ -49,6 +50,8 @@ func main() {
 	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile)
 	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile)
 	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile)
+	lightRepo := api.NewSunriseSunsetRepository(5 * time.Second)
+	lightRepo.CleanYesterday(ctx)
 	pe := pinsExecutor()
 	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
 
@@ -61,7 +64,7 @@ func main() {
 	qhBus.Subscribe(app.FindZonesQueryName, logQHMdw(app.NewFindZones(zr)))
 
 	chBus := app.NewCommandBus()
-	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr)))
+	chBus.Subscribe(app.CreateStatusCmdName, logCHMdw(app.NewCreateStatus(sr, lightRepo)))
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr)))
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr)))

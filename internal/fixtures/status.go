@@ -18,19 +18,22 @@ type StatusBuilder struct {
 
 func (b StatusBuilder) Build() status.Status {
 	var st status.Status
-	start := vo.TimeNow()
-	if b.SystemStartedAt != nil {
-		start = *b.SystemStartedAt
-	}
-	weath := WeatherBuilder{}.Build()
-	if b.Weather != nil {
-		weath = *b.Weather
-	}
-	update := start.Add(3 * time.Hour)
-	updateAt := &update
-	if b.UpdatedAt != nil {
-		updateAt = b.UpdatedAt
-	}
-	st.Hydrate(start, weath, updateAt, b.Active)
+	start := setData(vo.TimeNow(), b.SystemStartedAt)
+	weath := setData(WeatherBuilder{}.Build(), b.Weather)
+	updateAt := setData(start.Add(3*time.Hour), b.UpdatedAt)
+
+	st.Hydrate(start, weath, &updateAt, b.Active, LightBuilder{}.Build())
 	return st
+}
+
+type LightBuilder struct {
+	Sunrise *time.Time
+	Sunset  *time.Time
+}
+
+func (b LightBuilder) Build() *status.Light {
+	sunrise := time.Date(2020, time.April, 14, 7, 45, 0, 0, time.UTC)
+	sunset := time.Date(2020, time.April, 14, 17, 30, 0, 0, time.UTC)
+	li, _ := status.NewLight(sunrise, sunset)
+	return li
 }

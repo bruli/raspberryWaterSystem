@@ -11,7 +11,8 @@
       "temperature": 20.5,
       "humidity": 50.0,
       "is_raining": false,
-      "active": true
+      "active": true,
+      "is_day": true
     }
   ],
   "properties": {
@@ -32,6 +33,9 @@
     },
     "active": {
       "type": "boolean"
+    },
+    "is_day": {
+      "type": "boolean"
     }
   },
   "required": [
@@ -39,6 +43,7 @@
     "temperature",
     "humidity",
     "is_raining",
-    "active"
+    "active",
+    "is_day"
   ]
 }

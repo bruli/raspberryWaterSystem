@@ -13,6 +13,9 @@ type StatusResponseJson struct {
 	// Humidity corresponds to the JSON schema field "humidity".
 	Humidity float64 `json:"humidity" yaml:"humidity" mapstructure:"humidity"`
 
+	// IsDay corresponds to the JSON schema field "is_day".
+	IsDay bool `json:"is_day" yaml:"is_day" mapstructure:"is_day"`
+
 	// IsRaining corresponds to the JSON schema field "is_raining".
 	IsRaining bool `json:"is_raining" yaml:"is_raining" mapstructure:"is_raining"`
 
@@ -37,6 +40,9 @@ func (j *StatusResponseJson) UnmarshalJSON(b []byte) error {
 	}
 	if v, ok := raw["humidity"]; !ok || v == nil {
 		return fmt.Errorf("field humidity in StatusResponseJson: required")
+	}
+	if v, ok := raw["is_day"]; !ok || v == nil {
+		return fmt.Errorf("field is_day in StatusResponseJson: required")
 	}
 	if v, ok := raw["is_raining"]; !ok || v == nil {
 		return fmt.Errorf("field is_raining in StatusResponseJson: required")

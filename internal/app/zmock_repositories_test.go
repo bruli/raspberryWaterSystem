@@ -11,6 +11,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"sync"
+	"time"
 )
 
 // Ensure, that ZoneRepositoryMock does implement app.ZoneRepository.
@@ -1450,5 +1451,77 @@ func (mock *ExecutionLogRepositoryMock) SaveCalls() []struct {
 	mock.lockSave.RLock()
 	calls = mock.calls.Save
 	mock.lockSave.RUnlock()
+	return calls
+}
+
+// Ensure, that LightRepositoryMock does implement app.LightRepository.
+// If this is not the case, regenerate this file with moq.
+var _ app.LightRepository = &LightRepositoryMock{}
+
+// LightRepositoryMock is a mock implementation of app.LightRepository.
+//
+//	func TestSomethingThatUsesLightRepository(t *testing.T) {
+//
+//		// make and configure a mocked app.LightRepository
+//		mockedLightRepository := &LightRepositoryMock{
+//			FindFunc: func(ctx context.Context, date time.Time) (*status.Light, error) {
+//				panic("mock out the Find method")
+//			},
+//		}
+//
+//		// use mockedLightRepository in code that requires app.LightRepository
+//		// and then make assertions.
+//
+//	}
+type LightRepositoryMock struct {
+	// FindFunc mocks the Find method.
+	FindFunc func(ctx context.Context, date time.Time) (*status.Light, error)
+
+	// calls tracks calls to the methods.
+	calls struct {
+		// Find holds details about calls to the Find method.
+		Find []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Date is the date argument value.
+			Date time.Time
+		}
+	}
+	lockFind sync.RWMutex
+}
+
+// Find calls FindFunc.
+func (mock *LightRepositoryMock) Find(ctx context.Context, date time.Time) (*status.Light, error) {
+	if mock.FindFunc == nil {
+		panic("LightRepositoryMock.FindFunc: method is nil but LightRepository.Find was just called")
+	}
+	callInfo := struct {
+		Ctx  context.Context
+		Date time.Time
+	}{
+		Ctx:  ctx,
+		Date: date,
+	}
+	mock.lockFind.Lock()
+	mock.calls.Find = append(mock.calls.Find, callInfo)
+	mock.lockFind.Unlock()
+	return mock.FindFunc(ctx, date)
+}
+
+// FindCalls gets all the calls that were made to Find.
+// Check the length with:
+//
+//	len(mockedLightRepository.FindCalls())
+func (mock *LightRepositoryMock) FindCalls() []struct {
+	Ctx  context.Context
+	Date time.Time
+} {
+	var calls []struct {
+		Ctx  context.Context
+		Date time.Time
+	}
+	mock.lockFind.RLock()
+	calls = mock.calls.Find
+	mock.lockFind.RUnlock()
 	return calls
 }

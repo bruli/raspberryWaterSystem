@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
@@ -26,10 +27,11 @@ func (c CreateStatusCmd) Name() string {
 
 type CreateStatus struct {
 	sr StatusRepository
+	lr LightRepository
 }
 
-func NewCreateStatus(sr StatusRepository) CreateStatus {
-	return CreateStatus{sr: sr}
+func NewCreateStatus(sr StatusRepository, lr LightRepository) CreateStatus {
+	return CreateStatus{sr: sr, lr: lr}
 }
 
 func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
@@ -43,7 +45,11 @@ func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event,
 	}
 	switch {
 	case errors.As(err, &vo.NotFoundError{}):
-		st := status.New(co.StartedAt, co.Weather)
+		li, err := c.lr.Find(ctx, time.Now().UTC())
+		if err != nil {
+			return nil, err
+		}
+		st := status.New(co.StartedAt, co.Weather, li)
 		return nil, c.sr.Save(ctx, *st)
 	default:
 		return nil, err

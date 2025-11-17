@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 )
 
-//go:generate go tool moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository StatusRepository ProgramRepository WeeklyProgramRepository TemperatureProgramRepository ExecutionLogRepository
+//go:generate go tool moq -out zmock_repositories_test.go -pkg app_test . ZoneRepository TemperatureRepository RainRepository StatusRepository ProgramRepository WeeklyProgramRepository TemperatureProgramRepository ExecutionLogRepository LightRepository
 
 type ZoneRepository interface {
 	FindAll(ctx context.Context) ([]*zone.Zone, error)
@@ -62,4 +63,8 @@ type TemperatureProgramRepository interface {
 type ExecutionLogRepository interface {
 	Save(ctx context.Context, logs []program.ExecutionLog) error
 	FindAll(ctx context.Context) ([]program.ExecutionLog, error)
+}
+
+type LightRepository interface {
+	Find(ctx context.Context, date time.Time) (*status.Light, error)
 }
