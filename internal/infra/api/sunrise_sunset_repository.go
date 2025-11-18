@@ -36,7 +36,10 @@ func (s *SunriseSunsetRepository) Find(ctx context.Context, date time.Time) (*st
 	day := s.formatDay(date)
 	defer func() {
 		tomorrow := s.formatDay(date.AddDate(0, 0, 1))
-		_, _ = s.getAndCache(ctx, tomorrow)
+		_, ok := s.cache[tomorrow]
+		if !ok {
+			_, _ = s.getAndCache(ctx, tomorrow)
+		}
 	}()
 	s.RLock()
 	light, ok := s.cache[day]
