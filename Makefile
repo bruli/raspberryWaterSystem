@@ -12,7 +12,7 @@ VAULT ?= ansible-vault
 # 📚 Declare all phony targets
 .PHONY: docker-logs docker-down docker-exec docker-ps docker-up \
         test test-functional lint clean fmt help \
-        build deploy security edit-vault check
+        build deploy security edit-vault check generate-schema
 
 # ────────────────────────────────────────────────────────────────
 # 🐳 Docker
@@ -73,6 +73,11 @@ test-functional:
 	go test -tags=functional ./... -v
 
 check: fmt security lint test
+
+generate-schema:
+	@set -euo pipefail; \
+    echo "🧪 Generating code from json schemas..."; \
+    devops/scripts/import_jsonschema.sh
 
 clean:
 	@set -euo pipefail; \
