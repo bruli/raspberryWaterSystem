@@ -23,7 +23,7 @@ func TestExecutionInTime(t *testing.T) {
 	require.NoError(t, err)
 	nowEven, err := time.Parse("2006-01-02T15:04", "2022-08-06T21:00")
 	require.NoError(t, err)
-	hour, err := program.ParseHour(now.Format("04:05"))
+	hour, err := program.ParseHour(now.Format(program.HourLayout))
 	require.NoError(t, err)
 	errTest := errors.New("")
 	status := fixtures.StatusBuilder{Active: true}.Build()

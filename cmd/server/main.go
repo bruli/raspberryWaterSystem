@@ -144,11 +144,16 @@ func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.Comm
 			logger.Info().Msg("[WORKER] Execution in time: context done")
 			return
 		case <-ticker.C:
-			if err := worker.ExecutionInTime(ctx, qh, ch, time.Now()); err != nil {
+			if err := worker.ExecutionInTime(ctx, qh, ch, now()); err != nil {
 				logger.Err(err).Msg("[WORKER] failed execution in time")
 			}
 		}
 	}
+}
+
+func now() time.Time {
+	loc, _ := time.LoadLocation("Europe/Madrid")
+	return time.Now().In(loc)
 }
 
 func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, logger *zerolog.Logger) {

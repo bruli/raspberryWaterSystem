@@ -4,11 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
-
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
+	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
@@ -73,7 +72,7 @@ func executeTemperature(ctx context.Context, prgms app.ProgramsInTime, ch cqs.Co
 
 func executeWeekly(ctx context.Context, prgms app.ProgramsInTime, ch cqs.CommandHandler, now time.Time) error {
 	if prgms.Weekly != nil {
-		if time.Time(now).Weekday().String() == prgms.Weekly.WeekDay().String() {
+		if now.Weekday().String() == prgms.Weekly.WeekDay().String() {
 			for _, pr := range prgms.Weekly.Programs() {
 				if err := executeProgram(ctx, ch, pr, now); err != nil {
 					return ExecuteWeeklyError{err: err}
@@ -88,7 +87,7 @@ func executeOddEven(ctx context.Context, now time.Time, prgms app.ProgramsInTime
 	var oddEvenPrgms *program.Program
 
 	switch {
-	case isEven(time.Time(now)) && prgms.Even != nil:
+	case isEven(now) && prgms.Even != nil:
 		oddEvenPrgms = prgms.Even
 	default:
 		oddEvenPrgms = prgms.Odd
@@ -117,7 +116,7 @@ func isEven(now time.Time) bool {
 }
 
 func executeProgram(ctx context.Context, ch cqs.CommandHandler, prg program.Program, now time.Time) error {
-	nowHour := now.Format("04:05")
+	nowHour := now.Format(program.HourLayout)
 	if nowHour == prg.Hour().String() {
 		for _, exec := range prg.Executions() {
 			for _, zo := range exec.Zones() {

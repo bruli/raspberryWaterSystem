@@ -10,7 +10,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	hour, err := program.ParseHour("15:04")
+	hour, err := program.ParseHour(program.HourLayout)
 	require.NoError(t, err)
 	tests := []struct {
 		name        string
