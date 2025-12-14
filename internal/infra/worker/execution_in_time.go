@@ -89,7 +89,7 @@ func executeOddEven(ctx context.Context, now time.Time, prgms app.ProgramsInTime
 	switch {
 	case isEven(now) && prgms.Even != nil:
 		oddEvenPrgms = prgms.Even
-	default:
+	case !isEven(now) && prgms.Odd != nil:
 		oddEvenPrgms = prgms.Odd
 	}
 	if oddEvenPrgms != nil {
