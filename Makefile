@@ -20,7 +20,7 @@ VAULT ?= ansible-vault
 docker-up:
 	@set -euo pipefail; \
 	echo "🚀 Starting services with Docker Compose..."; \
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) up -d --build
 
 docker-down:
 	@set -euo pipefail; \
