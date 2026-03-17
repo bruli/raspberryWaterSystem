@@ -3,7 +3,6 @@ package listener
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
@@ -16,7 +15,6 @@ type ExecutePinsOnExecuteZone struct {
 }
 
 func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
-	now := time.Now()
 	event, _ := ev.(zone.Executed)
 	if _, err := e.ch.Handle(ctx, app.ExecutePinsCmd{
 		Seconds: event.Seconds,
@@ -28,7 +26,7 @@ func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) erro
 	if _, err := e.ch.Handle(ctx, app.SaveExecutionLogCmd{
 		ZoneName:   event.ZoneName,
 		Seconds:    sec,
-		ExecutedAt: now,
+		ExecutedAt: event.EventAt(),
 	}); err != nil {
 		return err
 	}

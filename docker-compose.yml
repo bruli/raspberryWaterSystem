@@ -26,4 +26,4 @@ services:
 
 networks:
     water_system:
-        external: true
+        driver: bridge
