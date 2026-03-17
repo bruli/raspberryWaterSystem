@@ -7,7 +7,7 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
 
-type log struct {
+type Log struct {
 	Seconds    int       `json:"seconds"`
 	ZoneName   string    `json:"zone_name"`
 	ExecutedAt time.Time `json:"executed_at"`
@@ -18,14 +18,19 @@ type ExecutionLogRepository struct {
 }
 
 func (e ExecutionLogRepository) Save(ctx context.Context, execLogs []program.ExecutionLog) error {
-	logs := buildLogs(execLogs)
-	return writeJsonFile(e.path, logs)
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		logs := buildLogs(execLogs)
+		return writeJsonFile(e.path, logs)
+	}
 }
 
-func buildLogs(execLogs []program.ExecutionLog) []log {
-	logs := make([]log, len(execLogs))
+func buildLogs(execLogs []program.ExecutionLog) []Log {
+	logs := make([]Log, len(execLogs))
 	for i, l := range execLogs {
-		logs[i] = log{
+		logs[i] = Log{
 			Seconds:    l.Seconds().Int(),
 			ZoneName:   l.ZoneName(),
 			ExecutedAt: time.Time(l.ExecutedAt()),
@@ -39,7 +44,7 @@ func (e ExecutionLogRepository) FindAll(ctx context.Context) ([]program.Executio
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
-		var logs []log
+		var logs []Log
 		if err := readJsonFile(e.path, &logs); err != nil {
 			return []program.ExecutionLog{}, nil
 		}
@@ -47,7 +52,7 @@ func (e ExecutionLogRepository) FindAll(ctx context.Context) ([]program.Executio
 	}
 }
 
-func buildExecutionLogs(logs []log) []program.ExecutionLog {
+func buildExecutionLogs(logs []Log) []program.ExecutionLog {
 	execLogs := make([]program.ExecutionLog, len(logs))
 	for i, l := range logs {
 		var el program.ExecutionLog

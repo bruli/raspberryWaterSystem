@@ -224,7 +224,6 @@ require (
 )
 
 tool (
-	github.com/golangci/golangci-lint/cmd/golangci-lint
 	github.com/matryer/moq
 	github.com/mfridman/tparse
 	github.com/santhosh-tekuri/jsonschema/cmd/jv
