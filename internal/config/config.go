@@ -1,27 +1,27 @@
 package config
 
 import (
-	"github.com/kelseyhightower/envconfig"
+	"github.com/caarlos0/env"
 )
 
 type Environment struct {
-	Value string `envconfig:"ENVIRONMENT" required:"true"`
+	Value string `env:"ENVIRONMENT,required"`
 }
 
 type Config struct {
-	ServerURL               string `envconfig:"SERVER_URL" required:"true"`
+	ServerURL               string `env:"SERVER_URL,required"`
 	environment             EnvironmentType
-	ZonesFile               string `envconfig:"ZONES_FILE" required:"true"`
-	AuthToken               string `envconfig:"AUTH_TOKEN" required:"true"`
-	DailyProgramsFile       string `envconfig:"DAILY_PROGRAMS_FILE" required:"true"`
-	OddProgramsFile         string `envconfig:"ODD_PROGRAMS_FILE" required:"true"`
-	EvenProgramsFile        string `envconfig:"EVEN_PROGRAMS_FILE" required:"true"`
-	WeeklyProgramsFile      string `envconfig:"WEEKLY_PROGRAMS_FILE" required:"true"`
-	TemperatureProgramsFile string `envconfig:"TEMPERATURE_PROGRAMS_FILE" required:"true"`
-	ExecutionLogsFile       string `envconfig:"EXECUTION_LOGS_FILE" required:"true"`
-	TelegramToken           string `envconfig:"TELEGRAM_TOKEN" required:"true"`
-	TelegramChatID          int    `envconfig:"TELEGRAM_CHAT_ID" required:"true"`
-	TelegramBotEnabled      bool   `envconfig:"TELEGRAM_BOT_ENABLED" required:"true"`
+	ZonesFile               string `env:"ZONES_FILE,required"`
+	AuthToken               string `env:"AUTH_TOKEN,required"`
+	DailyProgramsFile       string `env:"DAILY_PROGRAMS_FILE,required"`
+	OddProgramsFile         string `env:"ODD_PROGRAMS_FILE,required"`
+	EvenProgramsFile        string `env:"EVEN_PROGRAMS_FILE,required"`
+	WeeklyProgramsFile      string `env:"WEEKLY_PROGRAMS_FILE,required"`
+	TemperatureProgramsFile string `env:"TEMPERATURE_PROGRAMS_FILE,required"`
+	ExecutionLogsFile       string `env:"EXECUTION_LOGS_FILE,required"`
+	TelegramToken           string `env:"TELEGRAM_TOKEN,required"`
+	TelegramChatID          int    `env:"TELEGRAM_CHAT_ID,required"`
+	TelegramBotEnabled      bool   `env:"TELEGRAM_BOT_ENABLED,required"`
 }
 
 func New() (*Config, error) {
@@ -29,13 +29,12 @@ func New() (*Config, error) {
 		co Config
 		e  Environment
 	)
-	prefix := "WS"
 
-	if err := envconfig.Process(prefix, &co); err != nil {
+	if err := env.Parse(&co); err != nil {
 		return nil, err
 	}
 
-	if err := envconfig.Process(prefix, &e); err != nil {
+	if err := env.Parse(&e); err != nil {
 		return nil, err
 	}
 	env, err := ParseEnvironment(e.Value)

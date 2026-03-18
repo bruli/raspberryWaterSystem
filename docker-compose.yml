@@ -6,23 +6,45 @@ services:
     volumes:
       - .:/app
     environment:
-      - WS_SERVER_URL=${WS_SERVER_URL:-:8080}
-      - WS_ENVIRONMENT=${WS_ENVIRONMENT:-development}
-      - WS_ZONES_FILE=${WS_ZONES_FILE:-/tmp/zones.yaml}
-      - WS_AUTH_TOKEN=${WS_AUTH_TOKEN:-token}
-      - WS_DAILY_PROGRAMS_FILE=${WS_DAILY_PROGRAMS_FILE:-/tmp/daily_programs.yml}
-      - WS_ODD_PROGRAMS_FILE=${WS_ODD_PROGRAMS_FILE:-/tmp/odd_programs.yml}
-      - WS_EVEN_PROGRAMS_FILE=${WS_EVEN_PROGRAMS_FILE:-/tmp/even_programs.yml}
-      - WS_WEEKLY_PROGRAMS_FILE=${WS_WEEKLY_PROGRAMS_FILE:-/tmp/weekly_programs.yml}
-      - WS_TEMPERATURE_PROGRAMS_FILE=${WS_TEMPERATURE_PROGRAMS_FILE:-/tmp/temperature_programs.yml}
-      - WS_EXECUTION_LOGS_FILE=${WS_EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
-      - WS_TELEGRAM_TOKEN=${WS_TELEGRAM_TOKEN:-token default}
-      - WS_TELEGRAM_CHAT_ID=${WS_TELEGRAM_CHAT_ID:-12345}
-      - WS_TELEGRAM_BOT_ENABLED=${WS_TELEGRAM_BOT_ENABLED:-false}
+      - SERVER_URL=${SERVER_URL:-:8080}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - ZONES_FILE=${ZONES_FILE:-/tmp/zones.yaml}
+      - AUTH_TOKEN=${AUTH_TOKEN:-token}
+      - DAILY_PROGRAMS_FILE=${DAILY_PROGRAMS_FILE:-/tmp/daily_programs.yml}
+      - ODD_PROGRAMS_FILE=${ODD_PROGRAMS_FILE:-/tmp/odd_programs.yml}
+      - EVEN_PROGRAMS_FILE=${EVEN_PROGRAMS_FILE:-/tmp/even_programs.yml}
+      - WEEKLY_PROGRAMS_FILE=${WEEKLY_PROGRAMS_FILE:-/tmp/weekly_programs.yml}
+      - TEMPERATURE_PROGRAMS_FILE=${TEMPERATURE_PROGRAMS_FILE:-/tmp/temperature_programs.yml}
+      - EXECUTION_LOGS_FILE=${EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-token default}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-12345}
+      - TELEGRAM_BOT_ENABLED=${TELEGRAM_BOT_ENABLED:-false}
+      - NATS_SERVER_URL=nats://nats:4222
     ports:
       - "8083:8080"
     networks:
         - water_system
+
+  nats:
+      image: nats:2-alpine
+      container_name: nats
+      # No afegim -js (JetStream) -> NATS bàsic efímer
+      command: ["--http_port", "8222"] # endpoint /varz, /connz, etc.
+      ports:
+        - "4222:4222" # client
+        - "8222:8222" # monitoring HTTP
+        # - "6222:6222" # (opcional) clustering
+      restart: unless-stopped
+
+  nats-box:
+      image: synadia/nats-box:latest
+      container_name: nats-box
+      depends_on:
+          - nats
+      stdin_open: true
+      tty: true
+      # Queda "idle" perquè hi puguis entrar amb exec
+      entrypoint: ["sh", "-lc", "sleep infinity"]
 
 networks:
     water_system:
