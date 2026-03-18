@@ -17,9 +17,11 @@ import (
 	infrahttp "github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/nats"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog"
 )
 
@@ -53,10 +55,31 @@ func main() {
 	go lightRepo.CleanYesterday(ctx)
 	pe := pinsExecutor()
 	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
+	eventsRepo := disk.NewEventsRepository(conf.EventsDirectory)
+
+	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed building execution logs publisher")
+		os.Exit(1)
+	}
+	defer eventsPublisher.Close()
+	if err := eventsPublisher.EnsureStream([]string{disk.ExecutionLogsEventType, disk.TerraceWeatherEventType}); err != nil {
+		log.Fatal().Err(err).Msg("failed ensuring events stream")
+		os.Exit(1)
+	}
+	findStatusQH := app.NewFindStatus(sr)
+
+	cron, err := buildCron()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed building cron")
+		os.Exit(1)
+	}
+	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, &log)
+	go readingEvents(ctx, eventsRepo, eventsPublisher, &log)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
-	qhBus.Subscribe(app.FindStatusQueryName, logQHMdw(app.NewFindStatus(sr)))
+	qhBus.Subscribe(app.FindStatusQueryName, logQHMdw(findStatusQH))
 	qhBus.Subscribe(app.FindAllProgramsQueryName, logQHMdw(app.NewFindAllPrograms(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	qhBus.Subscribe(app.FindProgramsInTimeQueryName, logQHMdw(app.NewFindProgramsInTime(dailyRepo, oddRepo, evenRepo, weeklyRepo, tempProgRepo)))
 	qhBus.Subscribe(app.FindExecutionLogsQueryName, logQHMdw(app.NewFindExecutionLogs(execLogRepo)))
@@ -89,7 +112,7 @@ func main() {
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.ExecutedEventName},
-	}, listener.NewExecutePinsOnExecuteZone(chBus))
+	}, listener.NewExecutePinsOnExecuteZone(chBus), listener.NewWriteExecutionLogEventOnExecuteZone(eventsRepo))
 	eventBus.Subscribe(zone.Ignored{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.IgnoredEventName},
 	}, listener.NewPublishMessageOnZoneIgnored(chBus))
@@ -107,6 +130,79 @@ func main() {
 
 	go runTelegramBot(conf, qhBus, chBus, log, ctx)
 	runHTTPServer(chBus, qhBus, conf, ctx, log)
+}
+
+func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *zerolog.Logger) {
+	defer cron.Stop()
+	_, err := cron.AddFunc("0 * * * *", func() {
+		log.Info().Msg("[WORKER] Terrace Weather: getting weather")
+		result, err := ch.Handle(ctx, app.FindWeatherQuery{})
+		if err != nil {
+			log.Err(err).Msg("failed getting weather")
+			return
+		}
+		weath, _ := result.(weather.Weather)
+		tw := disk.Weather{
+			Temperature: weath.Temperature().Float32(),
+			IsRaining:   weath.IsRaining(),
+		}
+		ev, err := disk.NewFromWeather(&tw)
+		if err != nil {
+			log.Err(err).Msg("failed creating weather event")
+			return
+		}
+		if err := repo.Save(ctx, ev); err != nil {
+			log.Err(err).Msg("failed saving weather event")
+		}
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed adding cron job")
+	}
+	log.Info().Msg("[WORKER] Terrace Weather: started")
+	cron.Start()
+	select {
+	case <-ctx.Done():
+		log.Info().Msg("[WORKER] Terrace Weather: context done")
+		return
+	}
+}
+
+func buildCron() (*cron.Cron, error) {
+	loc, err := time.LoadLocation("Europe/Madrid")
+	if err != nil {
+		return nil, err
+	}
+	c := cron.New(cron.WithLocation(loc))
+	return c, nil
+}
+
+func readingEvents(ctx context.Context, eventsRepo *disk.EventsRepository, publisher *nats.Publisher, log *zerolog.Logger) {
+	log.Info().Msg("[WORKER] Reading Events: started")
+	tick := time.NewTicker(time.Minute)
+	defer tick.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info().Msg("[WORKER] Reading Events: context done")
+		case <-tick.C:
+			events, err := eventsRepo.FindAll(ctx)
+			if err != nil {
+				log.Err(err).Msg("failed reading events")
+			}
+			for _, ev := range events {
+				if err := publishEvent(ctx, eventsRepo, publisher, &ev); err != nil {
+					log.Err(err).Msg("failed publishing event")
+				}
+			}
+		}
+	}
+}
+
+func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher *nats.Publisher, ev *disk.Event) error {
+	if err := publisher.PublishEvent(ctx, ev.ID, ev.EventType, ev.Payload); err != nil {
+		return err
+	}
+	return evRepo.Remove(ctx, ev)
 }
 
 func runTelegramBot(conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log zerolog.Logger, ctx context.Context) {

@@ -8,11 +8,11 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
-type WriteEventOnExecuteZone struct {
-	eventsRepo disk.EventsRepository
+type WriteExecutionLogEventOnExecuteZone struct {
+	eventsRepo *disk.EventsRepository
 }
 
-func (w WriteEventOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
+func (w WriteExecutionLogEventOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
 	event, _ := ev.(zone.Executed)
 	evnt, err := disk.NewFromExecutionLog(&disk.Log{
 		Seconds:    int(event.Seconds),
@@ -25,6 +25,6 @@ func (w WriteEventOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error
 	return w.eventsRepo.Save(ctx, evnt)
 }
 
-func NewWriteEventOnExecuteZone(eventsRepo disk.EventsRepository) *WriteEventOnExecuteZone {
-	return &WriteEventOnExecuteZone{eventsRepo: eventsRepo}
+func NewWriteExecutionLogEventOnExecuteZone(eventsRepo *disk.EventsRepository) *WriteExecutionLogEventOnExecuteZone {
+	return &WriteExecutionLogEventOnExecuteZone{eventsRepo: eventsRepo}
 }

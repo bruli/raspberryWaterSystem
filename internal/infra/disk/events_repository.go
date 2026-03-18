@@ -6,18 +6,38 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
-	ExecutionLogsEventName = "execution.logs"
-	WeatherEventNam        = "weather"
+	ExecutionLogsEventType  = "execution.logs"
+	TerraceWeatherEventType = "terrace.weather"
 )
 
 type Event struct {
 	ID        string    `json:"id"`
-	EventName string    `json:"event_name"`
+	EventType string    `json:"event_type"`
 	EventAt   time.Time `json:"event_at"`
 	Payload   []byte    `json:"payload"`
+}
+
+type Weather struct {
+	Temperature float32 `json:"temperature"`
+	IsRaining   bool    `json:"is_raining"`
+}
+
+func NewFromWeather(w *Weather) (*Event, error) {
+	payload, err := json.Marshal(w)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal weather: %w", err)
+	}
+	return &Event{
+		ID:        uuid.NewString(),
+		EventType: TerraceWeatherEventType,
+		EventAt:   time.Now(),
+		Payload:   payload,
+	}, nil
 }
 
 func NewFromExecutionLog(lo *Log) (*Event, error) {
@@ -27,7 +47,7 @@ func NewFromExecutionLog(lo *Log) (*Event, error) {
 	}
 	return &Event{
 		ID:        fmt.Sprintf("%s-%v", lo.ZoneName, lo.ExecutedAt.Unix()),
-		EventName: ExecutionLogsEventName,
+		EventType: ExecutionLogsEventType,
 		EventAt:   time.Now(),
 		Payload:   payload,
 	}, nil
@@ -42,7 +62,7 @@ func (e EventsRepository) Save(ctx context.Context, ev *Event) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		if err := os.MkdirAll(e.eventsDir, 0755); err != nil {
+		if err := os.MkdirAll(e.eventsDir, 0o755); err != nil {
 			return err
 		}
 

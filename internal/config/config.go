@@ -22,6 +22,8 @@ type Config struct {
 	TelegramToken           string `env:"TELEGRAM_TOKEN,required"`
 	TelegramChatID          int    `env:"TELEGRAM_CHAT_ID,required"`
 	TelegramBotEnabled      bool   `env:"TELEGRAM_BOT_ENABLED,required"`
+	NatsServerURL           string `env:"NATS_SERVER_URL,required"`
+	EventsDirectory         string `env:"EVENTS_DIRECTORY,required"`
 }
 
 func New() (*Config, error) {
