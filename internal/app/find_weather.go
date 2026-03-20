@@ -26,10 +26,12 @@ func (f FindWeather) Handle(ctx context.Context, _ cqs.Query) (any, error) {
 	temp, hum, err := f.tr.Find(ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to find temperature")
+		return nil, err
 	}
 	rain, err := f.rr.Find(ctx)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to find rain")
+		return nil, err
 	}
 	return weather.New(temp, hum, rain), nil
 }

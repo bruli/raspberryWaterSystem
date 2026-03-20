@@ -10,6 +10,7 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/config"
+	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/api"
@@ -57,7 +58,7 @@ func main() {
 	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
 	eventsRepo := disk.NewEventsRepository(conf.EventsDirectory)
 
-	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL)
+	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL, &log)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed building execution logs publisher")
 		os.Exit(1)
@@ -134,17 +135,21 @@ func main() {
 
 func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *zerolog.Logger) {
 	defer cron.Stop()
-	_, err := cron.AddFunc("0 * * * *", func() {
+	_, err := cron.AddFunc("00 * * * *", func() {
 		log.Info().Msg("[WORKER] Terrace Weather: getting weather")
-		result, err := ch.Handle(ctx, app.FindWeatherQuery{})
+		result, err := ch.Handle(ctx, app.FindStatusQuery{})
 		if err != nil {
 			log.Err(err).Msg("failed getting weather")
 			return
 		}
-		weath, _ := result.(weather.Weather)
+		st, ok := result.(status.Status)
+		if !ok {
+			log.Err(err).Msg("failed casting weather")
+			return
+		}
 		tw := disk.Weather{
-			Temperature: weath.Temperature().Float32(),
-			IsRaining:   weath.IsRaining(),
+			Temperature: st.Weather().Temperature().Float32(),
+			IsRaining:   st.Weather().IsRaining(),
 		}
 		ev, err := disk.NewFromWeather(&tw)
 		if err != nil {
