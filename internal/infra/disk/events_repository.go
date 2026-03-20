@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	ExecutionLogsEventType  = "execution.logs"
-	TerraceWeatherEventType = "terrace.weather"
+	ExecutionLogsEventType  = "execution_logs"
+	TerraceWeatherEventType = "terrace_weather"
 )
 
 type Event struct {

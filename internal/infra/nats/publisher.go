@@ -8,6 +8,8 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+const StreamName = "WATER_SYSTEM"
+
 type Publisher struct {
 	nc *nats.Conn
 	js nats.JetStreamContext
@@ -38,13 +40,13 @@ func (p *Publisher) PublishEvent(ctx context.Context, id, subject string, payloa
 }
 
 func (p *Publisher) EnsureStream(subjects []string) error {
-	_, err := p.js.StreamInfo("WATER_SYSTEM")
+	_, err := p.js.StreamInfo(StreamName)
 	if err == nil {
 		return nil
 	}
 
 	_, err = p.js.AddStream(&nats.StreamConfig{
-		Name:       "WATER_SYSTEM",
+		Name:       StreamName,
 		Subjects:   subjects,
 		Storage:    nats.FileStorage,
 		Retention:  nats.WorkQueuePolicy,
