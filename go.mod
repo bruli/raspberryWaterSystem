@@ -1,6 +1,6 @@
 module github.com/bruli/raspberryWaterSystem
 
-go 1.25.5
+go 1.26.1
 
 require github.com/davecgh/go-spew v1.1.1
 
@@ -31,7 +31,6 @@ require (
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/matryer/moq v0.6.0 // indirect
-	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mfridman/tparse v0.17.0 // indirect
@@ -64,7 +63,6 @@ require (
 
 require (
 	github.com/go-telegram-bot-api/telegram-bot-api v4.6.4+incompatible
-	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.11.1
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
 )

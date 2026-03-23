@@ -3,11 +3,11 @@ package telegram
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"strconv"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/rs/zerolog"
 )
 
 type unknownCommand struct{}
@@ -22,8 +22,8 @@ type CommandReader struct {
 	bus     *runnerBus
 }
 
-func (r CommandReader) Read(ctx context.Context, logger *zerolog.Logger) {
-	logger.Info().Msg("[TELEGRAM SERVICE] starting command reader")
+func (r CommandReader) Read(ctx context.Context, logger *slog.Logger) {
+	logger.InfoContext(ctx, "[TELEGRAM SERVICE] starting command reader")
 	msgs := NewMessages()
 	for update := range r.updates {
 		if update.Message == nil {
@@ -36,7 +36,7 @@ func (r CommandReader) Read(ctx context.Context, logger *zerolog.Logger) {
 		}
 		for _, j := range msgs.GetMessages() {
 			if _, err := r.bot.Send(j); err != nil {
-				logger.Error().Err(err).Msg("failed to send message to telegram")
+				logger.ErrorContext(ctx, "failed to send message to telegram", slog.String("error", err.Error()))
 			}
 		}
 

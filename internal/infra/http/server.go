@@ -3,11 +3,12 @@ package http
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 
 	corsx "github.com/rs/cors"
-	"github.com/rs/zerolog"
 )
 
 // newServer returns a http.Server configured with the provided handler and a
@@ -54,16 +55,17 @@ type CORSOpt struct {
 	OptionsPassthrough bool
 }
 
-func RunServer(ctx context.Context, serverURL string, httpHandler http.Handler, corsOpt *CORSOpt, logger *zerolog.Logger) error {
-	logger.Info().Msgf("[HTTP SERVICE] system starting ...")
+func RunServer(ctx context.Context, serverURL string, httpHandler http.Handler, corsOpt *CORSOpt, logger *slog.Logger) error {
+	logger.InfoContext(ctx, "[HTTP SERVICE] starting...")
 	defer func() {
-		logger.Info().Msgf("[HTTP SERVICE] system stop")
+		logger.InfoContext(ctx, "[HTTP SERVICE] stopping...")
 	}()
 
 	readyCh := make(chan struct{})
 	go func() {
 		<-readyCh
-		logger.Info().Msgf("[HTTP SERVICE] system ready to serve at %s", serverURL)
+		logger.InfoContext(ctx, fmt.Sprintf("[HTTP SERVICE] system ready to serve at %s", serverURL))
+
 	}()
 
 	corsHTTPHandler := buildCORS(corsOpt).Handler(httpHandler)

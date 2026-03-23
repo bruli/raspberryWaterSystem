@@ -3,8 +3,6 @@ package fake
 import (
 	"context"
 	"time"
-
-	"github.com/rs/zerolog/log"
 )
 
 type PinsExecutor struct{}
@@ -19,7 +17,6 @@ func (p PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string) 
 		return ctx.Err()
 	default:
 		time.Sleep(time.Duration(seconds) * time.Second)
-		log.Debug().Msgf("pins %s executed %v seconds", pins, seconds)
 		return nil
 	}
 }

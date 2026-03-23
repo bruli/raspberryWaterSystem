@@ -3,8 +3,6 @@ package app
 import (
 	"context"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
@@ -25,12 +23,10 @@ type FindWeather struct {
 func (f FindWeather) Handle(ctx context.Context, _ cqs.Query) (any, error) {
 	temp, hum, err := f.tr.Find(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to find temperature")
 		return nil, err
 	}
 	rain, err := f.rr.Find(ctx)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to find rain")
 		return nil, err
 	}
 	return weather.New(temp, hum, rain), nil

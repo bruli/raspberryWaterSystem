@@ -6,15 +6,13 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
-	"github.com/rs/zerolog"
 )
 
 const StreamName = "WATER_SYSTEM"
 
 type Publisher struct {
-	nc  *nats.Conn
-	js  nats.JetStreamContext
-	log *zerolog.Logger
+	nc *nats.Conn
+	js nats.JetStreamContext
 }
 
 func (p *Publisher) PublishEvent(ctx context.Context, id, subject string, payload []byte) error {
@@ -68,7 +66,7 @@ func (p *Publisher) Close() {
 	}
 }
 
-func NewPublisher(natsURL string, log *zerolog.Logger) (*Publisher, error) {
+func NewPublisher(natsURL string) (*Publisher, error) {
 	nc, err := nats.Connect(
 		natsURL,
 		nats.Name("water-system"),
@@ -86,8 +84,7 @@ func NewPublisher(natsURL string, log *zerolog.Logger) (*Publisher, error) {
 	}
 
 	return &Publisher{
-		nc:  nc,
-		js:  js,
-		log: log,
+		nc: nc,
+		js: js,
 	}, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,24 +24,26 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/robfig/cron/v3"
-	"github.com/rs/zerolog"
 )
 
+const serviceName = "raspberryWaterSystem"
+
 func main() {
-	log := buildLogger()
+	ctx := context.Background()
+	log := buildLog()
 	conf, err := config.New()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed building config")
+		log.ErrorContext(ctx, "failed building config", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
-	ctx := context.Background()
 
 	eventsCh := make(chan cqs.Event, 5)
 	defer close(eventsCh)
 
-	logCHMdw := cqs.NewCommandHndErrorMiddleware(&log)
+	logCHMdw := cqs.NewCommandHndErrorMiddleware(log)
 	eventsCHMdw := app.NewEventMiddleware(eventsCh)
 	eventsMultiCHMdw := cqs.CommandHandlerMultiMiddleware(logCHMdw, eventsCHMdw)
-	logQHMdw := cqs.NewQueryHndErrorMiddleware(&log)
+	logQHMdw := cqs.NewQueryHndErrorMiddleware(log)
 
 	tr := temperatureRepository()
 	rr := rainRepository()
@@ -58,25 +61,25 @@ func main() {
 	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
 	eventsRepo := disk.NewEventsRepository(conf.EventsDirectory)
 
-	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL, &log)
+	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed building execution logs publisher")
+		log.ErrorContext(ctx, "failed building execution logs", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 	defer eventsPublisher.Close()
 	if err := eventsPublisher.EnsureStream([]string{disk.ExecutionLogsEventType, disk.TerraceWeatherEventType}); err != nil {
-		log.Fatal().Err(err).Msg("failed ensuring events stream")
+		log.ErrorContext(ctx, "failed ensuring execution logs stream", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 	findStatusQH := app.NewFindStatus(sr)
 
 	cron, err := buildCron()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed building cron")
+		log.ErrorContext(ctx, "failed building cron")
 		os.Exit(1)
 	}
-	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, &log)
-	go readingEvents(ctx, eventsRepo, eventsPublisher, &log)
+	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, log)
+	go readingEvents(ctx, eventsRepo, eventsPublisher, log)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
@@ -119,32 +122,33 @@ func main() {
 	}, listener.NewPublishMessageOnZoneIgnored(chBus))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
-		log.Fatal().Err(err)
+		log.ErrorContext(ctx, "failed initializing status", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	go updateStatusWorker(ctx, qhBus, chBus, &log)
-	go eventsWorker(ctx, eventsCh, eventBus, &log)
-	go executionInTimeWorker(ctx, qhBus, chBus, &log)
+	go updateStatusWorker(ctx, qhBus, chBus, log)
+	go eventsWorker(ctx, eventsCh, eventBus, log)
+	go executionInTimeWorker(ctx, qhBus, chBus, log)
 
-	go runTelegramBot(conf, qhBus, chBus, log, ctx)
-	runHTTPServer(chBus, qhBus, conf, ctx, log)
+	go runTelegramBot(ctx, conf, qhBus, chBus, log)
+	runHTTPServer(ctx, chBus, qhBus, conf, log)
 }
 
-func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *zerolog.Logger) {
+func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger) {
 	defer cron.Stop()
 	_, err := cron.AddFunc("00 * * * *", func() {
-		log.Info().Msg("[WORKER] Terrace Weather: getting weather")
+		log.InfoContext(ctx, "[WORKER] Terrace Weather: getting weather")
 		result, err := ch.Handle(ctx, app.FindStatusQuery{})
 		if err != nil {
-			log.Err(err).Msg("failed getting weather")
+			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed getting weather", slog.String("error", err.Error()))
 			return
 		}
 		st, ok := result.(status.Status)
 		if !ok {
-			log.Err(err).Msg("failed casting weather")
+			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed casting weather", slog.String("type", fmt.Sprintf("%T", result)))
 			return
 		}
 		tw := disk.Weather{
@@ -153,21 +157,22 @@ func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsR
 		}
 		ev, err := disk.NewFromWeather(&tw)
 		if err != nil {
-			log.Err(err).Msg("failed creating weather event")
+			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed creating weather event", slog.String("error", err.Error()))
 			return
 		}
 		if err := repo.Save(ctx, ev); err != nil {
-			log.Err(err).Msg("failed saving weather event")
+			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed saving weather event", slog.String("error", err.Error()))
 		}
 	})
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed adding cron job")
+		log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed adding cron job", slog.String("error", err.Error()))
+		return
 	}
-	log.Info().Msg("[WORKER] Terrace Weather: started")
+	log.InfoContext(ctx, "[WORKER] Terrace Weather: cron job started")
 	cron.Start()
 	select {
 	case <-ctx.Done():
-		log.Info().Msg("[WORKER] Terrace Weather: context done")
+		log.InfoContext(ctx, "[WORKER] Terrace Weather: context done")
 		return
 	}
 }
@@ -181,22 +186,23 @@ func buildCron() (*cron.Cron, error) {
 	return c, nil
 }
 
-func readingEvents(ctx context.Context, eventsRepo *disk.EventsRepository, publisher *nats.Publisher, log *zerolog.Logger) {
-	log.Info().Msg("[WORKER] Reading Events: started")
+func readingEvents(ctx context.Context, eventsRepo *disk.EventsRepository, publisher *nats.Publisher, log *slog.Logger) {
+	log.InfoContext(ctx, "[WORKER] Reading Events: starting")
 	tick := time.NewTicker(time.Minute)
 	defer tick.Stop()
 	for {
 		select {
 		case <-ctx.Done():
-			log.Info().Msg("[WORKER] Reading Events: context done")
+			log.InfoContext(ctx, "[WORKER] Reading Events: context done")
 		case <-tick.C:
 			events, err := eventsRepo.FindAll(ctx)
 			if err != nil {
-				log.Err(err).Msg("failed reading events")
+				log.ErrorContext(ctx, "[WORKER] Reading Events: failed reading events", slog.String("error", err.Error()))
 			}
 			for _, ev := range events {
 				if err := publishEvent(ctx, eventsRepo, publisher, &ev); err != nil {
-					log.Err(err).Msg("failed publishing event")
+					log.ErrorContext(ctx, "[WORKER] Reading Events: failed publishing event",
+						slog.String("event_id", ev.ID), slog.String("error", err.Error()))
 				}
 			}
 		}
@@ -210,43 +216,49 @@ func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher 
 	return evRepo.Remove(ctx, ev)
 }
 
-func runTelegramBot(conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log zerolog.Logger, ctx context.Context) {
+func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log *slog.Logger) {
 	if !conf.TelegramBotEnabled {
-		log.Info().Msg("[TELEGRAM SERVICE] disabled")
+		log.InfoContext(ctx, "[TELEGRAM SERVICE] disabled")
 		return
 	}
 	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken, qhBus, chBus)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("[TELEGRAM SERVICE] failed building telegram server: %s", err)
+		log.ErrorContext(ctx, "[TELEGRAM SERVICE] failed building telegram server", slog.String("error", err.Error()))
+		os.Exit(11)
 	}
-	telegramServer.Read(ctx, &log)
+	telegramServer.Read(ctx, log)
 }
 
-func runHTTPServer(chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, ctx context.Context, log zerolog.Logger) {
+func runHTTPServer(ctx context.Context, chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, log *slog.Logger) {
 	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken)
 	httpHandlers := infrahttp.NewHandler(definitions)
-	if err := infrahttp.RunServer(ctx, conf.ServerURL, httpHandlers, &infrahttp.CORSOpt{}, &log); err != nil {
-		log.Fatal().Err(err).Msg("system error")
+	if err := infrahttp.RunServer(ctx, conf.ServerURL, httpHandlers, &infrahttp.CORSOpt{}, log); err != nil {
+		log.ErrorContext(ctx, "[HTTP SERVER] failed running server", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 }
 
-func buildLogger() zerolog.Logger {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	log := zerolog.New(os.Stdout).With().Timestamp().Logger()
+func buildLog() *slog.Logger {
+	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
+
+	log := slog.New(handler)
+	log.With("service", serviceName)
 	return log
 }
 
-func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {
-	logger.Info().Msg("[WORKER] Execution in time: started")
+func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *slog.Logger) {
+	logger.InfoContext(ctx, "[WORKER] Execution in time: started")
 	ticker := time.NewTicker(time.Minute)
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info().Msg("[WORKER] Execution in time: context done")
+			logger.InfoContext(ctx, "[WORKER] Execution in time: context done")
 			return
 		case <-ticker.C:
 			if err := worker.ExecutionInTime(ctx, qh, ch, now()); err != nil {
-				logger.Err(err).Msg("[WORKER] failed execution in time")
+				logger.ErrorContext(ctx, "[WORKER] failed execution in time", slog.String("error", err.Error()))
 			}
 		}
 	}
@@ -257,28 +269,28 @@ func now() time.Time {
 	return time.Now().In(loc)
 }
 
-func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, logger *zerolog.Logger) {
-	logger.Info().Msg("[WORKER] Events: started")
+func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, logger *slog.Logger) {
+	logger.InfoContext(ctx, "[WORKER] Events: started")
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info().Msg("[WORKER] Events: context done")
+			logger.InfoContext(ctx, "[WORKER] Events: context done")
 			return
 		case event := <-ch:
 			if err := evBus.Dispatch(ctx, event); err != nil {
-				logger.Err(err).Msg(fmt.Sprintf("[WORKER] Events: failed dispatching %q", event.EventName()))
+				logger.ErrorContext(ctx, "[WORKER] Events: failed dispatching event", slog.String("error", err.Error()))
 			}
 		}
 	}
 }
 
-func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {
-	logger.Info().Msg("[WORKER] Update status: started")
+func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *slog.Logger) {
+	logger.InfoContext(ctx, "[WORKER] Update status: started")
 	ticker := time.NewTicker(5 * time.Minute)
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info().Msg("[WORKER] Update status: context done")
+			logger.InfoContext(ctx, "[WORKER] Update status: context done")
 			return
 		case <-ticker.C:
 			updateStatus(ctx, qh, ch, logger)
@@ -286,14 +298,14 @@ func updateStatusWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.Command
 	}
 }
 
-func updateStatus(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *zerolog.Logger) {
+func updateStatus(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *slog.Logger) {
 	result, err := qh.Handle(ctx, app.FindWeatherQuery{})
 	if err != nil {
-		logger.Fatal().Err(err).Msg("failed getting weather")
+		logger.ErrorContext(ctx, "[WORKER] Update status: failed getting weather", slog.String("error", err.Error()))
 	}
 	weath, _ := result.(weather.Weather)
 	if _, err = ch.Handle(ctx, app.UpdateStatusCmd{Weather: weath}); err != nil {
-		logger.Fatal().Err(err).Msg("failed updating status")
+		logger.ErrorContext(ctx, "[WORKER] Update status: failed updating status", slog.String("error", err.Error()))
 	}
 }
 
