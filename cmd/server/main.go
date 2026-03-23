@@ -170,11 +170,8 @@ func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsR
 	}
 	log.InfoContext(ctx, "[WORKER] Terrace Weather: cron job started")
 	cron.Start()
-	select {
-	case <-ctx.Done():
-		log.InfoContext(ctx, "[WORKER] Terrace Weather: context done")
-		return
-	}
+	<-ctx.Done()
+	log.InfoContext(ctx, "[WORKER] Terrace Weather: context done")
 }
 
 func buildCron() (*cron.Cron, error) {

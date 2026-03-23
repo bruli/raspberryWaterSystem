@@ -6,7 +6,7 @@ DOCKER_COMPOSE  := COMPOSE_BAKE=true docker compose
 
 VAULT ?= ansible-vault
 
-GOLANGCI_LINT_VERSION ?= v2.10.0
+GOLANGCI_LINT_VERSION ?= v2.11.4
 
 # Default goal
 .DEFAULT_GOAL := help
