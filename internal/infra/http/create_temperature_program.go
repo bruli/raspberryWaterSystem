@@ -7,25 +7,35 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func CreateTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
+func CreateTemperatureProgram(ch cqs.CommandHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "CreateTemperatureProgramRequest")
+		defer span.End()
 		var req CreateTemperatureProgramRequestJson
 		if err := ReadRequest(w, r, &req); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return
 		}
 		cmd, err := buildCreateTemperatureProgram(req)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
 				Message: err.Error(),
 			})
 			return
 		}
-		if _, err := ch.Handle(r.Context(), app.CreateTemperatureProgramCommand{
+		if _, err := ch.Handle(ctx, app.CreateTemperatureProgramCommand{
 			Temperature: cmd,
 		}); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &app.CreateTemperatureProgramError{}):
 				WriteErrorResponse(w, http.StatusBadRequest, Error{
@@ -38,6 +48,7 @@ func CreateTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
 				return
 			}
 		}
+		span.SetStatus(codes.Ok, "temperature program created")
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

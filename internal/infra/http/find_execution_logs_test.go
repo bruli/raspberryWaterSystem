@@ -59,7 +59,7 @@ func TestFindExecutionLogs(t *testing.T) {
 					return tt.result, tt.qhErr
 				},
 			}
-			handler := http.FindExecutionLogs(qh)
+			handler := http.FindExecutionLogs(qh, tracer())
 			req := httptest.NewRequest(http2.MethodGet, tt.url, nil)
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)

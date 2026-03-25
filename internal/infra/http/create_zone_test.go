@@ -57,7 +57,7 @@ func TestCreateZone(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.CreateZone(ch)
+			handler := http.CreateZone(ch, tracer())
 			req := httptest.NewRequest(http2.MethodPost, "/zones", buildRequestBody(tt.body))
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)

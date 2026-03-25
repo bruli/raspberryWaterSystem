@@ -7,6 +7,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -15,17 +17,25 @@ const (
 	EvenProgram  = "even"
 )
 
-func CreateProgram(ch cqs.CommandHandler, programType string) http.HandlerFunc {
+func CreateProgram(ch cqs.CommandHandler, programType string, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "CreateProgramRequest")
+		defer span.End()
 		var req CreateProgramRequestJson
 		if err := ReadRequest(w, r, &req); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return
 		}
 		prog, err := buildProgram(w, req)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return
 		}
-		if _, err = ch.Handle(r.Context(), buildCreateProgramCommand(programType, prog)); err != nil {
+		if _, err = ch.Handle(ctx, buildCreateProgramCommand(programType, prog)); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &app.CreateProgramError{}):
 				WriteErrorResponse(w, http.StatusBadRequest, Error{
@@ -37,6 +47,7 @@ func CreateProgram(ch cqs.CommandHandler, programType string) http.HandlerFunc {
 				WriteErrorResponse(w, http.StatusInternalServerError)
 			}
 		}
+		span.SetStatus(codes.Ok, "program created")
 		WriteErrorResponse(w, http.StatusOK)
 	}
 }

@@ -9,15 +9,21 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
+func FindExecutionLogs(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "FindExecutionLogsRequest")
+		defer span.End()
 		limit := 5
 		limitStr := r.URL.Query().Get("limit")
 		if len(limitStr) > 0 {
 			limitValue, err := strconv.Atoi(limitStr)
 			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				WriteErrorResponse(w, http.StatusBadRequest, Error{
 					Code:    ErrorCodeInvalidRequest,
 					Message: "invalid limit value",
@@ -26,8 +32,10 @@ func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
 			}
 			limit = limitValue
 		}
-		result, err := qh.Handle(r.Context(), app.FindExecutionLogsQuery{Limit: limit})
+		result, err := qh.Handle(ctx, app.FindExecutionLogsQuery{Limit: limit})
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.Is(err, app.ErrInvalidExecutionsLogLimit):
 				WriteErrorResponse(w, http.StatusBadRequest, Error{
@@ -49,6 +57,7 @@ func FindExecutionLogs(qh cqs.QueryHandler) http.HandlerFunc {
 			}
 		}
 		data, _ := json.Marshal(resp)
+		span.SetStatus(codes.Ok, "logs found")
 		WriteResponse(w, http.StatusOK, data)
 	}
 }

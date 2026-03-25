@@ -10,19 +10,27 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func RemoveWeeklyProgram(ch cqs.CommandHandler) http.HandlerFunc {
+func RemoveWeeklyProgram(ch cqs.CommandHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "RemoveWeeklyProgramRequest")
+		defer span.End()
 		day, err := program.ParseWeekDay(capitalizeDay(chi.URLParam(r, "day")))
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
 				Message: err.Error(),
 			})
 			return
 		}
-		if _, err = ch.Handle(r.Context(), app.RemoveWeeklyProgramCommand{Day: &day}); err != nil {
+		if _, err = ch.Handle(ctx, app.RemoveWeeklyProgramCommand{Day: &day}); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
@@ -31,6 +39,7 @@ func RemoveWeeklyProgram(ch cqs.CommandHandler) http.HandlerFunc {
 			}
 			return
 		}
+		span.SetStatus(codes.Ok, "weekly program removed")
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

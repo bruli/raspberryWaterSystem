@@ -92,7 +92,7 @@ func TestUpdateTemperatureProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.UpdateTemperatureProgram(ch)
+			handler := http.UpdateTemperatureProgram(ch, tracer())
 			server := chi.NewMux()
 			server.Put("/programs/temperature/{temperature}", handler)
 			url := fmt.Sprintf("/programs/temperature/%s", tt.temperature)

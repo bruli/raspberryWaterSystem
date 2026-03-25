@@ -9,19 +9,27 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func RemoveProgram(ch cqs.CommandHandler, prg string) http.HandlerFunc {
+func RemoveProgram(ch cqs.CommandHandler, prg string, tracer trace.Tracer) http.HandlerFunc {
 	return func(writer http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "RemoveProgramRequest")
+		defer span.End()
 		hour, err := program.ParseHour(chi.URLParam(r, "hour"))
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(writer, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
 				Message: err.Error(),
 			})
 			return
 		}
-		if _, err := ch.Handle(r.Context(), buildRemoveProgramCommand(hour, prg)); err != nil {
+		if _, err := ch.Handle(ctx, buildRemoveProgramCommand(hour, prg)); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(writer, http.StatusNotFound)
@@ -29,6 +37,7 @@ func RemoveProgram(ch cqs.CommandHandler, prg string) http.HandlerFunc {
 				WriteErrorResponse(writer, http.StatusInternalServerError)
 			}
 		}
+		span.SetStatus(codes.Ok, "program removed")
 		WriteResponse(writer, http.StatusOK, nil)
 	}
 }

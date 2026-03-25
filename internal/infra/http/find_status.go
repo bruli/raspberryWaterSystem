@@ -11,12 +11,18 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func FindStatus(qh cqs.QueryHandler) http.HandlerFunc {
+func FindStatus(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		result, err := qh.Handle(r.Context(), app.FindStatusQuery{})
+		ctx, span := tracer.Start(r.Context(), "FindStatusRequest")
+		defer span.End()
+		result, err := qh.Handle(ctx, app.FindStatusQuery{})
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
@@ -40,6 +46,7 @@ func FindStatus(qh cqs.QueryHandler) http.HandlerFunc {
 			UpdatedAt:       updated,
 		}
 		data, _ := json.Marshal(resp)
+		span.SetStatus(codes.Ok, "OK")
 		WriteResponse(w, http.StatusOK, data)
 	}
 }

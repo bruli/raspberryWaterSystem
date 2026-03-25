@@ -5,15 +5,21 @@ import (
 	"net/http"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
-func FindAllPrograms(qh cqs.QueryHandler) http.HandlerFunc {
+func FindAllPrograms(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		result, err := qh.Handle(r.Context(), app.FindAllProgramsQuery{})
+		ctx, span := tracer.Start(r.Context(), "FindAllProgramsRequest")
+		defer span.End()
+		result, err := qh.Handle(ctx, app.FindAllProgramsQuery{})
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
@@ -26,6 +32,7 @@ func FindAllPrograms(qh cqs.QueryHandler) http.HandlerFunc {
 			Weekly:      buildWeeklyProgramsResponse(programs.Weekly),
 		}
 		data, _ := json.Marshal(resp)
+		span.SetStatus(codes.Ok, "programs found")
 		WriteResponse(w, http.StatusOK, data)
 	}
 }

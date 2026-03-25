@@ -12,6 +12,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 )
 
 func TestActivateDeactivateServer(t *testing.T) {
@@ -47,7 +49,7 @@ func TestActivateDeactivateServer(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.ActivateDeactivateServer(ch)
+			handler := http.ActivateDeactivateServer(ch, tracer())
 			server := chi.NewMux()
 			server.Patch("/status/{action}", handler)
 			req := httptest.NewRequest(http2.MethodPatch, fmt.Sprintf("/status/%s", tt.action), nil)
@@ -56,4 +58,8 @@ func TestActivateDeactivateServer(t *testing.T) {
 			require.Equal(t, tt.expectedCode, writer.Code)
 		})
 	}
+}
+
+func tracer() trace.Tracer {
+	return noop.NewTracerProvider().Tracer("test")
 }

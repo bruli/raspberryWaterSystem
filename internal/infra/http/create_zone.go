@@ -5,21 +5,29 @@ import (
 	"net/http"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
 
-func CreateZone(ch cqs.CommandHandler) http.HandlerFunc {
+func CreateZone(ch cqs.CommandHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "CreateZoneRequest")
+		defer span.End()
 		var req CreateZoneRequestJson
 		if err := ReadRequest(w, r, &req); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return
 		}
-		if _, err := ch.Handle(r.Context(), app.CreateZoneCmd{
+		if _, err := ch.Handle(ctx, app.CreateZoneCmd{
 			ID:       req.Id,
 			ZoneName: req.Name,
 			Relays:   req.Relays,
 		}); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &app.CreateZoneError{}):
 				WriteErrorResponse(w, http.StatusBadRequest, Error{
@@ -31,6 +39,7 @@ func CreateZone(ch cqs.CommandHandler) http.HandlerFunc {
 			}
 			return
 		}
+		span.SetStatus(codes.Ok, "zone created")
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

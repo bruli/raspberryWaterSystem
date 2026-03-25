@@ -90,7 +90,7 @@ func TestCreateProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http2.CreateProgram(ch, http2.DailyProgram)
+			handler := http2.CreateProgram(ch, http2.DailyProgram, tracer())
 			req := httptest.NewRequest(http.MethodPost, "/programs", buildRequestBody(tt.body))
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)

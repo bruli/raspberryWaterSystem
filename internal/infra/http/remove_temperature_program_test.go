@@ -55,7 +55,7 @@ func TestRemoveTemperatureProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.RemoveTemperatureProgram(ch)
+			handler := http.RemoveTemperatureProgram(ch, tracer())
 			server := chi.NewMux()
 			server.Delete("/programs/temperature/{temperature}", handler)
 			req := httptest.NewRequest(http2.MethodDelete, fmt.Sprintf("/programs/temperature/%s", tt.temp), nil)

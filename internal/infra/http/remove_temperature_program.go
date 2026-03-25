@@ -9,19 +9,27 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func RemoveTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
+func RemoveTemperatureProgram(ch cqs.CommandHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "RemoveTemperatureProgramRequest")
+		defer span.End()
 		temp, err := strconv.ParseFloat(chi.URLParam(r, "temperature"), 32)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
 				Message: "invalid temperature value, must be a number",
 			})
 			return
 		}
-		if _, err = ch.Handle(r.Context(), app.RemoveTemperatureProgramCommand{Temperature: float32(temp)}); err != nil {
+		if _, err = ch.Handle(ctx, app.RemoveTemperatureProgramCommand{Temperature: float32(temp)}); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
@@ -30,6 +38,7 @@ func RemoveTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
 			}
 			return
 		}
+		span.SetStatus(codes.Ok, "temperature program removed")
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

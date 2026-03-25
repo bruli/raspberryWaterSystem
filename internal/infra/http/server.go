@@ -65,7 +65,6 @@ func RunServer(ctx context.Context, serverURL string, httpHandler http.Handler, 
 	go func() {
 		<-readyCh
 		logger.InfoContext(ctx, fmt.Sprintf("[HTTP SERVICE] system ready to serve at %s", serverURL))
-
 	}()
 
 	corsHTTPHandler := buildCORS(corsOpt).Handler(httpHandler)

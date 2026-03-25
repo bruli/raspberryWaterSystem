@@ -21,10 +21,14 @@ services:
       - TELEGRAM_BOT_ENABLED=${TELEGRAM_BOT_ENABLED:-false}
       - NATS_SERVER_URL=${NATS_SERVER_URL:-nats://nats:4222}
       - EVENTS_DIRECTORY=${EVENTS_DIRECTORY:-/tmp/events}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://lgtm:4318
+      - OTEL_TRACES_SAMPLER=always_on
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     ports:
       - "8083:8080"
     depends_on:
       - nats
+      - lgtm
     networks:
       - water_system
 
@@ -51,6 +55,15 @@ services:
     entrypoint: ["sh", "-lc", "sleep infinity"]
     networks:
       - water_system
+
+  lgtm:
+    image: grafana/otel-lgtm:latest
+    ports:
+      - "3000:3000"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+        - water_system
 
 networks:
   water_system:

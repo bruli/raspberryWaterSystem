@@ -49,7 +49,7 @@ func TestFindStatus(t *testing.T) {
 					return tt.result, tt.qhErr
 				},
 			}
-			handler := http.FindStatus(qh)
+			handler := http.FindStatus(qh, tracer())
 			req := httptest.NewRequest(http2.MethodGet, "/status", nil)
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)

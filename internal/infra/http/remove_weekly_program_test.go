@@ -55,7 +55,7 @@ func TestRemoveWeeklyProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.RemoveWeeklyProgram(ch)
+			handler := http.RemoveWeeklyProgram(ch, tracer())
 			server := chi.NewMux()
 			server.Delete("/programs/weekly/{day}", handler)
 			req := httptest.NewRequest(http2.MethodDelete, fmt.Sprintf("/programs/weekly/%s", tt.day), nil)

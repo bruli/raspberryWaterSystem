@@ -21,9 +21,12 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/infra/memory"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/nats"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/telegram"
+	"github.com/bruli/raspberryWaterSystem/internal/infra/tracing"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/worker"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/robfig/cron/v3"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const serviceName = "raspberryWaterSystem"
@@ -36,6 +39,22 @@ func main() {
 		log.ErrorContext(ctx, "failed building config", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+
+	tracingProv, err := tracing.InitTracing(ctx, serviceName)
+	if err != nil {
+		log.ErrorContext(ctx, "Error initializing tracing", "err", err)
+		os.Exit(1)
+	}
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err = tracingProv.Shutdown(shutdownCtx); err != nil {
+			log.ErrorContext(ctx, "Error shutting down tracing", "err", err)
+		}
+	}()
+
+	tracer := otel.Tracer(serviceName)
 
 	eventsCh := make(chan cqs.Event, 5)
 	defer close(eventsCh)
@@ -134,7 +153,7 @@ func main() {
 	go executionInTimeWorker(ctx, qhBus, chBus, log)
 
 	go runTelegramBot(ctx, conf, qhBus, chBus, log)
-	runHTTPServer(ctx, chBus, qhBus, conf, log)
+	runHTTPServer(ctx, chBus, qhBus, conf, log, tracer)
 }
 
 func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger) {
@@ -226,8 +245,8 @@ func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus
 	telegramServer.Read(ctx, log)
 }
 
-func runHTTPServer(ctx context.Context, chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, log *slog.Logger) {
-	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken)
+func runHTTPServer(ctx context.Context, chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, log *slog.Logger, tracer trace.Tracer) {
+	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken, tracer)
 	httpHandlers := infrahttp.NewHandler(definitions)
 	if err := infrahttp.RunServer(ctx, conf.ServerURL, httpHandlers, &infrahttp.CORSOpt{}, log); err != nil {
 		log.ErrorContext(ctx, "[HTTP SERVER] failed running server", slog.String("error", err.Error()))
@@ -319,7 +338,7 @@ func initStatus(ctx context.Context, ch cqs.CommandHandler, qh cqs.QueryHandler)
 	return err
 }
 
-func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string) infrahttp.HandlersDefinition {
+func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken string, tracer trace.Tracer) infrahttp.HandlersDefinition {
 	authMdw := infrahttp.AuthMiddleware(authToken)
 	return infrahttp.HandlersDefinition{
 		{
@@ -330,12 +349,12 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		{
 			Endpoint:    "/zones",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.CreateZone(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/zones",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(infrahttp.FinZones(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FinZones(qhBus, tracer)),
 		},
 		{
 			Endpoint:    "/zones/{id}/execute",
@@ -345,92 +364,92 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		{
 			Endpoint:    "/zones/{id}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(infrahttp.RemoveZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.RemoveZone(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/zones/{id}",
 			Method:      http.MethodPut,
-			HandlerFunc: authMdw(infrahttp.UpdateZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.UpdateZone(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/status",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(infrahttp.FindStatus(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindStatus(qhBus, tracer)),
 		},
 		{
 			Endpoint:    "/status/{action}",
 			Method:      http.MethodPatch,
-			HandlerFunc: authMdw(infrahttp.ActivateDeactivateServer(chBus)),
+			HandlerFunc: authMdw(infrahttp.ActivateDeactivateServer(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/weather",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(infrahttp.FindWeather(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindWeather(qhBus, tracer)),
 		},
 		{
 			Endpoint:    "/programs",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(infrahttp.FindAllPrograms(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindAllPrograms(qhBus, tracer)),
 		},
 		{
 			Endpoint:    "/programs/daily",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.DailyProgram)),
+			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.DailyProgram, tracer)),
 		},
 		{
 			Endpoint:    "/programs/daily/{hour}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.DailyProgram)),
+			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.DailyProgram, tracer)),
 		},
 		{
 			Endpoint:    "/programs/odd",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.OddProgram)),
+			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.OddProgram, tracer)),
 		},
 		{
 			Endpoint:    "/programs/odd/{hour}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.OddProgram)),
+			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.OddProgram, tracer)),
 		},
 		{
 			Endpoint:    "/programs/even",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.EvenProgram)),
+			HandlerFunc: authMdw(infrahttp.CreateProgram(chBus, infrahttp.EvenProgram, tracer)),
 		},
 		{
 			Endpoint:    "/programs/even/{hour}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.EvenProgram)),
+			HandlerFunc: authMdw(infrahttp.RemoveProgram(chBus, infrahttp.EvenProgram, tracer)),
 		},
 		{
 			Endpoint:    "/programs/weekly",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateWeeklyProgram(chBus)),
+			HandlerFunc: authMdw(infrahttp.CreateWeeklyProgram(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/programs/weekly/{day}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(infrahttp.RemoveWeeklyProgram(chBus)),
+			HandlerFunc: authMdw(infrahttp.RemoveWeeklyProgram(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/programs/temperature",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.CreateTemperatureProgram(chBus)),
+			HandlerFunc: authMdw(infrahttp.CreateTemperatureProgram(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/programs/temperature/{temperature}",
 			Method:      http.MethodPut,
-			HandlerFunc: authMdw(infrahttp.UpdateTemperatureProgram(chBus)),
+			HandlerFunc: authMdw(infrahttp.UpdateTemperatureProgram(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/programs/temperature/{temperature}",
 			Method:      http.MethodDelete,
-			HandlerFunc: authMdw(infrahttp.RemoveTemperatureProgram(chBus)),
+			HandlerFunc: authMdw(infrahttp.RemoveTemperatureProgram(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/logs",
 			Method:      http.MethodGet,
-			HandlerFunc: authMdw(infrahttp.FindExecutionLogs(qhBus)),
+			HandlerFunc: authMdw(infrahttp.FindExecutionLogs(qhBus, tracer)),
 		},
 		{
 			Endpoint:    "/metrics",

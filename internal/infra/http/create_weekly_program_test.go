@@ -145,7 +145,7 @@ func TestCreateWeeklyProgram(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http2.CreateWeeklyProgram(ch)
+			handler := http2.CreateWeeklyProgram(ch, tracer())
 			req := httptest.NewRequest(http.MethodPost, "/programs/weekly", buildRequestBody(tt.body))
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)

@@ -10,12 +10,18 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func UpdateTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
+func UpdateTemperatureProgram(ch cqs.CommandHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "UpdateTemperatureProgramRequest")
+		defer span.End()
 		temp, err := strconv.ParseFloat(chi.URLParam(r, "temperature"), 64)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
 				Message: "invalid temperature value, must be a number",
@@ -24,11 +30,15 @@ func UpdateTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
 		}
 		var req UpdateTemperatureProgramRequestJson
 		if err = ReadRequest(w, r, &req); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return
 		}
 
 		prgms, err := buildUpdateTempPrograms(req)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusBadRequest, Error{
 				Code:    ErrorCodeInvalidRequest,
 				Message: err.Error(),
@@ -36,10 +46,12 @@ func UpdateTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
 			return
 		}
 
-		if _, err = ch.Handle(r.Context(), app.UpdateTemperatureProgramCommand{
+		if _, err = ch.Handle(ctx, app.UpdateTemperatureProgramCommand{
 			Temperature: float32(temp),
 			Programs:    prgms,
 		}); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
@@ -48,6 +60,7 @@ func UpdateTemperatureProgram(ch cqs.CommandHandler) http.HandlerFunc {
 			}
 			return
 		}
+		span.SetStatus(codes.Ok, "temperature program updated")
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

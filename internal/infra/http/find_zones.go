@@ -7,12 +7,18 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func FinZones(qh cqs.QueryHandler) http.HandlerFunc {
+func FinZones(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		result, err := qh.Handle(r.Context(), app.FindZonesQuery{})
+		ctx, span := tracer.Start(r.Context(), "FindZonesRequest")
+		defer span.End()
+		result, err := qh.Handle(ctx, app.FindZonesQuery{})
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			WriteErrorResponse(w, http.StatusInternalServerError)
 			return
 		}
@@ -30,6 +36,7 @@ func FinZones(qh cqs.QueryHandler) http.HandlerFunc {
 			}
 		}
 		data, _ := json.Marshal(resp)
+		span.SetStatus(codes.Ok, "zones found")
 		WriteResponse(w, http.StatusOK, data)
 	}
 }

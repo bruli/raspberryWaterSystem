@@ -41,7 +41,7 @@ func TestFindWeather(t *testing.T) {
 					return tt.result, tt.qhErr
 				},
 			}
-			handler := http.FindWeather(qh)
+			handler := http.FindWeather(qh, tracer())
 			req := httptest.NewRequest(http2.MethodGet, "/weather", nil)
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)
