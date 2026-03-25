@@ -9,6 +9,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/davecgh/go-spew/spew"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const CreateZoneCmdName = "createZone"
@@ -23,26 +25,39 @@ func (c CreateZoneCmd) Name() string {
 }
 
 type CreateZone struct {
-	zr ZoneRepository
-}
-
-func NewCreateZone(zr ZoneRepository) CreateZone {
-	return CreateZone{zr: zr}
+	zr     ZoneRepository
+	tracer trace.Tracer
 }
 
 func (c CreateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateZoneCmd")
+	defer span.End()
 	co, ok := cmd.(CreateZoneCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateZoneCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateZoneCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	_, err := c.zr.FindByID(ctx, co.ID)
 	if err == nil {
-		return nil, CreateZoneError{msg: fmt.Sprintf("a zone with id %s, already exists", co.ID)}
+		err = CreateZoneError{msg: fmt.Sprintf("a zone with id %s, already exists", co.ID)}
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	switch {
 	case errors.As(err, &vo.NotFoundError{}):
-		return nil, c.createZone(ctx, co)
+		if err := c.createZone(ctx, co); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
+		}
+		span.SetStatus(codes.Ok, "zone created")
+		return nil, nil
 	default:
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 }
@@ -61,6 +76,10 @@ func (c CreateZone) createZone(ctx context.Context, co CreateZoneCmd) error {
 		return CreateZoneError{msg: err.Error()}
 	}
 	return c.zr.Save(ctx, zo)
+}
+
+func NewCreateZone(zr ZoneRepository, tracer trace.Tracer) CreateZone {
+	return CreateZone{zr: zr, tracer: tracer}
 }
 
 type CreateZoneError struct {

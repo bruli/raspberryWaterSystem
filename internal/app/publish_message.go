@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const PublishMessageCmdName = "publishMessage"
@@ -17,17 +19,29 @@ func (p PublishMessageCmd) Name() string {
 }
 
 type PublishMessage struct {
-	mp MessagePublisher
+	mp     MessagePublisher
+	tracer trace.Tracer
 }
 
 func (p PublishMessage) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := p.tracer.Start(ctx, "PublishMessageCmd")
+	defer span.End()
 	co, ok := cmd.(PublishMessageCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(PublishMessageCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(PublishMessageCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, p.mp.Publish(ctx, co.Message)
+	if err := p.mp.Publish(ctx, co.Message); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "message published")
+	return nil, nil
 }
 
-func NewPublishMessage(elp MessagePublisher) PublishMessage {
-	return PublishMessage{mp: elp}
+func NewPublishMessage(elp MessagePublisher, tracer trace.Tracer) PublishMessage {
+	return PublishMessage{mp: elp, tracer: tracer}
 }

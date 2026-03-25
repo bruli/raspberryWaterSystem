@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"sort"
-	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 )
@@ -24,36 +25,48 @@ func (f FindExecutionLogsQuery) Name() string {
 }
 
 type FindExecutionLogs struct {
-	elr ExecutionLogRepository
+	elr    ExecutionLogRepository
+	tracer trace.Tracer
 }
 
 func (f FindExecutionLogs) Handle(ctx context.Context, query cqs.Query) (any, error) {
+	ctx, span := f.tracer.Start(ctx, "FindExecutionLogs")
+	defer span.End()
 	q, ok := query.(FindExecutionLogsQuery)
 	if !ok {
-		return nil, cqs.NewInvalidQueryError(FindExecutionLogsQueryName, query.Name())
+		err := cqs.NewInvalidQueryError(FindExecutionLogsQueryName, query.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	if q.Limit > maxExecutionLogs {
-		return nil, ErrInvalidExecutionsLogLimit
+		err := ErrInvalidExecutionsLogLimit
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	logs, err := f.elr.FindAll(ctx)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	if q.Limit >= len(logs) {
+		span.SetStatus(codes.Ok, "all execution logs found")
 		return f.orderLogs(logs), nil
 	}
 	filtered := logs[len(logs)-q.Limit:]
-
+	span.SetStatus(codes.Ok, "execution logs found")
 	return f.orderLogs(filtered), nil
 }
 
 func (f FindExecutionLogs) orderLogs(logs []program.ExecutionLog) []program.ExecutionLog {
 	sort.Slice(logs, func(i, j int) bool {
-		return time.Time(logs[i].ExecutedAt()).After(time.Time(logs[j].ExecutedAt()))
+		return logs[i].ExecutedAt().After(logs[j].ExecutedAt())
 	})
 	return logs
 }
 
-func NewFindExecutionLogs(elr ExecutionLogRepository) FindExecutionLogs {
-	return FindExecutionLogs{elr: elr}
+func NewFindExecutionLogs(elr ExecutionLogRepository, tracer trace.Tracer) FindExecutionLogs {
+	return FindExecutionLogs{elr: elr, tracer: tracer}
 }

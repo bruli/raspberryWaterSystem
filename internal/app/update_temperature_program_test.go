@@ -73,7 +73,7 @@ func TestUpdateTemperatureProgram_Handle(t *testing.T) {
 			repo.SaveFunc = func(ctx context.Context, program *program.Temperature) error {
 				return tt.saveErr
 			}
-			handler := app.NewUpdateTemperatureProgram(repo)
+			handler := app.NewUpdateTemperatureProgram(repo, tracer())
 			_, err := handler.Handle(tt.args.ctx, tt.args.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

@@ -86,7 +86,7 @@ func TestCreateZoneHandle(t *testing.T) {
 					return tt.saveErr
 				},
 			}
-			handler := app.NewCreateZone(zr)
+			handler := app.NewCreateZone(zr, tracer())
 			_, errHand := handler.Handle(context.Background(), tt.cmd)
 			if errHand != nil {
 				require.ErrorAs(t, errHand, &tt.expectedErr)

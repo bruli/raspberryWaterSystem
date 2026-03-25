@@ -8,6 +8,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -42,55 +44,93 @@ func (c CreateEvenProgramCommand) Name() string {
 
 type CreateDailyProgram struct {
 	CreateProgram
+	tracer trace.Tracer
 }
 
 func (c CreateDailyProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateDailyProgramCmd")
+	defer span.End()
 	co, ok := cmd.(CreateDailyProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateDailyProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateDailyProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, c.Create(ctx, co.Program)
+	if err := c.Create(ctx, co.Program); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "program created")
+	return nil, nil
 }
 
-func NewCreateDailyProgram(programRepo ProgramRepository, zonesRepo ZoneRepository) *CreateDailyProgram {
+func NewCreateDailyProgram(programRepo ProgramRepository, zonesRepo ZoneRepository, tracer trace.Tracer) *CreateDailyProgram {
 	return &CreateDailyProgram{
 		CreateProgram: CreateProgram{programRepo: programRepo, zonesRepo: zonesRepo},
+		tracer:        tracer,
 	}
 }
 
 type CreateOddProgram struct {
 	CreateProgram
+	tracer trace.Tracer
 }
 
 func (c CreateOddProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateOddProgramCmd")
 	co, ok := cmd.(CreateOddProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateOddProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateOddProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, c.Create(ctx, co.Program)
+	if err := c.Create(ctx, co.Program); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "odd program created")
+	return nil, nil
 }
 
-func NewCreateOddProgram(programRepo ProgramRepository, zonesRepo ZoneRepository) *CreateOddProgram {
+func NewCreateOddProgram(programRepo ProgramRepository, zonesRepo ZoneRepository, tracer trace.Tracer) *CreateOddProgram {
 	return &CreateOddProgram{
 		CreateProgram: CreateProgram{programRepo: programRepo, zonesRepo: zonesRepo},
+		tracer:        tracer,
 	}
 }
 
 type CreateEvenProgram struct {
 	CreateProgram
+	tracer trace.Tracer
 }
 
 func (c CreateEvenProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateEvenProgramCmd")
+	defer span.End()
 	co, ok := cmd.(CreateEvenProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateEvenProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateEvenProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, c.Create(ctx, co.Program)
+	if err := c.Create(ctx, co.Program); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "even program created")
+	return nil, nil
 }
 
-func NewCreateEvenProgram(programRepo ProgramRepository, zonesRepo ZoneRepository) *CreateEvenProgram {
+func NewCreateEvenProgram(programRepo ProgramRepository, zonesRepo ZoneRepository, tracer trace.Tracer) *CreateEvenProgram {
 	return &CreateEvenProgram{
 		CreateProgram: CreateProgram{programRepo: programRepo, zonesRepo: zonesRepo},
+		tracer:        tracer,
 	}
 }
 

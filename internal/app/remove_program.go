@@ -5,6 +5,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -39,52 +41,88 @@ func (c RemoveEvenProgramCommand) Name() string {
 
 type RemoveDailyProgram struct {
 	RemoveProgram
+	tracer trace.Tracer
 }
 
 func (r RemoveDailyProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := r.tracer.Start(ctx, "RemoveDailyProgramCmd")
+	defer span.End()
 	co, ok := cmd.(RemoveDailyProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(RemoveDailyProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(RemoveDailyProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, r.Remove(ctx, co.Hour)
+	if err := r.Remove(ctx, co.Hour); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "program removed")
+	return nil, nil
 }
 
-func NewRemoveDailyProgram(pr ProgramRepository) *RemoveDailyProgram {
-	return &RemoveDailyProgram{RemoveProgram{pr: pr}}
+func NewRemoveDailyProgram(pr ProgramRepository, tracer trace.Tracer) *RemoveDailyProgram {
+	return &RemoveDailyProgram{RemoveProgram: RemoveProgram{pr: pr}, tracer: tracer}
 }
 
 type RemoveOddProgram struct {
 	RemoveProgram
+	tracer trace.Tracer
 }
 
 func (r RemoveOddProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := r.tracer.Start(ctx, "RemoveOddProgramCmd")
+	defer span.End()
 	co, ok := cmd.(RemoveOddProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(RemoveOddProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(RemoveOddProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, r.Remove(ctx, co.Hour)
+	if err := r.Remove(ctx, co.Hour); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "odd program removed")
+	return nil, nil
 }
 
-func NewRemoveOddProgram(pr ProgramRepository) *RemoveOddProgram {
+func NewRemoveOddProgram(pr ProgramRepository, tracer trace.Tracer) *RemoveOddProgram {
 	return &RemoveOddProgram{RemoveProgram: RemoveProgram{
 		pr: pr,
-	}}
+	}, tracer: tracer}
 }
 
 type RemoveEvenProgram struct {
 	RemoveProgram
+	tracer trace.Tracer
 }
 
 func (r RemoveEvenProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := r.tracer.Start(ctx, "RemoveEvenProgramCmd")
+	defer span.End()
 	co, ok := cmd.(RemoveEvenProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(RemoveEvenProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(RemoveEvenProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, r.Remove(ctx, co.Hour)
+	if err := r.Remove(ctx, co.Hour); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "even program removed")
+	return nil, nil
 }
 
-func NewRemoveEvenProgram(pr ProgramRepository) *RemoveEvenProgram {
-	return &RemoveEvenProgram{RemoveProgram: RemoveProgram{pr: pr}}
+func NewRemoveEvenProgram(pr ProgramRepository, tracer trace.Tracer) *RemoveEvenProgram {
+	return &RemoveEvenProgram{RemoveProgram: RemoveProgram{pr: pr}, tracer: tracer}
 }
 
 type RemoveProgram struct {

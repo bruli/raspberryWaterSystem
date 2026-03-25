@@ -60,7 +60,7 @@ func TestExecuteZoneHandle(t *testing.T) {
 					return tt.zone, tt.findErr
 				},
 			}
-			handler := app.NewExecuteZone(zr)
+			handler := app.NewExecuteZone(zr, tracer())
 			events, err := handler.Handle(context.Background(), tt.command)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

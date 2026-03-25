@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
@@ -26,32 +28,50 @@ func (c CreateStatusCmd) Name() string {
 }
 
 type CreateStatus struct {
-	sr StatusRepository
-	lr LightRepository
-}
-
-func NewCreateStatus(sr StatusRepository, lr LightRepository) CreateStatus {
-	return CreateStatus{sr: sr, lr: lr}
+	sr     StatusRepository
+	lr     LightRepository
+	tracer trace.Tracer
 }
 
 func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateStatusCmd")
+	defer span.End()
 	co, ok := cmd.(CreateStatusCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateStatusCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateStatusCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	_, err := c.sr.Find(ctx)
 	if err == nil {
+		span.RecordError(ErrStatusAlreadyExist)
+		span.SetStatus(codes.Error, ErrStatusAlreadyExist.Error())
 		return nil, ErrStatusAlreadyExist
 	}
 	switch {
 	case errors.As(err, &vo.NotFoundError{}):
 		li, err := c.lr.Find(ctx, time.Now().UTC())
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		st := status.New(co.StartedAt, co.Weather, li)
-		return nil, c.sr.Save(ctx, *st)
+		if err = c.sr.Save(ctx, *st); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
+		}
+		span.SetStatus(codes.Ok, "status created")
+		return nil, nil
 	default:
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+}
+
+func NewCreateStatus(sr StatusRepository, lr LightRepository, tracer trace.Tracer) CreateStatus {
+	return CreateStatus{sr: sr, lr: lr, tracer: tracer}
 }

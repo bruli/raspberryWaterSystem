@@ -8,6 +8,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const CreateTemperatureProgramCommandName = "createTemperatureProgram"
@@ -21,27 +23,44 @@ func (c CreateTemperatureProgramCommand) Name() string {
 }
 
 type CreateTemperatureProgram struct {
-	repo TemperatureProgramRepository
+	repo   TemperatureProgramRepository
+	tracer trace.Tracer
 }
 
 func (c CreateTemperatureProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateTemperatureProgramCmd")
+	defer span.End()
 	co, ok := cmd.(CreateTemperatureProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateTemperatureProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateTemperatureProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	_, err := c.repo.FindByTemperature(ctx, co.Temperature.Temperature())
 	switch {
 	case err == nil:
-		return nil, CreateTemperatureProgramError{msg: fmt.Sprintf("a temperature program with day %v already exists", co.Temperature)}
+		err = CreateTemperatureProgramError{msg: fmt.Sprintf("a temperature program with day %v already exists", co.Temperature)}
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	case errors.As(err, &vo.NotFoundError{}):
-		return nil, c.repo.Save(ctx, co.Temperature)
+		if err = c.repo.Save(ctx, co.Temperature); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
+		}
+		span.SetStatus(codes.Ok, "temperature program created")
+		return nil, nil
 	default:
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 }
 
-func NewCreateTemperatureProgram(repo TemperatureProgramRepository) *CreateTemperatureProgram {
-	return &CreateTemperatureProgram{repo: repo}
+func NewCreateTemperatureProgram(repo TemperatureProgramRepository, tracer trace.Tracer) *CreateTemperatureProgram {
+	return &CreateTemperatureProgram{repo: repo, tracer: tracer}
 }
 
 type CreateTemperatureProgramError struct {

@@ -74,7 +74,7 @@ func TestUpdateStatusHandle(t *testing.T) {
 					return tt.light, tt.lightErr
 				},
 			}
-			handler := app.NewUpdateStatus(sr, lr)
+			handler := app.NewUpdateStatus(sr, lr, tracer())
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

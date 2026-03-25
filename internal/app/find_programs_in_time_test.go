@@ -124,7 +124,7 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 					return tt.temp, tt.tempErr
 				},
 			}
-			handler := app.NewFindProgramsInTime(daily, odd, even, weekly, temperature)
+			handler := app.NewFindProgramsInTime(daily, odd, even, weekly, temperature, tracer())
 			result, err := handler.Handle(context.Background(), tt.query)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

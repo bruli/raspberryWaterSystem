@@ -7,6 +7,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const SaveExecutionLogCmdName = "saveExecutionLog"
@@ -24,16 +26,24 @@ func (s SaveExecutionLogCmd) Name() string {
 }
 
 type SaveExecutionLog struct {
-	elr ExecutionLogRepository
+	elr    ExecutionLogRepository
+	tracer trace.Tracer
 }
 
 func (s SaveExecutionLog) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := s.tracer.Start(ctx, "SaveExecutionLogCmd")
+	defer span.End()
 	co, ok := cmd.(SaveExecutionLogCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(SaveExecutionLogCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(SaveExecutionLogCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	logs, err := s.elr.FindAll(ctx)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	readedLogs := logs
@@ -42,14 +52,22 @@ func (s SaveExecutionLog) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Ev
 	}
 	log, err := program.NewExecutionLog(co.Seconds, co.ZoneName, co.ExecutedAt)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, SaveExecutionLogError{m: err.Error()}
 	}
 	readedLogs = append(readedLogs, log)
-	return nil, s.elr.Save(ctx, readedLogs)
+	if err = s.elr.Save(ctx, readedLogs); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "execution log saved")
+	return nil, nil
 }
 
-func NewSaveExecutionLog(elr ExecutionLogRepository) SaveExecutionLog {
-	return SaveExecutionLog{elr: elr}
+func NewSaveExecutionLog(elr ExecutionLogRepository, tracer trace.Tracer) SaveExecutionLog {
+	return SaveExecutionLog{elr: elr, tracer: tracer}
 }
 
 type SaveExecutionLogError struct {

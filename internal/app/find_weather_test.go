@@ -58,7 +58,7 @@ func TestFindWeatherHandle(t *testing.T) {
 					return false, tt.rainErr
 				},
 			}
-			handler := app.NewFindWeather(tr, rr)
+			handler := app.NewFindWeather(tr, rr, tracer())
 			result, err := handler.Handle(context.Background(), app.FindWeatherQuery{})
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

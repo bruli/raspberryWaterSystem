@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const ExecuteZoneCmdName = "executeZone"
@@ -19,26 +21,38 @@ func (e ExecuteZoneCmd) Name() string {
 }
 
 type ExecuteZone struct {
-	zr ZoneRepository
+	zr     ZoneRepository
+	tracer trace.Tracer
 }
 
 func (e ExecuteZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := e.tracer.Start(ctx, "ExecuteZoneCmd")
+	defer span.End()
 	co, ok := cmd.(ExecuteZoneCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(ExecuteZoneCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(ExecuteZoneCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	zo, err := e.zr.FindByID(ctx, co.ZoneID)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	if err = zo.Execute(co.Seconds); err != nil {
-		return nil, ExecuteZoneError{m: err.Error()}
+		err = ExecuteZoneError{m: err.Error()}
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
+	span.SetStatus(codes.Ok, "zone executed")
 	return zo.Events(), nil
 }
 
-func NewExecuteZone(zr ZoneRepository) ExecuteZone {
-	return ExecuteZone{zr: zr}
+func NewExecuteZone(zr ZoneRepository, tracer trace.Tracer) ExecuteZone {
+	return ExecuteZone{zr: zr, tracer: tracer}
 }
 
 type ExecuteZoneError struct {

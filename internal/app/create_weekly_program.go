@@ -8,6 +8,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const CreateWeeklyProgramCommandName = "createWeeklyProgram"
@@ -21,28 +23,45 @@ func (c CreateWeeklyProgramCommand) Name() string {
 }
 
 type CreateWeeklyProgram struct {
-	repo WeeklyProgramRepository
+	repo   WeeklyProgramRepository
+	tracer trace.Tracer
 }
 
 func (c CreateWeeklyProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := c.tracer.Start(ctx, "CreateWeeklyProgramCmd")
+	defer span.End()
 	co, ok := cmd.(CreateWeeklyProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(CreateWeeklyProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(CreateWeeklyProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	day := co.Weekly.WeekDay()
 	_, err := c.repo.FindByDay(ctx, &day)
 	switch {
 	case err == nil:
-		return nil, CreateWeeklyProgramError{msg: fmt.Sprintf("a weekly program with day %s already exists", day.String())}
+		err = CreateWeeklyProgramError{msg: fmt.Sprintf("a weekly program with day %s already exists", day.String())}
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	case errors.As(err, &vo.NotFoundError{}):
-		return nil, c.repo.Save(ctx, co.Weekly)
+		if err = c.repo.Save(ctx, co.Weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
+		}
+		span.SetStatus(codes.Ok, "weekly program created")
+		return nil, nil
 	default:
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 }
 
-func NewCreateWeeklyProgram(repo WeeklyProgramRepository) *CreateWeeklyProgram {
-	return &CreateWeeklyProgram{repo: repo}
+func NewCreateWeeklyProgram(repo WeeklyProgramRepository, tracer trace.Tracer) *CreateWeeklyProgram {
+	return &CreateWeeklyProgram{repo: repo, tracer: tracer}
 }
 
 type CreateWeeklyProgramError struct {

@@ -84,7 +84,7 @@ func TestCreateStatusHandle(t *testing.T) {
 					return nil, tt.lightErr
 				},
 			}
-			handler := app.NewCreateStatus(sr, lr)
+			handler := app.NewCreateStatus(sr, lr, tracer())
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

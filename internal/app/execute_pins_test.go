@@ -44,7 +44,7 @@ func TestExecutePinsHandle(t *testing.T) {
 					return tt.execErr
 				},
 			}
-			handler := app.NewExecutePins(pe)
+			handler := app.NewExecutePins(pe, tracer())
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

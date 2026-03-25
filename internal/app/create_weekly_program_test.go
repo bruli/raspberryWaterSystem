@@ -77,7 +77,7 @@ func TestCreateWeeklyProgram_Handle(t *testing.T) {
 					return tt.saveErr
 				},
 			}
-			handler := app.NewCreateWeeklyProgram(repo)
+			handler := app.NewCreateWeeklyProgram(repo, tracer())
 			_, err := handler.Handle(tt.args.ctx, tt.args.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

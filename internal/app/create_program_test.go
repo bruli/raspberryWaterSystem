@@ -98,7 +98,7 @@ func TestCreateProgram_Handle(t *testing.T) {
 				},
 			}
 
-			handler := app.NewCreateDailyProgram(programRepo, zonesRepo)
+			handler := app.NewCreateDailyProgram(programRepo, zonesRepo, tracer())
 			_, err := handler.Handle(tt.args.ctx, tt.args.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

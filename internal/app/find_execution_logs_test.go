@@ -85,7 +85,7 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 					return tt.logs, tt.findErr
 				},
 			}
-			handler := app.NewFindExecutionLogs(elr)
+			handler := app.NewFindExecutionLogs(elr, tracer())
 			result, err := handler.Handle(context.Background(), tt.query)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

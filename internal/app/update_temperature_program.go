@@ -5,6 +5,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const UpdateTemperatureProgramCommandName = "updateTemperatureProgram"
@@ -19,23 +21,37 @@ func (u UpdateTemperatureProgramCommand) Name() string {
 }
 
 type UpdateTemperatureProgram struct {
-	repo TemperatureProgramRepository
+	repo   TemperatureProgramRepository
+	tracer trace.Tracer
 }
 
 func (u UpdateTemperatureProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := u.tracer.Start(ctx, "UpdateTemperatureProgramCmd")
+	defer span.End()
 	co, ok := cmd.(UpdateTemperatureProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(UpdateTemperatureProgramCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(UpdateTemperatureProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	pr, err := u.repo.FindByTemperature(ctx, co.Temperature)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	pr.Update(co.Programs)
 
-	return nil, u.repo.Save(ctx, pr)
+	if err = u.repo.Save(ctx, pr); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "temperature program updated")
+	return nil, nil
 }
 
-func NewUpdateTemperatureProgram(repo TemperatureProgramRepository) *UpdateTemperatureProgram {
-	return &UpdateTemperatureProgram{repo: repo}
+func NewUpdateTemperatureProgram(repo TemperatureProgramRepository, tracer trace.Tracer) *UpdateTemperatureProgram {
+	return &UpdateTemperatureProgram{repo: repo, tracer: tracer}
 }

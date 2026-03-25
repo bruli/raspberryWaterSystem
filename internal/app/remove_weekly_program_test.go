@@ -64,7 +64,7 @@ func TestRemoveWeekly_Handle(t *testing.T) {
 					return tt.removeErr
 				},
 			}
-			handler := app.NewRemoveWeeklyProgram(repo)
+			handler := app.NewRemoveWeeklyProgram(repo, tracer())
 			_, err := handler.Handle(tt.args.ctx, tt.args.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

@@ -33,7 +33,7 @@ func TestNewEventMiddleware(t *testing.T) {
 			Event:       ev,
 		}
 		eventCh := make(chan tracing.Event)
-		eventMdw := app.NewEventMiddleware(eventCh)
+		eventMdw := app.NewEventMiddleware(eventCh, tracer())
 		handler := eventMdw(commandHandler{
 			events: []cqs.Event{
 				ev,

@@ -40,7 +40,7 @@ func TestFindStatusHandle(t *testing.T) {
 					return tt.status, tt.findErr
 				},
 			}
-			handler := app.NewFindStatus(sr)
+			handler := app.NewFindStatus(sr, tracer())
 			result, err := handler.Handle(context.Background(), app.FindStatusQuery{})
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

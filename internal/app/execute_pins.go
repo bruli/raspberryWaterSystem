@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const ExecutePinsCmdName = "executePins"
@@ -18,17 +20,28 @@ func (e ExecutePinsCmd) Name() string {
 }
 
 type ExecutePins struct {
-	pe PinExecutor
+	pe     PinExecutor
+	tracer trace.Tracer
 }
 
 func (e ExecutePins) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := e.tracer.Start(ctx, "ExecutePinsCmd")
+	defer span.End()
 	co, ok := cmd.(ExecutePinsCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(ExecutePinsCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(ExecutePinsCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
-	return nil, e.pe.Execute(ctx, co.Seconds, co.Pins)
+	if err := e.pe.Execute(ctx, co.Seconds, co.Pins); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	return nil, nil
 }
 
-func NewExecutePins(pe PinExecutor) ExecutePins {
-	return ExecutePins{pe: pe}
+func NewExecutePins(pe PinExecutor, tracer trace.Tracer) ExecutePins {
+	return ExecutePins{pe: pe, tracer: tracer}
 }

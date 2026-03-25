@@ -8,6 +8,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const FindProgramsInTimeQueryName = "findProgramsInTime"
@@ -25,34 +27,51 @@ type FindProgramsInTime struct {
 	Daily, Odd, Even ProgramRepository
 	Weekly           WeeklyProgramRepository
 	Temperature      TemperatureProgramRepository
+	tracer           trace.Tracer
 }
 
 func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, error) {
+	ctx, span := f.tracer.Start(ctx, "FindProgramsInTime")
+	defer span.End()
 	q, ok := query.(FindProgramsInTimeQuery)
 	if !ok {
-		return nil, cqs.NewInvalidQueryError(FindProgramsInTimeQueryName, query.Name())
+		err := cqs.NewInvalidQueryError(FindProgramsInTimeQueryName, query.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	hour, _ := program.ParseHour(q.On.Format(program.HourLayout))
 	daily, err := f.findDaily(ctx, &hour)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	odd, err := f.findOdd(ctx, &hour)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	even, err := f.findEven(ctx, &hour)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	weekly, err := f.findWeekly(ctx, hour, q.On.Weekday())
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 	temp, err := f.findTemperature(ctx, hour, q.Temperature)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
+	span.SetStatus(codes.Ok, "programs found")
 	return ProgramsInTime{
 		Daily:       daily,
 		Odd:         odd,
@@ -111,8 +130,9 @@ func NewFindProgramsInTime(
 	daily, odd, even ProgramRepository,
 	weekly WeeklyProgramRepository,
 	temperature TemperatureProgramRepository,
+	tracer trace.Tracer,
 ) FindProgramsInTime {
-	return FindProgramsInTime{Daily: daily, Odd: odd, Even: even, Weekly: weekly, Temperature: temperature}
+	return FindProgramsInTime{Daily: daily, Odd: odd, Even: even, Weekly: weekly, Temperature: temperature, tracer: tracer}
 }
 
 type ProgramsInTime struct {

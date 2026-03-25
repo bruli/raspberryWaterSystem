@@ -102,7 +102,7 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 			sr.FindFunc = func(ctx context.Context) (status.Status, error) {
 				return tt.st, tt.stErr
 			}
-			handler := app.NewExecuteZoneWithStatus(zr, sr)
+			handler := app.NewExecuteZoneWithStatus(zr, sr, tracer())
 			events, err := handler.Handle(context.Background(), tt.command)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

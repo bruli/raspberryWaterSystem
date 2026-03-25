@@ -8,6 +8,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const UpdateZoneCommandName = "updateZone"
@@ -22,15 +24,23 @@ func (u UpdateZoneCommand) Name() string {
 }
 
 type UpdateZone struct {
-	zr ZoneRepository
+	zr     ZoneRepository
+	tracer trace.Tracer
 }
 
 func (u UpdateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := u.tracer.Start(ctx, "UpdateZoneCmd")
+	defer span.End()
 	co, ok := cmd.(UpdateZoneCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(UpdateZoneCommandName, cmd.Name())
+		err := cqs.NewInvalidCommandError(UpdateZoneCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 	if _, err := u.zr.FindByID(ctx, co.ID); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		switch {
 		case errors.As(err, &vo.NotFoundError{}):
 			return nil, UpdateZoneError{fmt.Sprintf("a zone with id %s, not found", co.ID)}
@@ -42,15 +52,29 @@ func (u UpdateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, e
 	for i, re := range co.Relays {
 		r, err := zone.ParseRelay(re)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, UpdateZoneError{msg: err.Error()}
 		}
 		relays[i] = r
 	}
 	zo, err := zone.New(co.ID, co.ZoneName, relays)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, UpdateZoneError{msg: err.Error()}
 	}
-	return nil, u.zr.Update(ctx, zo)
+	if err = u.zr.Update(ctx, zo); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "zone updated")
+	return nil, nil
+}
+
+func NewUpdateZone(zr ZoneRepository, tracer trace.Tracer) *UpdateZone {
+	return &UpdateZone{zr: zr, tracer: tracer}
 }
 
 type UpdateZoneError struct {
@@ -59,8 +83,4 @@ type UpdateZoneError struct {
 
 func (u UpdateZoneError) Error() string {
 	return fmt.Sprintf("failed to update zone: %s", u.msg)
-}
-
-func NewUpdateZone(zr ZoneRepository) *UpdateZone {
-	return &UpdateZone{zr: zr}
 }

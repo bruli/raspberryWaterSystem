@@ -7,6 +7,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
@@ -58,7 +60,7 @@ func TestActivateDeactivateServerHandle(t *testing.T) {
 			stRepo.UpdateFunc = func(ctx context.Context, st status.Status) error {
 				return tt.updateErr
 			}
-			handler := app.NewActivateDeactivateServer(stRepo)
+			handler := app.NewActivateDeactivateServer(stRepo, tracer())
 			_, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)
@@ -73,4 +75,8 @@ type invalidCommand struct{}
 
 func (i invalidCommand) Name() string {
 	return "invalid"
+}
+
+func tracer() trace.Tracer {
+	return noop.NewTracerProvider().Tracer("test")
 }

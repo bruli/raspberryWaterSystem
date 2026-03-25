@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const ActivateDeactivateServerCmdName = "activateDeactivateServer"
@@ -18,16 +20,24 @@ func (a ActivateDeactivateServerCmd) Name() string {
 
 type ActivateDeactivateServer struct {
 	stRepo StatusRepository
+	tracer trace.Tracer
 }
 
 func (a ActivateDeactivateServer) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := a.tracer.Start(ctx, "ActivateDeactivateServerCmd")
+	defer span.End()
 	co, ok := cmd.(ActivateDeactivateServerCmd)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(ActivateDeactivateServerCmdName, cmd.Name())
+		err := cqs.NewInvalidCommandError(ActivateDeactivateServerCmdName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
 	}
 
 	st, err := a.stRepo.Find(ctx)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
 
@@ -37,9 +47,10 @@ func (a ActivateDeactivateServer) Handle(ctx context.Context, cmd cqs.Command) (
 	default:
 		st.Deactivate()
 	}
+	span.SetStatus(codes.Ok, "server activated/deactivated")
 	return nil, a.stRepo.Update(ctx, st)
 }
 
-func NewActivateDeactivateServer(stRepo StatusRepository) *ActivateDeactivateServer {
-	return &ActivateDeactivateServer{stRepo: stRepo}
+func NewActivateDeactivateServer(stRepo StatusRepository, tracer trace.Tracer) *ActivateDeactivateServer {
+	return &ActivateDeactivateServer{stRepo: stRepo, tracer: tracer}
 }

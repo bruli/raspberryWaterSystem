@@ -45,7 +45,7 @@ func TestPublishExecutionLogHandle(t *testing.T) {
 					return tt.publishErr
 				},
 			}
-			handler := app.NewPublishMessage(elp)
+			handler := app.NewPublishMessage(elp, tracer())
 			events, err := handler.Handle(context.Background(), tt.cmd)
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)

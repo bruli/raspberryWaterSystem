@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const RemoveTemperatureProgramCommandName = "removeTemperatureProgram"
@@ -17,20 +19,34 @@ func (r RemoveTemperatureProgramCommand) Name() string {
 }
 
 type RemoveTemperatureProgram struct {
-	repo TemperatureProgramRepository
+	repo   TemperatureProgramRepository
+	tracer trace.Tracer
 }
 
 func (r RemoveTemperatureProgram) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+	ctx, span := r.tracer.Start(ctx, "RemoveTemperatureProgramCmd")
+	defer span.End()
 	co, ok := cmd.(RemoveTemperatureProgramCommand)
 	if !ok {
-		return nil, cqs.NewInvalidCommandError(RemoveTemperatureProgramCommandName, cmd.Name())
-	}
-	if _, err := r.repo.FindByTemperature(ctx, co.Temperature); err != nil {
+		err := cqs.NewInvalidCommandError(RemoveTemperatureProgramCommandName, cmd.Name())
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return nil, err
 	}
-	return nil, r.repo.Remove(ctx, co.Temperature)
+	if _, err := r.repo.FindByTemperature(ctx, co.Temperature); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	if err := r.repo.Remove(ctx, co.Temperature); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+	span.SetStatus(codes.Ok, "program removed")
+	return nil, nil
 }
 
-func NewRemoveTemperatureProgram(repo TemperatureProgramRepository) *RemoveTemperatureProgram {
-	return &RemoveTemperatureProgram{repo: repo}
+func NewRemoveTemperatureProgram(repo TemperatureProgramRepository, tracer trace.Tracer) *RemoveTemperatureProgram {
+	return &RemoveTemperatureProgram{repo: repo, tracer: tracer}
 }
