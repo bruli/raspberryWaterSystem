@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/tracing"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
@@ -20,17 +22,21 @@ func TestNewEventMiddleware(t *testing.T) {
 	then all events are write in channel`, func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		errTest := errors.New("")
-		event1 := Event{
+		ev := Event{
 			ID:        uuid.New(),
 			Name:      "eventito 1",
 			At:        time.Now(),
 			AggRootID: "dkdkdkd",
 		}
-		eventCh := make(chan cqs.Event)
+		event1 := tracing.Event{
+			SpanContext: trace.SpanContext{},
+			Event:       ev,
+		}
+		eventCh := make(chan tracing.Event)
 		eventMdw := app.NewEventMiddleware(eventCh)
 		handler := eventMdw(commandHandler{
 			events: []cqs.Event{
-				event1,
+				ev,
 			},
 			err: errTest,
 		})

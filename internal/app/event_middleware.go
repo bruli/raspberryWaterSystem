@@ -3,15 +3,20 @@ package app
 import (
 	"context"
 
+	"github.com/bruli/raspberryWaterSystem/internal/infra/tracing"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func NewEventMiddleware(evCh chan<- cqs.Event) cqs.CommandHandlerMiddleware {
+func NewEventMiddleware(evCh chan<- tracing.Event) cqs.CommandHandlerMiddleware {
 	return func(h cqs.CommandHandler) cqs.CommandHandler {
 		return cqs.CommandHandlerFunc(func(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
 			events, err := h.Handle(ctx, cmd)
 			for _, ev := range events {
-				evCh <- ev
+				evCh <- tracing.Event{
+					SpanContext: trace.SpanContextFromContext(ctx),
+					Event:       ev,
+				}
 			}
 			return nil, err
 		})

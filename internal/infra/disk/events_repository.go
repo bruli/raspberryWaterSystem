@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 const (
@@ -16,10 +18,11 @@ const (
 )
 
 type Event struct {
-	ID        string    `json:"id"`
-	EventType string    `json:"event_type"`
-	EventAt   time.Time `json:"event_at"`
-	Payload   []byte    `json:"payload"`
+	ID        string            `json:"id"`
+	EventType string            `json:"event_type"`
+	EventAt   time.Time         `json:"event_at"`
+	Payload   []byte            `json:"payload"`
+	Trace     map[string]string `json:"trace"`
 }
 
 type Weather struct {
@@ -27,7 +30,7 @@ type Weather struct {
 	IsRaining   bool    `json:"is_raining"`
 }
 
-func NewFromWeather(w *Weather) (*Event, error) {
+func NewFromWeather(ctx context.Context, w *Weather) (*Event, error) {
 	payload, err := json.Marshal(w)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal weather: %w", err)
@@ -37,10 +40,11 @@ func NewFromWeather(w *Weather) (*Event, error) {
 		EventType: TerraceWeatherEventType,
 		EventAt:   time.Now(),
 		Payload:   payload,
+		Trace:     buildTracingMap(ctx),
 	}, nil
 }
 
-func NewFromExecutionLog(lo *Log) (*Event, error) {
+func NewFromExecutionLog(ctx context.Context, lo *Log) (*Event, error) {
 	payload, err := json.Marshal(lo)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal execution log: %w", err)
@@ -50,7 +54,14 @@ func NewFromExecutionLog(lo *Log) (*Event, error) {
 		EventType: ExecutionLogsEventType,
 		EventAt:   time.Now(),
 		Payload:   payload,
+		Trace:     buildTracingMap(ctx),
 	}, nil
+}
+
+func buildTracingMap(ctx context.Context) map[string]string {
+	carrier := make(map[string]string)
+	otel.GetTextMapPropagator().Inject(ctx, propagation.MapCarrier(carrier))
+	return carrier
 }
 
 type EventsRepository struct {

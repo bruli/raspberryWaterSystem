@@ -54,7 +54,7 @@ func TestExecuteZone(t *testing.T) {
 					return nil, tt.chErr
 				},
 			}
-			handler := http.ExecuteZone(ch)
+			handler := http.ExecuteZone(ch, tracer())
 			server := chi.NewMux()
 			server.Post("/zones/{id}/execute", handler)
 			req := httptest.NewRequest(http2.MethodPost, "/zones/id/execute", buildRequestBody(tt.body))

@@ -8,19 +8,27 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func ExecuteZone(ch cqs.CommandHandler) http.HandlerFunc {
+func ExecuteZone(ch cqs.CommandHandler, tracer trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "ExecuteZoneRequest")
+		defer span.End()
 		var req ExecuteZoneRequestJson
 		if err := ReadRequest(w, r, &req); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return
 		}
 		id := chi.URLParam(r, "id")
-		if _, err := ch.Handle(r.Context(), app.ExecuteZoneCmd{
+		if _, err := ch.Handle(ctx, app.ExecuteZoneCmd{
 			Seconds: uint(req.Seconds),
 			ZoneID:  id,
 		}); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			switch {
 			case errors.As(err, &vo.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
@@ -29,6 +37,7 @@ func ExecuteZone(ch cqs.CommandHandler) http.HandlerFunc {
 			}
 			return
 		}
+		span.SetStatus(codes.Ok, "zone executed")
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

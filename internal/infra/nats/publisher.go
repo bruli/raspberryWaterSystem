@@ -6,13 +6,18 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const StreamName = "WATER_SYSTEM"
 
 type Publisher struct {
-	nc *nats.Conn
-	js nats.JetStreamContext
+	nc     *nats.Conn
+	js     nats.JetStreamContext
+	tracer trace.Tracer
 }
 
 func (p *Publisher) PublishEvent(ctx context.Context, id, subject string, payload []byte) error {
@@ -20,20 +25,29 @@ func (p *Publisher) PublishEvent(ctx context.Context, id, subject string, payloa
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		ack, err := p.js.PublishMsg(&nats.Msg{
+		_, span := p.tracer.Start(ctx, "publish-nats-event")
+		defer span.End()
+		msg := nats.Msg{
 			Subject: subject,
 			Data:    payload,
 			Header: nats.Header{
 				"Nats-Msg-Id": []string{id},
 			},
-		})
+		}
+		otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(msg.Header))
+		ack, err := p.js.PublishMsg(&msg)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return fmt.Errorf("failed to publish event: %w", err)
 		}
 
 		if ack == nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return fmt.Errorf("failed to publish event: nil puback")
 		}
+		span.SetStatus(codes.Ok, "event published")
 		return nil
 	}
 }
@@ -66,7 +80,7 @@ func (p *Publisher) Close() {
 	}
 }
 
-func NewPublisher(natsURL string) (*Publisher, error) {
+func NewPublisher(natsURL string, tracer trace.Tracer) (*Publisher, error) {
 	nc, err := nats.Connect(
 		natsURL,
 		nats.Name("water-system"),
@@ -84,7 +98,8 @@ func NewPublisher(natsURL string) (*Publisher, error) {
 	}
 
 	return &Publisher{
-		nc: nc,
-		js: js,
+		nc:     nc,
+		js:     js,
+		tracer: tracer,
 	}, nil
 }

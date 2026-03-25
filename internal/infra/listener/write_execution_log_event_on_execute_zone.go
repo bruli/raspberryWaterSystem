@@ -14,7 +14,7 @@ type WriteExecutionLogEventOnExecuteZone struct {
 
 func (w WriteExecutionLogEventOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) error {
 	event, _ := ev.(zone.Executed)
-	evnt, err := disk.NewFromExecutionLog(&disk.Log{
+	evnt, err := disk.NewFromExecutionLog(ctx, &disk.Log{
 		Seconds:    int(event.Seconds),
 		ZoneName:   event.ZoneName,
 		ExecutedAt: event.EventAt(),

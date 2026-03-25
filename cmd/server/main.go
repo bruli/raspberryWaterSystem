@@ -26,6 +26,9 @@ import (
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/robfig/cron/v3"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -56,7 +59,7 @@ func main() {
 
 	tracer := otel.Tracer(serviceName)
 
-	eventsCh := make(chan cqs.Event, 5)
+	eventsCh := make(chan tracing.Event, 5)
 	defer close(eventsCh)
 
 	logCHMdw := cqs.NewCommandHndErrorMiddleware(log)
@@ -80,7 +83,7 @@ func main() {
 	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
 	eventsRepo := disk.NewEventsRepository(conf.EventsDirectory)
 
-	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL)
+	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL, tracer)
 	if err != nil {
 		log.ErrorContext(ctx, "failed building execution logs", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -97,8 +100,8 @@ func main() {
 		log.ErrorContext(ctx, "failed building cron")
 		os.Exit(1)
 	}
-	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, log)
-	go readingEvents(ctx, eventsRepo, eventsPublisher, log)
+	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, log, tracer)
+	go readingEvents(ctx, eventsRepo, eventsPublisher, log, tracer)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr)))
@@ -149,24 +152,30 @@ func main() {
 	defer stop()
 
 	go updateStatusWorker(ctx, qhBus, chBus, log)
-	go eventsWorker(ctx, eventsCh, eventBus, log)
+	go eventsWorker(ctx, eventsCh, eventBus, log, tracer)
 	go executionInTimeWorker(ctx, qhBus, chBus, log)
 
 	go runTelegramBot(ctx, conf, qhBus, chBus, log)
 	runHTTPServer(ctx, chBus, qhBus, conf, log, tracer)
 }
 
-func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger) {
+func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger, tracer trace.Tracer) {
 	defer cron.Stop()
-	_, err := cron.AddFunc("00 * * * *", func() {
+	_, err := cron.AddFunc("* * * * *", func() {
+		ctx, span := tracer.Start(ctx, "TerraceWeatherCron")
+		defer span.End()
 		log.InfoContext(ctx, "[WORKER] Terrace Weather: getting weather")
 		result, err := ch.Handle(ctx, app.FindStatusQuery{})
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed getting weather", slog.String("error", err.Error()))
 			return
 		}
 		st, ok := result.(status.Status)
 		if !ok {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed casting weather", slog.String("type", fmt.Sprintf("%T", result)))
 			return
 		}
@@ -174,14 +183,19 @@ func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsR
 			Temperature: st.Weather().Temperature().Float32(),
 			IsRaining:   st.Weather().IsRaining(),
 		}
-		ev, err := disk.NewFromWeather(&tw)
+		ev, err := disk.NewFromWeather(ctx, &tw)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed creating weather event", slog.String("error", err.Error()))
 			return
 		}
-		if err := repo.Save(ctx, ev); err != nil {
+		if err = repo.Save(ctx, ev); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed saving weather event", slog.String("error", err.Error()))
 		}
+		span.SetStatus(codes.Ok, "Weather updated")
 	})
 	if err != nil {
 		log.ErrorContext(ctx, "[WORKER] Terrace Weather: failed adding cron job", slog.String("error", err.Error()))
@@ -202,34 +216,77 @@ func buildCron() (*cron.Cron, error) {
 	return c, nil
 }
 
-func readingEvents(ctx context.Context, eventsRepo *disk.EventsRepository, publisher *nats.Publisher, log *slog.Logger) {
+func readingEvents(
+	ctx context.Context,
+	eventsRepo *disk.EventsRepository,
+	publisher *nats.Publisher,
+	log *slog.Logger,
+	tracer trace.Tracer,
+) {
 	log.InfoContext(ctx, "[WORKER] Reading Events: starting")
+
 	tick := time.NewTicker(time.Minute)
 	defer tick.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			log.InfoContext(ctx, "[WORKER] Reading Events: context done")
+			return
+
 		case <-tick.C:
-			events, err := eventsRepo.FindAll(ctx)
+			batchCtx, batchSpan := tracer.Start(ctx, "readingEvents")
+
+			events, err := eventsRepo.FindAll(batchCtx)
 			if err != nil {
-				log.ErrorContext(ctx, "[WORKER] Reading Events: failed reading events", slog.String("error", err.Error()))
+				batchSpan.RecordError(err)
+				batchSpan.SetStatus(codes.Error, err.Error())
+				log.ErrorContext(batchCtx, "[WORKER] Reading Events: failed reading events",
+					slog.String("error", err.Error()))
+				batchSpan.End()
+				continue
 			}
+
 			for _, ev := range events {
-				if err := publishEvent(ctx, eventsRepo, publisher, &ev); err != nil {
-					log.ErrorContext(ctx, "[WORKER] Reading Events: failed publishing event",
-						slog.String("event_id", ev.ID), slog.String("error", err.Error()))
+				if err := publishEvent(batchCtx, eventsRepo, publisher, &ev, batchSpan); err != nil {
+					batchSpan.RecordError(err)
+					log.ErrorContext(batchCtx, "[WORKER] Reading Events: failed publishing event",
+						slog.String("event_id", ev.ID),
+						slog.String("error", err.Error()))
 				}
 			}
+
+			batchSpan.SetStatus(codes.Ok, "events processed")
+			batchSpan.End()
 		}
 	}
 }
 
-func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher *nats.Publisher, ev *disk.Event) error {
-	if err := publisher.PublishEvent(ctx, ev.ID, ev.EventType, ev.Payload); err != nil {
+func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher *nats.Publisher, ev *disk.Event, span trace.Span) error {
+	traceparent := ev.Trace["traceparent"]
+
+	carrier := propagation.MapCarrier{}
+	if traceparent != "" {
+		carrier.Set("traceparent", traceparent)
+	}
+
+	// Reconstruïm el context original de la request
+	eventCtx := otel.GetTextMapPropagator().Extract(context.Background(), carrier)
+
+	if err := publisher.PublishEvent(eventCtx, ev.ID, ev.EventType, ev.Payload); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
-	return evRepo.Remove(ctx, ev)
+
+	if err := evRepo.Remove(ctx, ev); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	span.SetStatus(codes.Ok, "event published and removed")
+	return nil
 }
 
 func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log *slog.Logger) {
@@ -285,7 +342,7 @@ func now() time.Time {
 	return time.Now().In(loc)
 }
 
-func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, logger *slog.Logger) {
+func eventsWorker(ctx context.Context, ch <-chan tracing.Event, evBus cqs.EventBus, logger *slog.Logger, tracer trace.Tracer) {
 	logger.InfoContext(ctx, "[WORKER] Events: started")
 	for {
 		select {
@@ -293,9 +350,15 @@ func eventsWorker(ctx context.Context, ch <-chan cqs.Event, evBus cqs.EventBus, 
 			logger.InfoContext(ctx, "[WORKER] Events: context done")
 			return
 		case event := <-ch:
-			if err := evBus.Dispatch(ctx, event); err != nil {
+			parentCtx := trace.ContextWithSpanContext(ctx, event.SpanContext)
+			ctx, span := tracer.Start(parentCtx, "eventDispatch")
+			span.SetAttributes(attribute.String("event-name", event.Event.EventName()))
+			if err := evBus.Dispatch(ctx, event.Event); err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				logger.ErrorContext(ctx, "[WORKER] Events: failed dispatching event", slog.String("error", err.Error()))
 			}
+			span.End()
 		}
 	}
 }
@@ -359,7 +422,7 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 		{
 			Endpoint:    "/zones/{id}/execute",
 			Method:      http.MethodPost,
-			HandlerFunc: authMdw(infrahttp.ExecuteZone(chBus)),
+			HandlerFunc: authMdw(infrahttp.ExecuteZone(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/zones/{id}",

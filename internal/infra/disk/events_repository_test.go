@@ -26,7 +26,7 @@ func TestEventsRepository(t *testing.T) {
 					ZoneName:   fmt.Sprintf("zone_%v", i),
 					ExecutedAt: now.Add(time.Minute * time.Duration(i) * 10),
 				}
-				event, err := disk.NewFromExecutionLog(&lo)
+				event, err := disk.NewFromExecutionLog(t.Context(), &lo)
 				require.NoError(t, err)
 				err = repo.Save(t.Context(), event)
 				require.NoError(t, err)
