@@ -8,6 +8,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
@@ -141,7 +143,7 @@ func TestExecutionInTime(t *testing.T) {
 					return nil, nil
 				}
 			}
-			err = worker.ExecutionInTime(context.Background(), qh, ch, tt.now)
+			err = worker.ExecutionInTime(context.Background(), qh, ch, tt.now, tracer())
 			if err != nil {
 				require.ErrorAs(t, err, &tt.expectedErr)
 				return
@@ -149,4 +151,8 @@ func TestExecutionInTime(t *testing.T) {
 			require.Equal(t, tt.expectedErr, err)
 		})
 	}
+}
+
+func tracer() trace.Tracer {
+	return noop.NewTracerProvider().Tracer("test")
 }

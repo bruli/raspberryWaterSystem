@@ -19,7 +19,7 @@ func TestTemperatureRepository(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/temperature_programs.yml"
 		defer populateFile(t, path)
-		repo := disk.NewTemperatureProgramRepository(path)
+		repo := disk.NewTemperatureProgramRepository(path, tracer())
 		t.Run(`when Save method is called,
 		then it save temperature programs`, func(t *testing.T) {
 			hour1, err := program.ParseHour("20:12")

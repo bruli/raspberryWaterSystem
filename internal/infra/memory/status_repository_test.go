@@ -6,6 +6,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/stretchr/testify/require"
@@ -15,7 +17,7 @@ import (
 
 func TestStatusRepository(t *testing.T) {
 	ctx := context.Background()
-	repo := memory.StatusRepository{}
+	repo := memory.NewStatusRepository(tracer())
 	var current *status.Status
 	_ = current
 	t.Run(`Given a status repository,`, func(t *testing.T) {
@@ -53,4 +55,8 @@ func TestStatusRepository(t *testing.T) {
 			require.False(t, currUpdated.IsActive())
 		})
 	})
+}
+
+func tracer() trace.Tracer {
+	return noop.NewTracerProvider().Tracer("test")
 }

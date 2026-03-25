@@ -8,6 +8,7 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type unknownCommand struct{}
@@ -76,7 +77,7 @@ func (r CommandReader) readCommand(update tgbotapi.Update) runnerCommand {
 	return cmd
 }
 
-func NewCommandReader(telegramToken string, cqh cqs.QueryHandler, ch cqs.CommandHandler) (*CommandReader, error) {
+func NewCommandReader(telegramToken string, cqh cqs.QueryHandler, ch cqs.CommandHandler, tracer trace.Tracer) (*CommandReader, error) {
 	bot, err := tgbotapi.NewBotAPI(telegramToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bot api: %w", err)
@@ -87,21 +88,21 @@ func NewCommandReader(telegramToken string, cqh cqs.QueryHandler, ch cqs.Command
 	return &CommandReader{
 		bot:     bot,
 		updates: bot.GetUpdatesChan(config),
-		bus:     buildRunnerBus(cqh, ch),
+		bus:     buildRunnerBus(cqh, ch, tracer),
 	}, nil
 }
 
-func buildRunnerBus(qh cqs.QueryHandler, ch cqs.CommandHandler) *runnerBus {
-	bus := newRunnerBus()
-	bus.subscribe(HelpCommandName, newHelpRunner())
-	bus.subscribe(StatusCommandName, newStatusRunner(qh))
-	bus.subscribe(WeatherCommandName, newWeatherRunner(qh))
-	bus.subscribe(LogCommandName, newLogRunner(qh))
-	bus.subscribe(ActivateCommandName, NewActivateRunner(ch))
-	bus.subscribe(DeactivateCommandName, NewDeactivateRunner(ch))
-	bus.subscribe(WaterCommandName, newWaterRunner(ch))
-	bus.subscribe(ZoneCommandName, newZoneRunner(ch))
-	bus.subscribe(ProgramsCommandName, newProgramsRunner(qh))
+func buildRunnerBus(qh cqs.QueryHandler, ch cqs.CommandHandler, tracer trace.Tracer) *runnerBus {
+	bus := newRunnerBus(tracer)
+	bus.subscribe(HelpCommandName, newHelpRunner(tracer))
+	bus.subscribe(StatusCommandName, newStatusRunner(qh, tracer))
+	bus.subscribe(WeatherCommandName, newWeatherRunner(qh, tracer))
+	bus.subscribe(LogCommandName, newLogRunner(qh, tracer))
+	bus.subscribe(ActivateCommandName, NewActivateRunner(ch, tracer))
+	bus.subscribe(DeactivateCommandName, NewDeactivateRunner(ch, tracer))
+	bus.subscribe(WaterCommandName, newWaterRunner(ch, tracer))
+	bus.subscribe(ZoneCommandName, newZoneRunner(ch, tracer))
+	bus.subscribe(ProgramsCommandName, newProgramsRunner(qh, tracer))
 
 	return bus
 }

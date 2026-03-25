@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -18,6 +20,7 @@ type (
 
 type ProgramRepository struct {
 	filePath string
+	tracer   trace.Tracer
 }
 
 func (d ProgramRepository) Remove(ctx context.Context, hour *program.Hour) error {
@@ -25,12 +28,23 @@ func (d ProgramRepository) Remove(ctx context.Context, hour *program.Hour) error
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := d.tracer.Start(ctx, "ProgramRepository.Remove")
+		defer span.End()
 		savedData := make(programMap)
 		if err := readYamlFile(d.filePath, &savedData); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		delete(savedData, hour.String())
-		return writeYamlFile(d.filePath, savedData)
+		if err := writeYamlFile(d.filePath, savedData); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "program removed")
+		return nil
+
 	}
 }
 
@@ -39,8 +53,12 @@ func (d ProgramRepository) Save(ctx context.Context, prg *program.Program) error
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := d.tracer.Start(ctx, "ProgramRepository.Save")
+		defer span.End()
 		savedData := make(programMap)
 		if err := readYamlFile(d.filePath, &savedData); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		execs := make([]executions, len(prg.Executions()))
@@ -48,7 +66,13 @@ func (d ProgramRepository) Save(ctx context.Context, prg *program.Program) error
 			execs[i] = buildExecution(&p)
 		}
 		savedData[prg.Hour().String()] = execs
-		return writeYamlFile(d.filePath, savedData)
+		if err := writeYamlFile(d.filePath, savedData); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "program saved")
+		return nil
 	}
 }
 
@@ -75,11 +99,21 @@ func buildProgramMap(programs []program.Program) programMap {
 }
 
 func (d ProgramRepository) FindAll(ctx context.Context) ([]program.Program, error) {
-	dailyPgrms := make(programMap)
-	if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
-		return nil, err
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		_, span := d.tracer.Start(ctx, "ProgramRepository.FindAll")
+		defer span.End()
+		dailyPgrms := make(programMap)
+		if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
+		}
+		span.SetStatus(codes.Ok, "programs found")
+		return buildPrograms(dailyPgrms), nil
 	}
-	return buildPrograms(dailyPgrms), nil
 }
 
 func buildPrograms(pr programMap) []program.Program {
@@ -96,14 +130,22 @@ func (d ProgramRepository) FindByHour(ctx context.Context, hour *program.Hour) (
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := d.tracer.Start(ctx, "ProgramRepository.FindByHour")
+		defer span.End()
 		dailyPgrms := make(programMap)
 		if err := readYamlFile(d.filePath, &dailyPgrms); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		pgr, ok := dailyPgrms[hour.String()]
 		if !ok {
-			return nil, vo.NewNotFoundError(hour.String())
+			err := vo.NewNotFoundError(hour.String())
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
 		}
+		span.SetStatus(codes.Ok, "program found")
 		return buildProgram(pgr, hour.String()), nil
 	}
 }
@@ -122,6 +164,6 @@ func buildProgram(pgr []executions, hour string) *program.Program {
 	return &prog
 }
 
-func NewProgramRepository(filePath string) ProgramRepository {
-	return ProgramRepository{filePath: filePath}
+func NewProgramRepository(filePath string, tracer trace.Tracer) ProgramRepository {
+	return ProgramRepository{filePath: filePath, tracer: tracer}
 }

@@ -5,12 +5,15 @@ import (
 	"sync"
 
 	"github.com/stianeikeland/go-rpio/v4"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const RainReference = 600
 
 type RainSensor struct {
 	sync.RWMutex
+	tracer trace.Tracer
 }
 
 func (r *RainSensor) Find(ctx context.Context) (bool, error) {
@@ -18,9 +21,13 @@ func (r *RainSensor) Find(ctx context.Context) (bool, error) {
 	case <-ctx.Done():
 		return false, ctx.Err()
 	default:
+		_, span := r.tracer.Start(ctx, "RainSensor.Find")
+		defer span.End()
 		r.RLock()
 		defer r.RUnlock()
 		if err := rpio.Open(); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return false, err
 		}
 
@@ -29,6 +36,8 @@ func (r *RainSensor) Find(ctx context.Context) (bool, error) {
 		}()
 
 		if err := rpio.SpiBegin(rpio.Spi0); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return false, err
 		}
 
@@ -42,10 +51,11 @@ func (r *RainSensor) Find(ctx context.Context) (bool, error) {
 		value := int(data[1]&3)<<8 + int(data[2])
 		defer rpio.SpiEnd(rpio.Spi0)
 
+		span.SetStatus(codes.Ok, "rain sensor found")
 		return value > RainReference, nil
 	}
 }
 
-func NewRainSensor() *RainSensor {
-	return &RainSensor{}
+func NewRainSensor(tracer trace.Tracer) *RainSensor {
+	return &RainSensor{tracer: tracer}
 }

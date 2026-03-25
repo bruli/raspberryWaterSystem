@@ -19,7 +19,7 @@ func TestProgramRepository(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/programs.yml"
 		defer populateFile(t, path)
-		repo := disk.NewProgramRepository(path)
+		repo := disk.NewProgramRepository(path, tracer())
 		hour, err := program.ParseHour("12:15")
 		require.NoError(t, err)
 		t.Run(`when Save method is called,

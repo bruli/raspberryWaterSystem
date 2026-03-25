@@ -67,21 +67,21 @@ func main() {
 	eventsMultiCHMdw := cqs.CommandHandlerMultiMiddleware(logCHMdw, eventsCHMdw)
 	logQHMdw := cqs.NewQueryHndErrorMiddleware(log, tracer)
 
-	tr := temperatureRepository()
-	rr := rainRepository()
-	sr := memory.NewStatusRepository()
-	zr := disk.NewZoneRepository(conf.ZonesFile)
-	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile)
-	oddRepo := disk.NewProgramRepository(conf.OddProgramsFile)
-	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile)
-	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile)
-	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile)
-	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile)
+	tr := temperatureRepository(tracer)
+	rr := rainRepository(tracer)
+	sr := memory.NewStatusRepository(tracer)
+	zr := disk.NewZoneRepository(conf.ZonesFile, tracer)
+	dailyRepo := disk.NewProgramRepository(conf.DailyProgramsFile, tracer)
+	oddRepo := disk.NewProgramRepository(conf.OddProgramsFile, tracer)
+	evenRepo := disk.NewProgramRepository(conf.EvenProgramsFile, tracer)
+	weeklyRepo := disk.NewWeeklyRepository(conf.WeeklyProgramsFile, tracer)
+	tempProgRepo := disk.NewTemperatureProgramRepository(conf.TemperatureProgramsFile, tracer)
+	execLogRepo := disk.NewExecutionLogRepository(conf.ExecutionLogsFile, tracer)
 	lightRepo := api.NewSunriseSunsetRepository(5 * time.Second)
 	go lightRepo.CleanYesterday(ctx)
-	pe := pinsExecutor()
-	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID)
-	eventsRepo := disk.NewEventsRepository(conf.EventsDirectory)
+	pe := pinsExecutor(tracer)
+	messagePublisher := telegram.NewMessagePublisher(conf.TelegramToken, conf.TelegramChatID, tracer)
+	eventsRepo := disk.NewEventsRepository(conf.EventsDirectory, tracer)
 
 	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL, tracer)
 	if err != nil {
@@ -138,10 +138,10 @@ func main() {
 	eventBus := cqs.NewEventBus()
 	eventBus.Subscribe(zone.Executed{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.ExecutedEventName},
-	}, listener.NewExecutePinsOnExecuteZone(chBus), listener.NewWriteExecutionLogEventOnExecuteZone(eventsRepo))
+	}, listener.NewExecutePinsOnExecuteZone(chBus, tracer), listener.NewWriteExecutionLogEventOnExecuteZone(eventsRepo, tracer))
 	eventBus.Subscribe(zone.Ignored{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.IgnoredEventName},
-	}, listener.NewPublishMessageOnZoneIgnored(chBus))
+	}, listener.NewPublishMessageOnZoneIgnored(chBus, tracer))
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.ErrorContext(ctx, "failed initializing status", slog.String("error", err.Error()))
@@ -153,9 +153,9 @@ func main() {
 
 	go updateStatusWorker(ctx, qhBus, chBus, log)
 	go eventsWorker(ctx, eventsCh, eventBus, log, tracer)
-	go executionInTimeWorker(ctx, qhBus, chBus, log)
+	go executionInTimeWorker(ctx, qhBus, chBus, log, tracer)
 
-	go runTelegramBot(ctx, conf, qhBus, chBus, log)
+	go runTelegramBot(ctx, conf, qhBus, chBus, log, tracer)
 	runHTTPServer(ctx, chBus, qhBus, conf, log, tracer)
 }
 
@@ -289,12 +289,12 @@ func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher 
 	return nil
 }
 
-func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log *slog.Logger) {
+func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log *slog.Logger, tracer trace.Tracer) {
 	if !conf.TelegramBotEnabled {
 		log.InfoContext(ctx, "[TELEGRAM SERVICE] disabled")
 		return
 	}
-	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken, qhBus, chBus)
+	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken, qhBus, chBus, tracer)
 	if err != nil {
 		log.ErrorContext(ctx, "[TELEGRAM SERVICE] failed building telegram server", slog.String("error", err.Error()))
 		os.Exit(11)
@@ -321,7 +321,7 @@ func buildLog() *slog.Logger {
 	return log
 }
 
-func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *slog.Logger) {
+func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, logger *slog.Logger, tracer trace.Tracer) {
 	logger.InfoContext(ctx, "[WORKER] Execution in time: started")
 	ticker := time.NewTicker(time.Minute)
 	for {
@@ -330,7 +330,7 @@ func executionInTimeWorker(ctx context.Context, qh cqs.QueryHandler, ch cqs.Comm
 			logger.InfoContext(ctx, "[WORKER] Execution in time: context done")
 			return
 		case <-ticker.C:
-			if err := worker.ExecutionInTime(ctx, qh, ch, now()); err != nil {
+			if err := worker.ExecutionInTime(ctx, qh, ch, now(), tracer); err != nil {
 				logger.ErrorContext(ctx, "[WORKER] failed execution in time", slog.String("error", err.Error()))
 			}
 		}

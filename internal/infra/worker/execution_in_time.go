@@ -9,30 +9,47 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, now time.Time) error {
+func ExecutionInTime(ctx context.Context, qh cqs.QueryHandler, ch cqs.CommandHandler, now time.Time, tracer trace.Tracer) error {
+	ctx, span := tracer.Start(ctx, "ExecutionInTime worker")
+	defer span.End()
 	st, err := readingCurrentStatus(ctx, qh)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	temp := st.Weather().Temperature()
 	prgms, err := findingPrograms(ctx, qh, now, temp)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	if err = executeDaily(ctx, prgms, ch, now); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	if err = executeOddEven(ctx, now, prgms, ch); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	if err = executeWeekly(ctx, prgms, ch, now); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
 	if err = executeTemperature(ctx, prgms, ch, now, temp); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return err
 	}
+	span.SetStatus(codes.Ok, "execution in time")
 	return nil
 }
 

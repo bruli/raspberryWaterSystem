@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -11,7 +13,8 @@ import (
 type weeklyMap = map[string]programMap
 
 type WeeklyRepository struct {
-	path string
+	path   string
+	tracer trace.Tracer
 }
 
 func (w WeeklyRepository) FindByDay(ctx context.Context, day *program.WeekDay) (*program.Weekly, error) {
@@ -19,14 +22,22 @@ func (w WeeklyRepository) FindByDay(ctx context.Context, day *program.WeekDay) (
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := w.tracer.Start(ctx, "WeeklyRepository.FindByDay")
+		defer span.End()
 		weekly := make(weeklyMap)
 		if err := readYamlFile(w.path, &weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		byDay, ok := weekly[day.String()]
 		if !ok {
-			return nil, vo.NotFoundError{}
+			err := vo.NotFoundError{}
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
 		}
+		span.SetStatus(codes.Ok, "weekly found")
 		return buildProgramWeeklyByDay(day, byDay), nil
 	}
 }
@@ -43,14 +54,21 @@ func (w WeeklyRepository) Remove(ctx context.Context, day *program.WeekDay) erro
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := w.tracer.Start(ctx, "WeeklyRepository.Remove")
+		defer span.End()
 		weekly := make(weeklyMap)
 		if err := readYamlFile(w.path, &weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		delete(weekly, day.String())
 		if err := writeYamlFile(w.path, &weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
+		span.SetStatus(codes.Ok, "weekly removed")
 		return nil
 	}
 }
@@ -60,18 +78,29 @@ func (w WeeklyRepository) FindByDayAndHour(ctx context.Context, day *program.Wee
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := w.tracer.Start(ctx, "WeeklyRepository.FindByDayAndHour")
+		defer span.End()
 		weekly := make(weeklyMap)
 		if err := readYamlFile(w.path, &weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		byDay, ok := weekly[day.String()]
 		if !ok {
-			return nil, vo.NewNotFoundError(day.String())
+			err := vo.NewNotFoundError(day.String())
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
 		}
 		byHour, ok := byDay[hour.String()]
 		if !ok {
-			return nil, vo.NewNotFoundError(hour.String())
+			err := vo.NewNotFoundError(hour.String())
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
 		}
+		span.SetStatus(codes.Ok, "weekly and hour found")
 		return buildProgramWeeklyByHour(day, hour, byHour), nil
 	}
 }
@@ -98,12 +127,22 @@ func (w WeeklyRepository) Save(ctx context.Context, program *program.Weekly) err
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := w.tracer.Start(ctx, "WeeklyRepository.Save")
+		defer span.End()
 		weekly := make(weeklyMap)
 		if err := readYamlFile(w.path, &weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		weekly[program.WeekDay().String()] = buildProgramMap(program.Programs())
-		return writeYamlFile(w.path, weekly)
+		if err := writeYamlFile(w.path, weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "weekly saved")
+		return nil
 	}
 }
 
@@ -112,10 +151,15 @@ func (w WeeklyRepository) FindAll(ctx context.Context) ([]program.Weekly, error)
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := w.tracer.Start(ctx, "WeeklyRepository.FindAll")
+		defer span.End()
 		weekly := make(weeklyMap)
 		if err := readYamlFile(w.path, &weekly); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
+		span.SetStatus(codes.Ok, "weeklys found")
 		return buildWeeklyPrograms(weekly), nil
 	}
 }
@@ -131,6 +175,6 @@ func buildWeeklyPrograms(weekly weeklyMap) []program.Weekly {
 	return prgms
 }
 
-func NewWeeklyRepository(path string) WeeklyRepository {
-	return WeeklyRepository{path: path}
+func NewWeeklyRepository(path string, tracer trace.Tracer) WeeklyRepository {
+	return WeeklyRepository{path: path, tracer: tracer}
 }

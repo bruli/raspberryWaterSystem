@@ -10,6 +10,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
@@ -22,7 +24,7 @@ func TestZoneRepository(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/zones.yml"
 		defer populateFile(t, path)
-		repo := disk.NewZoneRepository(path)
+		repo := disk.NewZoneRepository(path, tracer())
 		var savedZone *zone.Zone
 		_ = savedZone
 		t.Run(`when Save method is called,
@@ -70,4 +72,8 @@ func populateFile(t *testing.T, path string) {
 			require.NoError(t, err)
 		}
 	}
+}
+
+func tracer() trace.Tracer {
+	return noop.NewTracerProvider().Tracer("test")
 }

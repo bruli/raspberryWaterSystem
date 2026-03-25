@@ -8,6 +8,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type zoneCommand struct {
@@ -19,14 +21,20 @@ func (z zoneCommand) CommandName() CommandName {
 }
 
 type zoneRunner struct {
-	ch cqs.CommandHandler
+	ch     cqs.CommandHandler
+	tracer trace.Tracer
 }
 
 func (z zoneRunner) Run(ctx context.Context, chatID int64, msgs *Messages, cmd runnerCommand) error {
+	ctx, span := z.tracer.Start(ctx, "zoneRunner.Run")
+	defer span.End()
 	co, _ := cmd.(zoneCommand)
 	arguments := strings.Fields(co.arguments)
 	if len(arguments) != 3 {
-		return fmt.Errorf("invalid arguments")
+		err := fmt.Errorf("invalid arguments")
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
 	id := arguments[0]
 	name := arguments[1]
@@ -36,9 +44,12 @@ func (z zoneRunner) Run(ctx context.Context, chatID int64, msgs *Messages, cmd r
 		ZoneName: name,
 		Relays:   relays,
 	}); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to create zone: %w", err)
 	}
 	buildMessage(chatID, msgs, fmt.Sprintf("Zone created: %s", name))
+	span.SetStatus(codes.Ok, "zone created")
 	return nil
 }
 
@@ -52,6 +63,6 @@ func (z zoneRunner) buildRelaysFromArguments(arguments []string) []int {
 	return relays
 }
 
-func newZoneRunner(ch cqs.CommandHandler) *zoneRunner {
-	return &zoneRunner{ch: ch}
+func newZoneRunner(ch cqs.CommandHandler, tracer trace.Tracer) *zoneRunner {
+	return &zoneRunner{ch: ch, tracer: tracer}
 }

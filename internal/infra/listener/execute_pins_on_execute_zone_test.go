@@ -9,6 +9,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 
 	"github.com/bruli/raspberryWaterSystem/internal/infra/listener"
 )
@@ -59,7 +61,7 @@ func TestExecutePinsOnExecuteZoneListen(t *testing.T) {
 					return nil, nil
 				}
 			}
-			list := listener.NewExecutePinsOnExecuteZone(ch)
+			list := listener.NewExecutePinsOnExecuteZone(ch, tracer())
 			err := list.Listen(context.Background(), zone.Executed{
 				ZoneName: "zone test",
 				Seconds:  10,
@@ -71,4 +73,8 @@ func TestExecutePinsOnExecuteZoneListen(t *testing.T) {
 			require.Equal(t, tt.expectedErr, err)
 		})
 	}
+}
+
+func tracer() trace.Tracer {
+	return noop.NewTracerProvider().Tracer("test")
 }

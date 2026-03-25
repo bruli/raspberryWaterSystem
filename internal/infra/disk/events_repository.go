@@ -9,7 +9,9 @@ import (
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -66,6 +68,7 @@ func buildTracingMap(ctx context.Context) map[string]string {
 
 type EventsRepository struct {
 	eventsDir string
+	tracer    trace.Tracer
 }
 
 func (e EventsRepository) Save(ctx context.Context, ev *Event) error {
@@ -73,11 +76,21 @@ func (e EventsRepository) Save(ctx context.Context, ev *Event) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := e.tracer.Start(ctx, "EventsRepository.Save")
+		defer span.End()
 		if err := os.MkdirAll(e.eventsDir, 0o755); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 
-		return writeJsonFile(fmt.Sprintf("%s/%v.json", e.eventsDir, ev.EventAt.UnixMicro()), ev)
+		if err := writeJsonFile(fmt.Sprintf("%s/%v.json", e.eventsDir, ev.EventAt.UnixMicro()), ev); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "event saved")
+		return nil
 	}
 }
 
@@ -86,11 +99,17 @@ func (e EventsRepository) Remove(ctx context.Context, ev *Event) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := e.tracer.Start(ctx, "EventsRepository.Remove")
+		defer span.End()
 		unix := ev.EventAt.UnixMicro()
 		err := os.Remove(fmt.Sprintf("%s/%v.json", e.eventsDir, unix))
 		if err != nil {
-			return fmt.Errorf("failed to remove event file: %w", err)
+			err = fmt.Errorf("failed to remove event file: %w", err)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
 		}
+		span.SetStatus(codes.Ok, "event removed")
 		return nil
 	}
 }
@@ -100,20 +119,27 @@ func (e EventsRepository) FindAll(ctx context.Context) ([]Event, error) {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := e.tracer.Start(ctx, "EventsRepository.FindAll")
+		defer span.End()
 		files, err := os.ReadDir(e.eventsDir)
 		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, fmt.Errorf("failed to read events directory: %w", err)
 		}
 		events := make([]Event, len(files))
 		for i, f := range files {
 			if err := readJsonFile(fmt.Sprintf("%s/%s", e.eventsDir, f.Name()), &events[i]); err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
 				return nil, fmt.Errorf("failed to read event file: %w", err)
 			}
 		}
+		span.SetStatus(codes.Ok, "events found")
 		return events, nil
 	}
 }
 
-func NewEventsRepository(eventsDir string) *EventsRepository {
-	return &EventsRepository{eventsDir: eventsDir}
+func NewEventsRepository(eventsDir string, tracer trace.Tracer) *EventsRepository {
+	return &EventsRepository{eventsDir: eventsDir, tracer: tracer}
 }

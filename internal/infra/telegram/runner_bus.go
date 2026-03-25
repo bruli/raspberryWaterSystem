@@ -3,6 +3,9 @@ package telegram
 import (
 	"context"
 	"errors"
+
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type runnerCommand interface {
@@ -17,6 +20,7 @@ type runner interface {
 
 type runnerBus struct {
 	runners map[CommandName]runner
+	tracer  trace.Tracer
 }
 
 func (r *runnerBus) subscribe(command CommandName, run runner) {
@@ -24,13 +28,24 @@ func (r *runnerBus) subscribe(command CommandName, run runner) {
 }
 
 func (r *runnerBus) handle(ctx context.Context, chatID int64, msgs *Messages, cmd runnerCommand) error {
+	ctx, span := r.tracer.Start(ctx, "runnerBus.handle")
+	defer span.End()
 	run, ok := r.runners[cmd.CommandName()]
 	if !ok {
-		return errors.New("command not found")
+		err := errors.New("command not found")
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
 	}
-	return run.Run(ctx, chatID, msgs, cmd)
+	if err := run.Run(ctx, chatID, msgs, cmd); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+	span.SetStatus(codes.Ok, "command executed")
+	return nil
 }
 
-func newRunnerBus() *runnerBus {
-	return &runnerBus{runners: make(map[CommandName]runner)}
+func newRunnerBus(tracer trace.Tracer) *runnerBus {
+	return &runnerBus{runners: make(map[CommandName]runner), tracer: tracer}
 }

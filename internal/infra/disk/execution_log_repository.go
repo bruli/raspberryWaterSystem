@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Log struct {
@@ -14,7 +16,8 @@ type Log struct {
 }
 
 type ExecutionLogRepository struct {
-	path string
+	path   string
+	tracer trace.Tracer
 }
 
 func (e ExecutionLogRepository) Save(ctx context.Context, execLogs []program.ExecutionLog) error {
@@ -22,8 +25,16 @@ func (e ExecutionLogRepository) Save(ctx context.Context, execLogs []program.Exe
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := e.tracer.Start(ctx, "ExecutionLogRepository.Save")
+		defer span.End()
 		logs := buildLogs(execLogs)
-		return writeJsonFile(e.path, logs)
+		if err := writeJsonFile(e.path, logs); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "execution logs saved")
+		return nil
 	}
 }
 
@@ -44,10 +55,15 @@ func (e ExecutionLogRepository) FindAll(ctx context.Context) ([]program.Executio
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := e.tracer.Start(ctx, "ExecutionLogRepository.FindAll")
+		defer span.End()
 		var logs []Log
 		if err := readJsonFile(e.path, &logs); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return []program.ExecutionLog{}, nil
 		}
+		span.SetStatus(codes.Ok, "execution logs found")
 		return buildExecutionLogs(logs), nil
 	}
 }
@@ -63,6 +79,6 @@ func buildExecutionLogs(logs []Log) []program.ExecutionLog {
 	return execLogs
 }
 
-func NewExecutionLogRepository(path string) ExecutionLogRepository {
-	return ExecutionLogRepository{path: path}
+func NewExecutionLogRepository(path string, tracer trace.Tracer) ExecutionLogRepository {
+	return ExecutionLogRepository{path: path, tracer: tracer}
 }

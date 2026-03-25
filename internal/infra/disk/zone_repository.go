@@ -5,6 +5,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type (
@@ -17,6 +19,7 @@ type (
 
 type ZoneRepository struct {
 	filePath string
+	tracer   trace.Tracer
 }
 
 func (z ZoneRepository) Update(ctx context.Context, zo *zone.Zone) error {
@@ -24,6 +27,8 @@ func (z ZoneRepository) Update(ctx context.Context, zo *zone.Zone) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := z.tracer.Start(ctx, "ZoneRepository.Update")
+		defer span.End()
 		zones := make(zonesMap)
 		if err := readYamlFile(z.filePath, &zones); err != nil {
 			return err
@@ -32,7 +37,13 @@ func (z ZoneRepository) Update(ctx context.Context, zo *zone.Zone) error {
 			Name:   zo.Name(),
 			Relays: z.buildRelaysForYaml(zo.Relays()),
 		}
-		return writeYamlFile(z.filePath, zones)
+		if err := writeYamlFile(z.filePath, zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "zone updated")
+		return nil
 	}
 }
 
@@ -41,10 +52,15 @@ func (z ZoneRepository) FindAll(ctx context.Context) ([]*zone.Zone, error) {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := z.tracer.Start(ctx, "ZoneRepository.FindAll")
+		defer span.End()
 		zones := make(zonesMap)
 		if err := readYamlFile(z.filePath, &zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
+		span.SetStatus(codes.Ok, "zones found")
 		return z.buildZones(zones), nil
 	}
 }
@@ -54,16 +70,29 @@ func (z ZoneRepository) Remove(ctx context.Context, zo *zone.Zone) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := z.tracer.Start(ctx, "ZoneRepository.Remove")
+		defer span.End()
 		zones := make(zonesMap)
 		if err := readYamlFile(z.filePath, &zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		_, ok := zones[zo.Id()]
 		if !ok {
-			return vo.NewNotFoundError(zo.Id())
+			err := vo.NewNotFoundError(zo.Id())
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
 		}
 		delete(zones, zo.Id())
-		return writeYamlFile(z.filePath, zones)
+		if err := writeYamlFile(z.filePath, zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "zone removed")
+		return nil
 	}
 }
 
@@ -72,14 +101,22 @@ func (z ZoneRepository) FindByID(ctx context.Context, id string) (*zone.Zone, er
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := z.tracer.Start(ctx, "ZoneRepository.FindByID")
+		defer span.End()
 		zones := make(zonesMap)
 		if err := readYamlFile(z.filePath, &zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		zo, ok := zones[id]
 		if !ok {
-			return nil, vo.NewNotFoundError(id)
+			err := vo.NewNotFoundError(id)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
 		}
+		span.SetStatus(codes.Ok, "zone found")
 		return buildZone(id, zo), nil
 	}
 }
@@ -104,15 +141,25 @@ func (z ZoneRepository) Save(ctx context.Context, zo *zone.Zone) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := z.tracer.Start(ctx, "ZoneRepository.Save")
+		defer span.End()
 		zones := make(zonesMap)
 		if err := readYamlFile(z.filePath, &zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		zones[zo.Id()] = zoneData{
 			Name:   zo.Name(),
 			Relays: z.buildRelaysForYaml(zo.Relays()),
 		}
-		return writeYamlFile(z.filePath, zones)
+		if err := writeYamlFile(z.filePath, zones); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "zone saved")
+		return nil
 	}
 }
 
@@ -132,6 +179,6 @@ func (z ZoneRepository) buildZones(data zonesMap) []*zone.Zone {
 	return zones
 }
 
-func NewZoneRepository(filePath string) ZoneRepository {
-	return ZoneRepository{filePath: filePath}
+func NewZoneRepository(filePath string, tracer trace.Tracer) ZoneRepository {
+	return ZoneRepository{filePath: filePath, tracer: tracer}
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type programsCommand struct{}
@@ -17,16 +19,17 @@ func (p programsCommand) CommandName() CommandName {
 }
 
 type programsRunner struct {
-	qh cqs.QueryHandler
-}
-
-func newProgramsRunner(qh cqs.QueryHandler) *programsRunner {
-	return &programsRunner{qh: qh}
+	qh     cqs.QueryHandler
+	tracer trace.Tracer
 }
 
 func (p programsRunner) Run(ctx context.Context, chatID int64, msgs *Messages, _ runnerCommand) error {
+	ctx, span := p.tracer.Start(ctx, "programsRunner.Run")
+	defer span.End()
 	result, err := p.qh.Handle(ctx, app.FindAllProgramsQuery{})
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return fmt.Errorf("failed to find programs: %w", err)
 	}
 	programs, _ := result.(app.AllPrograms)
@@ -35,6 +38,7 @@ func (p programsRunner) Run(ctx context.Context, chatID int64, msgs *Messages, _
 	p.checkPrograms(programs.Even, "Even", chatID, msgs)
 	p.checkWeeklyPrograms(programs.Weekly, chatID, msgs)
 	p.checkTemperaturePrograms(programs.Temperature, chatID, msgs)
+	span.SetStatus(codes.Ok, "programs found")
 	return nil
 }
 
@@ -96,4 +100,8 @@ func (p programsRunner) checkTemperaturePrograms(temperature []program.Temperatu
 			}
 		}
 	}
+}
+
+func newProgramsRunner(qh cqs.QueryHandler, tracer trace.Tracer) *programsRunner {
+	return &programsRunner{qh: qh, tracer: tracer}
 }

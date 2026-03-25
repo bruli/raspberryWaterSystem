@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 )
@@ -12,7 +14,8 @@ import (
 type temperatureMap = map[float32]programMap
 
 type TemperatureProgramRepository struct {
-	path string
+	path   string
+	tracer trace.Tracer
 }
 
 func (t TemperatureProgramRepository) FindByTemperature(ctx context.Context, temperature float32) (*program.Temperature, error) {
@@ -20,14 +23,22 @@ func (t TemperatureProgramRepository) FindByTemperature(ctx context.Context, tem
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := t.tracer.Start(ctx, "TemperatureProgramRepository.FindByTemperature")
+		defer span.End()
 		temp := make(temperatureMap)
 		if err := readYamlFile(t.path, &temp); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		byTemp, ok := temp[temperature]
 		if !ok {
-			return nil, vo.NewNotFoundError(strconv.FormatFloat(float64(temperature), 'f', -1, 32))
+			err := vo.NewNotFoundError(strconv.FormatFloat(float64(temperature), 'f', -1, 32))
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return nil, err
 		}
+		span.SetStatus(codes.Ok, "temperature found")
 		return buildTemperatureProgram(temperature, byTemp), nil
 	}
 }
@@ -43,14 +54,21 @@ func (t TemperatureProgramRepository) Remove(ctx context.Context, temperature fl
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := t.tracer.Start(ctx, "TemperatureProgramRepository.Remove")
+		defer span.End()
 		temp := make(temperatureMap)
 		if err := readYamlFile(t.path, &temp); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		delete(temp, temperature)
 		if err := writeYamlFile(t.path, &temp); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
+		span.SetStatus(codes.Ok, "temperature removed")
 		return nil
 	}
 }
@@ -60,12 +78,22 @@ func (t TemperatureProgramRepository) Save(ctx context.Context, programs *progra
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		_, span := t.tracer.Start(ctx, "TemperatureProgramRepository.Save")
+		defer span.End()
 		temp := make(temperatureMap)
 		if err := readYamlFile(t.path, &temp); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
 		temp[programs.Temperature()] = buildProgramMap(programs.Programs())
-		return writeYamlFile(t.path, temp)
+		if err := writeYamlFile(t.path, temp); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return err
+		}
+		span.SetStatus(codes.Ok, "temperature saved")
+		return nil
 	}
 }
 
@@ -74,10 +102,15 @@ func (t TemperatureProgramRepository) FindAll(ctx context.Context) ([]program.Te
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	default:
+		_, span := t.tracer.Start(ctx, "TemperatureProgramRepository.FindAll")
+		defer span.End()
 		temperature := make(temperatureMap)
 		if err := readYamlFile(t.path, &temperature); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
+		span.SetStatus(codes.Ok, "temperatures found")
 		return buildTemperaturePrograms(temperature), nil
 	}
 }
@@ -97,8 +130,12 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 	case <-ctx.Done():
 		return program.Temperature{}, ctx.Err()
 	default:
+		_, span := t.tracer.Start(ctx, "TemperatureProgramRepository.FindByTemperatureAndHour")
+		defer span.End()
 		temp := make(temperatureMap)
 		if err := readYamlFile(t.path, &temp); err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
 			return program.Temperature{}, err
 		}
 		programs := make(programMap, 0)
@@ -111,8 +148,12 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 		}
 		byHour, ok := programs[hour.String()]
 		if !ok {
-			return program.Temperature{}, vo.NotFoundError{}
+			err := vo.NotFoundError{}
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+			return program.Temperature{}, err
 		}
+		span.SetStatus(codes.Ok, "temperature and hour found")
 		return buildProgramTemperature(temperature, hour, byHour), nil
 	}
 }
@@ -138,6 +179,6 @@ func buildExecutions(pd executions) []program.Execution {
 	return executions
 }
 
-func NewTemperatureProgramRepository(path string) TemperatureProgramRepository {
-	return TemperatureProgramRepository{path: path}
+func NewTemperatureProgramRepository(path string, tracer trace.Tracer) TemperatureProgramRepository {
+	return TemperatureProgramRepository{path: path, tracer: tracer}
 }

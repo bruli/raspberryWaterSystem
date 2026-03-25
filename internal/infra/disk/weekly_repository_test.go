@@ -19,7 +19,7 @@ func TestWeeklyRepository(t *testing.T) {
 		ctx := context.Background()
 		path := "/tmp/weekly_programs.yml"
 		defer populateFile(t, path)
-		repo := disk.NewWeeklyRepository(path)
+		repo := disk.NewWeeklyRepository(path, tracer())
 		t.Run(`when Save method is called,
 		then it save weekly programs`, func(t *testing.T) {
 			monday := program.WeekDay(time.Monday)

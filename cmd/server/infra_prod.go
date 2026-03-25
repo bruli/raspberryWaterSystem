@@ -5,17 +5,18 @@ package main
 import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/gpio"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func temperatureRepository() app.TemperatureRepository {
-	repo, _ := gpio.NewBme280TemperatureSensor()
+func temperatureRepository(tracer trace.Tracer) app.TemperatureRepository {
+	repo, _ := gpio.NewBme280TemperatureSensor(tracer)
 	return repo
 }
 
-func pinsExecutor() app.PinExecutor {
-	return gpio.NewPinsExecutor()
+func pinsExecutor(tracer trace.Tracer) app.PinExecutor {
+	return gpio.NewPinsExecutor(tracer)
 }
 
-func rainRepository() app.RainRepository {
-	return gpio.NewRainSensor()
+func rainRepository(tracer trace.Tracer) app.RainRepository {
+	return gpio.NewRainSensor(tracer)
 }

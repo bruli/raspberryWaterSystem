@@ -14,7 +14,7 @@ import (
 
 func TestEventsRepository(t *testing.T) {
 	t.Run(`Given an Events repository`, func(t *testing.T) {
-		repo := disk.NewEventsRepository("/tmp/events")
+		repo := disk.NewEventsRepository("/tmp/events", tracer())
 		number := 3
 		var events []disk.Event
 		t.Run(`when Save method is called with a Log payload in event,
