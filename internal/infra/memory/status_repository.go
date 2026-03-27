@@ -45,8 +45,6 @@ func (s *StatusRepository) Update(ctx context.Context, st status.Status) error {
 	default:
 		_, span := s.tracer.Start(ctx, "StatusRepository.Update")
 		defer span.End()
-		s.Lock()
-		defer s.Unlock()
 		if err := s.Save(ctx, st); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())

@@ -101,7 +101,7 @@ func main() {
 		os.Exit(1)
 	}
 	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, log, tracer)
-	go readingEvents(ctx, eventsRepo, eventsPublisher, log, tracer)
+	go readingEvents(ctx, eventsRepo, eventsPublisher, log)
 
 	qhBus := app.NewQueryBus()
 	qhBus.Subscribe(app.FindWeatherQueryName, logQHMdw(app.NewFindWeather(tr, rr, tracer)))
@@ -221,7 +221,6 @@ func readingEvents(
 	eventsRepo *disk.EventsRepository,
 	publisher *nats.Publisher,
 	log *slog.Logger,
-	tracer trace.Tracer,
 ) {
 	log.InfoContext(ctx, "[WORKER] Reading Events: starting")
 
@@ -235,45 +234,35 @@ func readingEvents(
 			return
 
 		case <-tick.C:
-			batchCtx, batchSpan := tracer.Start(ctx, "readingEvents")
-
-			events, err := eventsRepo.FindAll(batchCtx)
+			events, err := eventsRepo.FindAll(ctx)
 			if err != nil {
-				batchSpan.RecordError(err)
-				batchSpan.SetStatus(codes.Error, err.Error())
-				log.ErrorContext(batchCtx, "[WORKER] Reading Events: failed reading events",
+				log.ErrorContext(ctx, "[WORKER] Reading Events: failed reading events",
 					slog.String("error", err.Error()))
-				batchSpan.End()
 				continue
 			}
 
 			for _, ev := range events {
-				if err := publishEvent(batchCtx, eventsRepo, publisher, &ev, batchSpan); err != nil {
-					batchSpan.RecordError(err)
-					log.ErrorContext(batchCtx, "[WORKER] Reading Events: failed publishing event",
+				prop := propagation.TraceContext{}
+				carrier := propagation.MapCarrier{
+					"traceparent": ev.Trace["traceparent"],
+				}
+				batchCtx := prop.Extract(ctx, carrier)
+				tracer := otel.Tracer("reading-events")
+				ctx, span := tracer.Start(batchCtx, ev.EventType)
+				if err = publishEvent(ctx, eventsRepo, publisher, &ev, span); err != nil {
+					span.RecordError(err)
+					log.ErrorContext(ctx, "[WORKER] Reading Events: failed publishing event",
 						slog.String("event_id", ev.ID),
 						slog.String("error", err.Error()))
 				}
+				span.End()
 			}
-
-			batchSpan.SetStatus(codes.Ok, "events processed")
-			batchSpan.End()
 		}
 	}
 }
 
 func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher *nats.Publisher, ev *disk.Event, span trace.Span) error {
-	traceparent := ev.Trace["traceparent"]
-
-	carrier := propagation.MapCarrier{}
-	if traceparent != "" {
-		carrier.Set("traceparent", traceparent)
-	}
-
-	// Reconstruïm el context original de la request
-	eventCtx := otel.GetTextMapPropagator().Extract(context.Background(), carrier)
-
-	if err := publisher.PublishEvent(eventCtx, ev.ID, ev.EventType, ev.Payload); err != nil {
+	if err := publisher.PublishEvent(ctx, ev.ID, ev.EventType, ev.Payload); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return err
