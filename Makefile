@@ -15,8 +15,14 @@ GOLANGCI_LINT_VERSION ?= v2.11.4
 # ────────────────────────────────────────────────────────────────
 # 🐳 Docker
 # ────────────────────────────────────────────────────────────────
+.PHONY: create-network
+create-network:
+	@set -euo pipefail; \
+    echo "🚀 Creating $(APP) network..."; \
+    docker network create $(APP)
+
 .PHONY: docker-up
-docker-up:
+docker-up: create-network
 	@set -euo pipefail; \
 	echo "🚀 Starting services with Docker Compose..."; \
 	$(DOCKER_COMPOSE) up -d --build
