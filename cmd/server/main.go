@@ -182,6 +182,7 @@ func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsR
 		tw := disk.Weather{
 			Temperature: st.Weather().Temperature().Float32(),
 			IsRaining:   st.Weather().IsRaining(),
+			Humidity:    st.Weather().Humidity().Float32(),
 		}
 		ev, err := disk.NewFromWeather(ctx, &tw)
 		if err != nil {

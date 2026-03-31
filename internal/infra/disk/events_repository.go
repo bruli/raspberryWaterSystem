@@ -30,6 +30,7 @@ type Event struct {
 type Weather struct {
 	Temperature float32 `json:"temperature"`
 	IsRaining   bool    `json:"is_raining"`
+	Humidity    float32 `json:"humidity"`
 }
 
 func NewFromWeather(ctx context.Context, w *Weather) (*Event, error) {
