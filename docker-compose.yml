@@ -5,6 +5,8 @@ services:
     container_name: water_system
     volumes:
       - .:/app
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
     environment:
       - SERVER_URL=${SERVER_URL:-:8080}
       - ENVIRONMENT=${ENVIRONMENT:-development}
@@ -31,6 +33,7 @@ services:
       - lgtm
     networks:
       - water_system
+    command: ["air", "-c", ".air.toml"]
 
   nats:
     image: nats:2-alpine
@@ -71,3 +74,5 @@ networks:
 
 volumes:
   nats_data:
+  go-mod-cache:
+  go-build-cache:

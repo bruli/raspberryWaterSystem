@@ -22,7 +22,7 @@ create-network:
     docker network create $(APP)
 
 .PHONY: docker-up
-docker-up: create-network
+docker-up:
 	@set -euo pipefail; \
 	echo "🚀 Starting services with Docker Compose..."; \
 	$(DOCKER_COMPOSE) up -d --build
