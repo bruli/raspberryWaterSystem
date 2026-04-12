@@ -35,18 +35,24 @@ import (
 const serviceName = "raspberryWaterSystem"
 
 func main() {
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	ctx := context.Background()
 	log := buildLog()
 	conf, err := config.New()
 	if err != nil {
 		log.ErrorContext(ctx, "failed building config", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	tracingProv, err := tracing.InitTracing(ctx, serviceName)
 	if err != nil {
 		log.ErrorContext(ctx, "Error initializing tracing", "err", err)
-		os.Exit(1)
+		return err
 	}
 	defer func() {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -86,19 +92,19 @@ func main() {
 	eventsPublisher, err := nats.NewPublisher(conf.NatsServerURL, tracer)
 	if err != nil {
 		log.ErrorContext(ctx, "failed building execution logs", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	defer eventsPublisher.Close()
 	if err := eventsPublisher.EnsureStream([]string{disk.ExecutionLogsEventType, disk.TerraceWeatherEventType}); err != nil {
 		log.ErrorContext(ctx, "failed ensuring execution logs stream", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 	findStatusQH := app.NewFindStatus(sr, tracer)
 
 	cronJob, err := buildCron()
 	if err != nil {
 		log.ErrorContext(ctx, "failed building cron")
-		os.Exit(1)
+		return err
 	}
 	go terraceWeatherCron(ctx, cronJob, eventsRepo, findStatusQH, log, tracer)
 	go readingEvents(ctx, eventsRepo, eventsPublisher, log)
@@ -145,18 +151,35 @@ func main() {
 
 	if err = initStatus(ctx, chBus, qhBus); err != nil {
 		log.ErrorContext(ctx, "failed initializing status", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
+	errCh := make(chan error)
+	defer close(errCh)
+
 	go updateStatusWorker(ctx, qhBus, chBus, log)
 	go eventsWorker(ctx, eventsCh, eventBus, log, tracer)
 	go executionInTimeWorker(ctx, qhBus, chBus, log, tracer)
 
-	go runTelegramBot(ctx, conf, qhBus, chBus, log, tracer)
-	runHTTPServer(ctx, chBus, qhBus, conf, log, tracer)
+	go func() {
+		if err := runTelegramBot(ctx, conf, qhBus, chBus, log, tracer); err != nil {
+			log.ErrorContext(ctx, "failed running telegram bot", slog.String("error", err.Error()))
+			errCh <- err
+		}
+	}()
+	go func() {
+		if err := runHTTPServer(ctx, chBus, qhBus, conf, log, tracer); err != nil {
+			log.ErrorContext(ctx, "failed running http server", slog.String("error", err.Error()))
+			errCh <- err
+		}
+	}()
+	if err := <-errCh; err != nil {
+		return err
+	}
+	return nil
 }
 
 func terraceWeatherCron(ctx context.Context, cronJob *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger, tracer trace.Tracer) {
@@ -279,26 +302,28 @@ func publishEvent(ctx context.Context, evRepo *disk.EventsRepository, publisher 
 	return nil
 }
 
-func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log *slog.Logger, tracer trace.Tracer) {
+func runTelegramBot(ctx context.Context, conf *config.Config, qhBus app.QueryBus, chBus app.CommandBus, log *slog.Logger, tracer trace.Tracer) error {
 	if !conf.TelegramBotEnabled {
 		log.InfoContext(ctx, "[TELEGRAM SERVICE] disabled")
-		return
+		return nil
 	}
 	telegramServer, err := telegram.NewCommandReader(conf.TelegramToken, qhBus, chBus, tracer)
 	if err != nil {
 		log.ErrorContext(ctx, "[TELEGRAM SERVICE] failed building telegram server", slog.String("error", err.Error()))
-		os.Exit(11)
+		return err
 	}
 	telegramServer.Read(ctx, log)
+	return nil
 }
 
-func runHTTPServer(ctx context.Context, chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, log *slog.Logger, tracer trace.Tracer) {
+func runHTTPServer(ctx context.Context, chBus app.CommandBus, qhBus app.QueryBus, conf *config.Config, log *slog.Logger, tracer trace.Tracer) error {
 	definitions := handlersDefinition(chBus, qhBus, conf.AuthToken, tracer)
 	httpHandlers := infrahttp.NewHandler(definitions)
 	if err := infrahttp.RunServer(ctx, conf.ServerURL, httpHandlers, &infrahttp.CORSOpt{}, log); err != nil {
 		log.ErrorContext(ctx, "[HTTP SERVER] failed running server", slog.String("error", err.Error()))
-		os.Exit(1)
+		return err
 	}
+	return nil
 }
 
 func buildLog() *slog.Logger {
