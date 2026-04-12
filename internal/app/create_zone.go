@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/davecgh/go-spew/spew"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -47,7 +47,7 @@ func (c CreateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, e
 		return nil, err
 	}
 	switch {
-	case errors.As(err, &vo.NotFoundError{}):
+	case errors.As(err, &errs.NotFoundError{}):
 		if err := c.createZone(ctx, co); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())

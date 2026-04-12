@@ -9,9 +9,9 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -48,14 +48,14 @@ func TestCreateStatusHandle(t *testing.T) {
 		{
 			name:        "and find light method returns an error, then it returns same error",
 			cmd:         cmd,
-			findErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
 			lightErr:    errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and save method returns an error, then it returns same error",
 			cmd:         cmd,
-			findErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
 			light:       light,
 			saveErr:     errTest,
 			expectedErr: errTest,
@@ -64,7 +64,7 @@ func TestCreateStatusHandle(t *testing.T) {
 			name:    "and save method returns nil, then it returns empty events",
 			cmd:     cmd,
 			light:   light,
-			findErr: vo.NotFoundError{},
+			findErr: errs.NotFoundError{},
 		},
 	}
 	for _, tt := range tests {

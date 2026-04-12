@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -80,7 +80,7 @@ func (z ZoneRepository) Remove(ctx context.Context, zo *zone.Zone) error {
 		}
 		_, ok := zones[zo.Id()]
 		if !ok {
-			err := vo.NewNotFoundError(zo.Id())
+			err := errors.NewNotFoundError(zo.Id())
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return err
@@ -111,7 +111,7 @@ func (z ZoneRepository) FindByID(ctx context.Context, id string) (*zone.Zone, er
 		}
 		zo, ok := zones[id]
 		if !ok {
-			err := vo.NewNotFoundError(id)
+			err := errors.NewNotFoundError(id)
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return nil, err

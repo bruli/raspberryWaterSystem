@@ -4,7 +4,7 @@ import (
 	"context"
 	"strconv"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -33,7 +33,7 @@ func (t TemperatureProgramRepository) FindByTemperature(ctx context.Context, tem
 		}
 		byTemp, ok := temp[temperature]
 		if !ok {
-			err := vo.NewNotFoundError(strconv.FormatFloat(float64(temperature), 'f', -1, 32))
+			err := errors.NewNotFoundError(strconv.FormatFloat(float64(temperature), 'f', -1, 32))
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return nil, err
@@ -148,7 +148,7 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 		}
 		byHour, ok := programs[hour.String()]
 		if !ok {
-			err := vo.NotFoundError{}
+			err := errors.NotFoundError{}
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return program.Temperature{}, err

@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
 
@@ -24,7 +24,7 @@ func TestStatusRepository(t *testing.T) {
 		t.Run(`when Find method is called,
 		then it returns a not found error`, func(t *testing.T) {
 			_, err := repo.Find(ctx)
-			require.ErrorAs(t, err, &vo.NotFoundError{})
+			require.ErrorAs(t, err, &errors.NotFoundError{})
 		})
 		t.Run(`when Save method is called,
 		then it save status and not return any error`, func(t *testing.T) {

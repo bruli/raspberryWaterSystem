@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -42,7 +42,7 @@ func (u UpdateZone) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, e
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		switch {
-		case errors.As(err, &vo.NotFoundError{}):
+		case errors.As(err, &errs.NotFoundError{}):
 			return nil, UpdateZoneError{fmt.Sprintf("a zone with id %s, not found", co.ID)}
 		default:
 			return nil, err

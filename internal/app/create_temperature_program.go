@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -44,7 +44,7 @@ func (c CreateTemperatureProgram) Handle(ctx context.Context, cmd cqs.Command) (
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return nil, err
-	case errors.As(err, &vo.NotFoundError{}):
+	case errors.As(err, &errs.NotFoundError{}):
 		if err = c.repo.Save(ctx, co.Temperature); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())

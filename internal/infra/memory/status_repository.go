@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -27,7 +27,7 @@ func (s *StatusRepository) Find(ctx context.Context) (status.Status, error) {
 		s.m.RLock()
 		defer s.m.RUnlock()
 		if s.currentStatus == nil {
-			err := vo.NotFoundError{}
+			err := errors.NotFoundError{}
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return status.Status{}, err

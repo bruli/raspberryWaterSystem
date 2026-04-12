@@ -10,7 +10,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -58,7 +57,7 @@ func TestWeeklyRepository(t *testing.T) {
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
 				_, err = repo.FindByDayAndHour(ctx, &day, &hour)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with an invalid hour,
 			then it returns not found error`, func(t *testing.T) {
@@ -66,7 +65,7 @@ func TestWeeklyRepository(t *testing.T) {
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
 				_, err = repo.FindByDayAndHour(ctx, &day, &hour)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with a valid day and hour,
 			then it returns valid weekly program`, func(t *testing.T) {
@@ -84,7 +83,7 @@ func TestWeeklyRepository(t *testing.T) {
 			then returns a not found error`, func(t *testing.T) {
 				day := program.WeekDay(time.Sunday)
 				_, err := repo.FindByDay(ctx, &day)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with a valid day,
 			then it returns a valid program`, func(t *testing.T) {

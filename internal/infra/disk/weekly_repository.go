@@ -3,7 +3,7 @@ package disk
 import (
 	"context"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -32,7 +32,7 @@ func (w WeeklyRepository) FindByDay(ctx context.Context, day *program.WeekDay) (
 		}
 		byDay, ok := weekly[day.String()]
 		if !ok {
-			err := vo.NotFoundError{}
+			err := errors.NotFoundError{}
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return nil, err
@@ -88,14 +88,14 @@ func (w WeeklyRepository) FindByDayAndHour(ctx context.Context, day *program.Wee
 		}
 		byDay, ok := weekly[day.String()]
 		if !ok {
-			err := vo.NewNotFoundError(day.String())
+			err := errors.NewNotFoundError(day.String())
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return nil, err
 		}
 		byHour, ok := byDay[hour.String()]
 		if !ok {
-			err := vo.NewNotFoundError(hour.String())
+			err := errors.NewNotFoundError(hour.String())
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return nil, err

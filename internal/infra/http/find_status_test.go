@@ -7,9 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 
 	"github.com/stretchr/testify/require"
@@ -26,7 +25,7 @@ func TestFindStatus(t *testing.T) {
 	}{
 		{
 			name:         "and query handler returns a not found error, then it returns a not found",
-			qhErr:        vo.NotFoundError{},
+			qhErr:        errs.NotFoundError{},
 			expectedCode: http2.StatusNotFound,
 		},
 		{

@@ -7,10 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
@@ -27,7 +25,7 @@ func TestSaveExecutionLogHandle(t *testing.T) {
 	logs := make([]program.ExecutionLog, 25)
 	for i := 0; 25 > i; i++ {
 		logs[i] = fixtures.ExecutionLogBuilder{
-			ZoneName: vo.ToPointer(fmt.Sprintf("zone %v", i)),
+			ZoneName: new(fmt.Sprintf("zone %v", i)),
 		}.Build()
 	}
 	tests := []struct {

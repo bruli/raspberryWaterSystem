@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
@@ -38,7 +37,7 @@ func TestZoneRepository(t *testing.T) {
 			t.Run(`with an invalid id,
 			then it returns a not found error`, func(t *testing.T) {
 				_, err := repo.FindByID(ctx, uuid.New().String())
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with a valid id,
 			then it returns the zone`, func(t *testing.T) {
@@ -52,14 +51,14 @@ func TestZoneRepository(t *testing.T) {
 			then it returns a not found error`, func(t *testing.T) {
 				zo := fixtures.ZoneBuilder{}.Build()
 				err := repo.Remove(ctx, zo)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with a valid zone,
 			then it returns nil`, func(t *testing.T) {
 				err := repo.Remove(ctx, savedZone)
 				require.NoError(t, err)
 				_, errFind := repo.FindByID(ctx, savedZone.Id())
-				require.ErrorAs(t, errFind, &vo.NotFoundError{})
+				require.ErrorAs(t, errFind, &errors.NotFoundError{})
 			})
 		})
 	})

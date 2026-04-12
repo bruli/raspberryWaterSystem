@@ -6,10 +6,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
 	"github.com/stretchr/testify/require"
 )
@@ -51,9 +50,9 @@ func TestTemperatureRepository(t *testing.T) {
 				}}.Build(),
 			}
 			temperatures := []program.Temperature{
-				fixtures.TemperatureBuilder{Programs: programs1, Temperature: vo.ToPointer(float32(20.3))}.Build(),
-				fixtures.TemperatureBuilder{Programs: programs2, Temperature: vo.ToPointer(float32(19.3))}.Build(),
-				fixtures.TemperatureBuilder{Programs: programs3, Temperature: vo.ToPointer(float32(22.3))}.Build(),
+				fixtures.TemperatureBuilder{Programs: programs1, Temperature: new(float32(20.3))}.Build(),
+				fixtures.TemperatureBuilder{Programs: programs2, Temperature: new(float32(19.3))}.Build(),
+				fixtures.TemperatureBuilder{Programs: programs3, Temperature: new(float32(22.3))}.Build(),
 			}
 			for _, temp := range temperatures {
 				err = repo.Save(ctx, &temp)
@@ -73,14 +72,14 @@ func TestTemperatureRepository(t *testing.T) {
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
 				_, err = repo.FindByTemperatureAndHour(ctx, float32(40), hour)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with an invalid hour,
 			then it returns a not found error`, func(t *testing.T) {
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
 				_, err = repo.FindByTemperatureAndHour(ctx, float32(22.3), hour)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with an major temperature and hour,
 			then it returns a valid temperature program`, func(t *testing.T) {
@@ -103,7 +102,7 @@ func TestTemperatureRepository(t *testing.T) {
 			t.Run(`with an invalid temperature,
 			then it returns a not found error`, func(t *testing.T) {
 				_, err := repo.FindByTemperature(ctx, float32(40))
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with a valid temperature,
 			then it returns a valid temperature program`, func(t *testing.T) {
@@ -119,7 +118,7 @@ func TestTemperatureRepository(t *testing.T) {
 			err := repo.Remove(ctx, temp)
 			require.NoError(t, err)
 			_, err = repo.FindByTemperature(ctx, temp)
-			require.ErrorAs(t, err, &vo.NotFoundError{})
+			require.ErrorAs(t, err, &errors.NotFoundError{})
 		})
 	})
 }

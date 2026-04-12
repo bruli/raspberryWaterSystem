@@ -9,8 +9,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/status"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -24,7 +24,7 @@ func FindStatus(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFunc {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			switch {
-			case errors.As(err, &vo.NotFoundError{}):
+			case errors.As(err, &errs.NotFoundError{}):
 				WriteErrorResponse(w, http.StatusNotFound)
 			default:
 				WriteErrorResponse(w, http.StatusInternalServerError)
@@ -34,7 +34,7 @@ func FindStatus(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFunc {
 		currenSt, _ := result.(status.Status)
 		var updated *string
 		if currenSt.UpdatedAt() != nil {
-			updated = vo.ToPointer(strconv.Itoa(int(currenSt.UpdatedAt().Unix())))
+			updated = new(strconv.Itoa(int(currenSt.UpdatedAt().Unix())))
 		}
 		resp := StatusResponseJson{
 			Active:          currenSt.IsActive(),

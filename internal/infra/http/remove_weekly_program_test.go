@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 )
@@ -31,7 +31,7 @@ func TestRemoveWeeklyProgram(t *testing.T) {
 		{
 			name:         "and command handler returns a not found error, then it returns a not found",
 			day:          day,
-			chErr:        vo.NotFoundError{},
+			chErr:        errs.NotFoundError{},
 			expectedCode: http2.StatusNotFound,
 		},
 		{

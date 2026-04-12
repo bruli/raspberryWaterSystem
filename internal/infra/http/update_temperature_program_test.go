@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 )
@@ -67,7 +67,7 @@ func TestUpdateTemperatureProgram(t *testing.T) {
 			temperature:  "20",
 			body:         body,
 			expectedCode: http2.StatusNotFound,
-			chErr:        vo.NotFoundError{},
+			chErr:        errs.NotFoundError{},
 		},
 		{
 			name:         "and command handler returns an error, then it returns an internal server error",

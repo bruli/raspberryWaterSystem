@@ -7,8 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/go-chi/chi/v5"
@@ -23,7 +22,7 @@ func TestRemoveZone(t *testing.T) {
 	}{
 		{
 			name:         "and command handler return a not found error, then it returns a not found",
-			chErr:        vo.NotFoundError{},
+			chErr:        errs.NotFoundError{},
 			expectedCode: http2.StatusNotFound,
 		},
 		{

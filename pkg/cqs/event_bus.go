@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 )
 
 // UnknownEventToDispatchError is self-described
@@ -36,7 +36,7 @@ func (e EventBus) Subscribe(ev Event, listeners ...EventListener) {
 
 // Dispatch execute event listeners from event
 func (e EventBus) Dispatch(ctx context.Context, ev Event) error {
-	mErr := vo.NewMultiError()
+	mErr := errors.NewMultiError()
 	list, ok := e[ev.EventName()]
 	if !ok {
 		return UnknownEventToDispatchError{event: ev.EventName()}

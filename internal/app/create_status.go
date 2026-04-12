@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -50,7 +50,7 @@ func (c CreateStatus) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event,
 		return nil, ErrStatusAlreadyExist
 	}
 	switch {
-	case errors.As(err, &vo.NotFoundError{}):
+	case errors.As(err, &errs.NotFoundError{}):
 		li, err := c.lr.Find(ctx, time.Now().UTC())
 		if err != nil {
 			span.RecordError(err)

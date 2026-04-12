@@ -9,8 +9,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
@@ -22,9 +20,9 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 	executedTime1 := time.Now()
 	executedTime2 := executedTime1.AddDate(0, 0, -1)
 	executedTime3 := executedTime1.AddDate(0, 0, -2)
-	firstLog := fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 1"), ExecutedAt: &executedTime1}.Build()
-	secondLog := fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 2"), ExecutedAt: &executedTime2}.Build()
-	thirdLog := fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 3"), ExecutedAt: &executedTime3}.Build()
+	firstLog := fixtures.ExecutionLogBuilder{ZoneName: new("zone 1"), ExecutedAt: &executedTime1}.Build()
+	secondLog := fixtures.ExecutionLogBuilder{ZoneName: new("zone 2"), ExecutedAt: &executedTime2}.Build()
+	thirdLog := fixtures.ExecutionLogBuilder{ZoneName: new("zone 3"), ExecutedAt: &executedTime3}.Build()
 	tests := []struct {
 		name                 string
 		expectedErr, findErr error

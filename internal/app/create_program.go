@@ -6,10 +6,10 @@ import (
 	"fmt"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
+	trace "go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -153,7 +153,7 @@ func (p CreateProgram) Create(ctx context.Context, prog *program.Program) error 
 	switch {
 	case err == nil:
 		return CreateProgramError{msg: fmt.Sprintf("a program with hour %s, already exists", hour.String())}
-	case errors.As(err, &vo.NotFoundError{}):
+	case errors.As(err, &errs.NotFoundError{}):
 		if err := p.checkZone(ctx, prog.Executions()); err != nil {
 			return err
 		}
@@ -168,7 +168,7 @@ func (p CreateProgram) checkZone(ctx context.Context, executions []program.Execu
 		for _, z := range e.Zones() {
 			if _, err := p.zonesRepo.FindByID(ctx, z); err != nil {
 				switch {
-				case errors.As(err, &vo.NotFoundError{}):
+				case errors.As(err, &errs.NotFoundError{}):
 					return CreateProgramError{msg: fmt.Sprintf("a zone with id %s, not found", z)}
 				default:
 					return err

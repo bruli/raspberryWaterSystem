@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -88,7 +88,7 @@ func (f *FindProgramsInTime) findDaily(ctx context.Context, hour *program.Hour) 
 
 func (f *FindProgramsInTime) findProgram(err error, prgInTime *program.Program) (*program.Program, error) {
 	if err != nil {
-		if !errors.As(err, &vo.NotFoundError{}) {
+		if !errors.As(err, &errs.NotFoundError{}) {
 			return nil, err
 		}
 	}
@@ -109,7 +109,7 @@ func (f *FindProgramsInTime) findWeekly(ctx context.Context, hour program.Hour, 
 	weekDay := program.WeekDay(day)
 	weekly, err := f.Weekly.FindByDayAndHour(ctx, &weekDay, &hour)
 	if err != nil {
-		if !errors.As(err, &vo.NotFoundError{}) {
+		if !errors.As(err, &errs.NotFoundError{}) {
 			return nil, err
 		}
 	}
@@ -119,7 +119,7 @@ func (f *FindProgramsInTime) findWeekly(ctx context.Context, hour program.Hour, 
 func (f *FindProgramsInTime) findTemperature(ctx context.Context, hour program.Hour, temperature float32) (*program.Temperature, error) {
 	temp, err := f.Temperature.FindByTemperatureAndHour(ctx, temperature, hour)
 	if err != nil {
-		if !errors.As(err, &vo.NotFoundError{}) {
+		if !errors.As(err, &errs.NotFoundError{}) {
 			return nil, err
 		}
 	}

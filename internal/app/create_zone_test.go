@@ -5,9 +5,8 @@ import (
 	"errors"
 	"testing"
 
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/stretchr/testify/require"
-
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 
@@ -50,7 +49,7 @@ func TestCreateZoneHandle(t *testing.T) {
 			cmd: app.CreateZoneCmd{
 				Relays: []int{99},
 			},
-			zoneErr:     vo.NotFoundError{},
+			zoneErr:     errs.NotFoundError{},
 			expectedErr: app.CreateZoneError{},
 		},
 		{
@@ -58,20 +57,20 @@ func TestCreateZoneHandle(t *testing.T) {
 			cmd: app.CreateZoneCmd{
 				Relays: []int{1},
 			},
-			zoneErr:     vo.NotFoundError{},
+			zoneErr:     errs.NotFoundError{},
 			expectedErr: app.CreateZoneError{},
 		},
 		{
 			name:        "and save method returns an error, then it returns same error",
 			cmd:         cmd,
-			zoneErr:     vo.NotFoundError{},
+			zoneErr:     errs.NotFoundError{},
 			saveErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:    "then it returns return nil",
 			cmd:     cmd,
-			zoneErr: vo.NotFoundError{},
+			zoneErr: errs.NotFoundError{},
 		},
 	}
 	for _, tt := range tests {

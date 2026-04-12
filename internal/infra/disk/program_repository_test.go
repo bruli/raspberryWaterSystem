@@ -6,10 +6,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
-
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
 	"github.com/stretchr/testify/require"
 )
@@ -54,7 +52,7 @@ func TestProgramRepository(t *testing.T) {
 				hour, err := program.ParseHour("08:00")
 				require.NoError(t, err)
 				_, err = repo.FindByHour(ctx, &hour)
-				require.ErrorAs(t, err, &vo.NotFoundError{})
+				require.ErrorAs(t, err, &errors.NotFoundError{})
 			})
 			t.Run(`with an existent hour,
 			then it returns valid program`, func(t *testing.T) {
@@ -69,7 +67,7 @@ func TestProgramRepository(t *testing.T) {
 			err = repo.Remove(ctx, &hour)
 			require.NoError(t, err)
 			_, err = repo.FindByHour(ctx, &hour)
-			require.ErrorAs(t, err, &vo.NotFoundError{})
+			require.ErrorAs(t, err, &errors.NotFoundError{})
 		})
 	})
 }

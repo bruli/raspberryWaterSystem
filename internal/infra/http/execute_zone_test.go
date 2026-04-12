@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 
@@ -31,7 +31,7 @@ func TestExecuteZone(t *testing.T) {
 			name:         "with a valid request and command handler returns not found error, then it returns not found",
 			expectedCode: http2.StatusNotFound,
 			body:         body,
-			chErr:        vo.NotFoundError{},
+			chErr:        errs.NotFoundError{},
 		},
 		{
 			name:         "with a valid request and command handler returns en error, then it returns internal server error",

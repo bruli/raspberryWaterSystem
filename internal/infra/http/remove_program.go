@@ -6,8 +6,8 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
@@ -31,7 +31,7 @@ func RemoveProgram(ch cqs.CommandHandler, prg string, tracer trace.Tracer) http.
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			switch {
-			case errors.As(err, &vo.NotFoundError{}):
+			case errors.As(err, &errs.NotFoundError{}):
 				WriteErrorResponse(writer, http.StatusNotFound)
 			default:
 				WriteErrorResponse(writer, http.StatusInternalServerError)

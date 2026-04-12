@@ -3,7 +3,7 @@ package disk
 import (
 	"context"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 
@@ -140,7 +140,7 @@ func (d ProgramRepository) FindByHour(ctx context.Context, hour *program.Hour) (
 		}
 		pgr, ok := dailyPgrms[hour.String()]
 		if !ok {
-			err := vo.NewNotFoundError(hour.String())
+			err := errors.NewNotFoundError(hour.String())
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())
 			return nil, err

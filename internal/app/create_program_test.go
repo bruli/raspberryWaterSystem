@@ -8,9 +8,9 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -56,28 +56,28 @@ func TestCreateProgram_Handle(t *testing.T) {
 		{
 			name:        "and find zone returns a not found error, then it returns a create program error",
 			args:        defaultArgs,
-			findErr:     vo.NotFoundError{},
-			zoneErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
+			zoneErr:     errs.NotFoundError{},
 			expectedErr: app.CreateProgramError{},
 		},
 		{
 			name:        "and find zone returns an error, then it returns same error",
 			args:        defaultArgs,
-			findErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
 			zoneErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:        "and save method returns an error, then it returns same error",
 			args:        defaultArgs,
-			findErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
 			saveErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:    "and save method returns nil, then it returns nil",
 			args:    defaultArgs,
-			findErr: vo.NotFoundError{},
+			findErr: errs.NotFoundError{},
 		},
 	}
 	for _, tt := range tests {

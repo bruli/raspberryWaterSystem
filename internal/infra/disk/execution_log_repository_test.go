@@ -9,7 +9,6 @@ import (
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/disk"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,9 +21,9 @@ func TestExecutionLogRepository(t *testing.T) {
 		t.Run(`when Save method is called,
 		then it not returns error`, func(t *testing.T) {
 			logs := []program.ExecutionLog{
-				fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 1")}.Build(),
-				fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 2")}.Build(),
-				fixtures.ExecutionLogBuilder{ZoneName: vo.ToPointer("zone 3")}.Build(),
+				fixtures.ExecutionLogBuilder{ZoneName: new("zone 1")}.Build(),
+				fixtures.ExecutionLogBuilder{ZoneName: new("zone 2")}.Build(),
+				fixtures.ExecutionLogBuilder{ZoneName: new("zone 3")}.Build(),
 			}
 			err := repo.Save(ctx, logs)
 			require.NoError(t, err)

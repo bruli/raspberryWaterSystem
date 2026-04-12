@@ -7,9 +7,9 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -46,7 +46,7 @@ func TestUpdateZone_Handle(t *testing.T) {
 		{
 			name:        "and find user returns a not found error, then it returns an update zone error",
 			args:        defaultArgs,
-			findErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
 			expectedErr: app.UpdateZoneError{},
 		},
 		{

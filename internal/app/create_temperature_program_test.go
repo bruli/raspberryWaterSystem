@@ -7,9 +7,9 @@ import (
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
+	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
-	"github.com/bruli/raspberryWaterSystem/pkg/vo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -55,14 +55,14 @@ func TestCreateTemperatureProgram_Handle(t *testing.T) {
 		{
 			name:        "and remove program returns an error, then it returns same error",
 			args:        defaultArgs,
-			findErr:     vo.NotFoundError{},
+			findErr:     errs.NotFoundError{},
 			saveErr:     errTest,
 			expectedErr: errTest,
 		},
 		{
 			name:    "and remove program returns nil, then it returns nil",
 			args:    defaultArgs,
-			findErr: vo.NotFoundError{},
+			findErr: errs.NotFoundError{},
 		},
 	}
 	for _, tt := range tests {
