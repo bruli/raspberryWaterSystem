@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"go.opentelemetry.io/otel/trace"
 )

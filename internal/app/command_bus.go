@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 )
 
 type CommandBus struct {

@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/weather"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )

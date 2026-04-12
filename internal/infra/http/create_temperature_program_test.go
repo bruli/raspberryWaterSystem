@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/bruli/raspberryWaterSystem/internal/app"
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	http2 "github.com/bruli/raspberryWaterSystem/internal/infra/http"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/stretchr/testify/require"
 )
 

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )

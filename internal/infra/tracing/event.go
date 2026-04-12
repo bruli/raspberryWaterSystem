@@ -1,7 +1,7 @@
 package tracing
 
 import (
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"go.opentelemetry.io/otel/trace"
 )
 

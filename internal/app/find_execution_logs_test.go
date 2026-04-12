@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 
 	"github.com/bruli/raspberryWaterSystem/internal/domain/program"
 

@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/http"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/otel/trace"

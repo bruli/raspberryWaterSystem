@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/domain/zone"
 	errs "github.com/bruli/raspberryWaterSystem/internal/errors"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"github.com/davecgh/go-spew/spew"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"

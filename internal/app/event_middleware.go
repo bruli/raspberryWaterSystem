@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 	"github.com/bruli/raspberryWaterSystem/internal/infra/tracing"
-	"github.com/bruli/raspberryWaterSystem/pkg/cqs"
 	"go.opentelemetry.io/otel/trace"
 )
 

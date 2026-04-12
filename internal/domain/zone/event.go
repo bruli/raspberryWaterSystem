@@ -1,6 +1,6 @@
 package zone
 
-import "github.com/bruli/raspberryWaterSystem/pkg/cqs"
+import "github.com/bruli/raspberryWaterSystem/internal/cqs"
 
 const (
 	ExecutedEventName = "v1.zone.executed"
