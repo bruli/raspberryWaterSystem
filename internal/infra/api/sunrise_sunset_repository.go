@@ -29,7 +29,7 @@ type results struct {
 type SunriseSunsetRepository struct {
 	cl    *http.Client
 	cache map[string]*status.Light
-	sync.RWMutex
+	m     sync.RWMutex
 }
 
 func (s *SunriseSunsetRepository) Find(ctx context.Context, date time.Time) (*status.Light, error) {
@@ -41,9 +41,9 @@ func (s *SunriseSunsetRepository) Find(ctx context.Context, date time.Time) (*st
 			_, _ = s.getAndCache(ctx, tomorrow)
 		}
 	}()
-	s.RLock()
+	s.m.RLock()
 	light, ok := s.cache[day]
-	s.RUnlock()
+	s.m.RUnlock()
 	if ok {
 		return light, nil
 	}
@@ -68,7 +68,7 @@ func (s *SunriseSunsetRepository) formatDay(date time.Time) string {
 func (s *SunriseSunsetRepository) getAndCache(ctx context.Context, day string) (*status.Light, error) {
 	url := fmt.Sprintf(urlRaw, latitude, longitude, day)
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create request: %w", err)
 	}
@@ -97,8 +97,8 @@ func (s *SunriseSunsetRepository) getAndCache(ctx context.Context, day string) (
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse sunrise light: %w", err)
 	}
-	s.Lock()
-	defer s.Unlock()
+	s.m.Lock()
+	defer s.m.Unlock()
 	s.cache[day] = li
 	return li, nil
 }

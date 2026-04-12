@@ -57,10 +57,10 @@ func TestRemoveWeekly_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			repo := &WeeklyProgramRepositoryMock{
-				FindByDayFunc: func(ctx context.Context, day *program.WeekDay) (*program.Weekly, error) {
+				FindByDayFunc: func(_ context.Context, _ *program.WeekDay) (*program.Weekly, error) {
 					return nil, tt.findErr
 				},
-				RemoveFunc: func(ctx context.Context, day *program.WeekDay) error {
+				RemoveFunc: func(_ context.Context, _ *program.WeekDay) error {
 					return tt.removeErr
 				},
 			}

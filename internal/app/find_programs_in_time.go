@@ -30,7 +30,7 @@ type FindProgramsInTime struct {
 	tracer           trace.Tracer
 }
 
-func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, error) {
+func (f *FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, error) {
 	ctx, span := f.tracer.Start(ctx, "FindProgramsInTime")
 	defer span.End()
 	q, ok := query.(FindProgramsInTimeQuery)
@@ -81,12 +81,12 @@ func (f FindProgramsInTime) Handle(ctx context.Context, query cqs.Query) (any, e
 	}, nil
 }
 
-func (f FindProgramsInTime) findDaily(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+func (f *FindProgramsInTime) findDaily(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 	daily, err := f.Daily.FindByHour(ctx, hour)
 	return f.findProgram(err, daily)
 }
 
-func (f FindProgramsInTime) findProgram(err error, prgInTime *program.Program) (*program.Program, error) {
+func (f *FindProgramsInTime) findProgram(err error, prgInTime *program.Program) (*program.Program, error) {
 	if err != nil {
 		if !errors.As(err, &vo.NotFoundError{}) {
 			return nil, err
@@ -95,17 +95,17 @@ func (f FindProgramsInTime) findProgram(err error, prgInTime *program.Program) (
 	return prgInTime, nil
 }
 
-func (f FindProgramsInTime) findOdd(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+func (f *FindProgramsInTime) findOdd(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 	odd, err := f.Odd.FindByHour(ctx, hour)
 	return f.findProgram(err, odd)
 }
 
-func (f FindProgramsInTime) findEven(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+func (f *FindProgramsInTime) findEven(ctx context.Context, hour *program.Hour) (*program.Program, error) {
 	even, err := f.Even.FindByHour(ctx, hour)
 	return f.findProgram(err, even)
 }
 
-func (f FindProgramsInTime) findWeekly(ctx context.Context, hour program.Hour, day time.Weekday) (*program.Weekly, error) {
+func (f *FindProgramsInTime) findWeekly(ctx context.Context, hour program.Hour, day time.Weekday) (*program.Weekly, error) {
 	weekDay := program.WeekDay(day)
 	weekly, err := f.Weekly.FindByDayAndHour(ctx, &weekDay, &hour)
 	if err != nil {
@@ -116,7 +116,7 @@ func (f FindProgramsInTime) findWeekly(ctx context.Context, hour program.Hour, d
 	return weekly, nil
 }
 
-func (f FindProgramsInTime) findTemperature(ctx context.Context, hour program.Hour, temperature float32) (*program.Temperature, error) {
+func (f *FindProgramsInTime) findTemperature(ctx context.Context, hour program.Hour, temperature float32) (*program.Temperature, error) {
 	temp, err := f.Temperature.FindByTemperatureAndHour(ctx, temperature, hour)
 	if err != nil {
 		if !errors.As(err, &vo.NotFoundError{}) {
@@ -131,8 +131,8 @@ func NewFindProgramsInTime(
 	weekly WeeklyProgramRepository,
 	temperature TemperatureProgramRepository,
 	tracer trace.Tracer,
-) FindProgramsInTime {
-	return FindProgramsInTime{Daily: daily, Odd: odd, Even: even, Weekly: weekly, Temperature: temperature, tracer: tracer}
+) *FindProgramsInTime {
+	return &FindProgramsInTime{Daily: daily, Odd: odd, Even: even, Weekly: weekly, Temperature: temperature, tracer: tracer}
 }
 
 type ProgramsInTime struct {

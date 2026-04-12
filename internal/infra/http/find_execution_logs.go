@@ -19,7 +19,7 @@ func FindExecutionLogs(qh cqs.QueryHandler, tracer trace.Tracer) http.HandlerFun
 		defer span.End()
 		limit := 5
 		limitStr := r.URL.Query().Get("limit")
-		if len(limitStr) > 0 {
+		if limitStr != "" {
 			limitValue, err := strconv.Atoi(limitStr)
 			if err != nil {
 				span.RecordError(err)

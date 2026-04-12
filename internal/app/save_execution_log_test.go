@@ -72,10 +72,10 @@ func TestSaveExecutionLogHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			elr := &ExecutionLogRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.ExecutionLog, error) {
+				FindAllFunc: func(_ context.Context) ([]program.ExecutionLog, error) {
 					return tt.logs, tt.findErr
 				},
-				SaveFunc: func(ctx context.Context, logs []program.ExecutionLog) error {
+				SaveFunc: func(_ context.Context, _ []program.ExecutionLog) error {
 					return tt.saveErr
 				},
 			}

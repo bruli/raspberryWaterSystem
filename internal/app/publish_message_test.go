@@ -41,7 +41,7 @@ func TestPublishExecutionLogHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			elp := &MessagePublisherMock{
-				PublishFunc: func(ctx context.Context, message string) error {
+				PublishFunc: func(_ context.Context, _ string) error {
 					return tt.publishErr
 				},
 			}

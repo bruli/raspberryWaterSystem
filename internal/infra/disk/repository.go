@@ -16,7 +16,7 @@ func readYamlFile(path string, data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to read file %s: %w", path, err)
 	}
-	if err = yaml.Unmarshal(fileData, data); err != nil {
+	if err := yaml.Unmarshal(fileData, data); err != nil {
 		return err
 	}
 	return nil
@@ -30,7 +30,7 @@ func readJsonFile(path string, data interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to read file %s: %w", path, err)
 	}
-	if err = json.Unmarshal(fileData, data); err != nil {
+	if err := json.Unmarshal(fileData, data); err != nil {
 		return err
 	}
 	return nil
@@ -40,7 +40,7 @@ func checkFile(path string) error {
 	_, err := os.Stat(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			if err = os.WriteFile(path, nil, 0o755); err != nil {
+			if err := os.WriteFile(path, nil, 0o755); err != nil {
 				return err
 			}
 		}

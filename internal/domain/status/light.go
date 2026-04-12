@@ -30,7 +30,7 @@ func (l Light) validate() error {
 	}
 }
 
-func NewLight(sunrise time.Time, sunset time.Time) (*Light, error) {
+func NewLight(sunrise, sunset time.Time) (*Light, error) {
 	l := Light{sunrise: sunrise, sunset: sunset}
 	if err := l.validate(); err != nil {
 		return nil, err

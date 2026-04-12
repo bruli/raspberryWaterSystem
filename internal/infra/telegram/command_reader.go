@@ -31,7 +31,7 @@ func (r CommandReader) Read(ctx context.Context, logger *slog.Logger) {
 			continue
 		}
 		chatID := update.Message.Chat.ID
-		cmd := r.readCommand(update)
+		cmd := r.readCommand(&update)
 		if err := r.bus.handle(ctx, chatID, msgs, cmd); err != nil {
 			buildMessage(chatID, msgs, err.Error())
 		}
@@ -46,7 +46,7 @@ func (r CommandReader) Read(ctx context.Context, logger *slog.Logger) {
 	}
 }
 
-func (r CommandReader) readCommand(update tgbotapi.Update) runnerCommand {
+func (r CommandReader) readCommand(update *tgbotapi.Update) runnerCommand {
 	var cmd runnerCommand
 	switch update.Message.Command() {
 	case HelpCommandName.String():

@@ -39,10 +39,10 @@ func New() (*Config, error) {
 	if err := env.Parse(&e); err != nil {
 		return nil, err
 	}
-	env, err := ParseEnvironment(e.Value)
+	envir, err := ParseEnvironment(e.Value)
 	if err != nil {
 		return nil, err
 	}
-	co.environment = env
+	co.environment = envir
 	return &co, nil
 }

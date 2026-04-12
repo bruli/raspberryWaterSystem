@@ -82,7 +82,7 @@ func TestCreateZoneHandle(t *testing.T) {
 				FindByIDFunc: func(_ context.Context, _ string) (*zone.Zone, error) {
 					return tt.zone, tt.zoneErr
 				},
-				SaveFunc: func(ctx context.Context, zo *zone.Zone) error {
+				SaveFunc: func(_ context.Context, _ *zone.Zone) error {
 					return tt.saveErr
 				},
 			}

@@ -12,7 +12,7 @@ type InvalidQueryError struct {
 }
 
 // NewInvalidQueryError is a constructor
-func NewInvalidQueryError(expected string, had string) InvalidQueryError {
+func NewInvalidQueryError(expected, had string) InvalidQueryError {
 	return InvalidQueryError{expected: expected, had: had}
 }
 

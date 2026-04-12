@@ -64,10 +64,10 @@ func (z *Zone) Hydrate(id, name string, relays []Relay) {
 }
 
 func (z *Zone) validate() error {
-	if len(z.id) == 0 {
+	if z.id == "" {
 		return ErrInvalidZoneID
 	}
-	if len(z.name) == 0 {
+	if z.name == "" {
 		return ErrInvalidZoneName
 	}
 	if len(z.relays) == 0 {

@@ -95,12 +95,12 @@ func main() {
 	}
 	findStatusQH := app.NewFindStatus(sr, tracer)
 
-	cron, err := buildCron()
+	cronJob, err := buildCron()
 	if err != nil {
 		log.ErrorContext(ctx, "failed building cron")
 		os.Exit(1)
 	}
-	go terraceWeatherCron(ctx, cron, eventsRepo, findStatusQH, log, tracer)
+	go terraceWeatherCron(ctx, cronJob, eventsRepo, findStatusQH, log, tracer)
 	go readingEvents(ctx, eventsRepo, eventsPublisher, log)
 
 	qhBus := app.NewQueryBus()
@@ -159,9 +159,9 @@ func main() {
 	runHTTPServer(ctx, chBus, qhBus, conf, log, tracer)
 }
 
-func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger, tracer trace.Tracer) {
-	defer cron.Stop()
-	_, err := cron.AddFunc("00 * * * *", func() {
+func terraceWeatherCron(ctx context.Context, cronJob *cron.Cron, repo *disk.EventsRepository, ch cqs.QueryHandler, log *slog.Logger, tracer trace.Tracer) {
+	defer cronJob.Stop()
+	_, err := cronJob.AddFunc("00 * * * *", func() {
 		ctx, span := tracer.Start(ctx, "TerraceWeatherCron")
 		defer span.End()
 		log.InfoContext(ctx, "[WORKER] Terrace Weather: getting weather")
@@ -203,7 +203,7 @@ func terraceWeatherCron(ctx context.Context, cron *cron.Cron, repo *disk.EventsR
 		return
 	}
 	log.InfoContext(ctx, "[WORKER] Terrace Weather: cron job started")
-	cron.Start()
+	cronJob.Start()
 	<-ctx.Done()
 	log.InfoContext(ctx, "[WORKER] Terrace Weather: context done")
 }

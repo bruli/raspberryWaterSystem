@@ -57,10 +57,10 @@ func (s *Status) Deactivate() {
 	s.active = false
 }
 
-func New(systemStartedAt time.Time, weather weather.Weather, light *Light) *Status {
+func New(systemStartedAt time.Time, w weather.Weather, light *Light) *Status {
 	return &Status{
 		systemStartedAt: systemStartedAt,
-		weather:         weather,
+		weather:         w,
 		active:          true,
 		light:           light,
 	}

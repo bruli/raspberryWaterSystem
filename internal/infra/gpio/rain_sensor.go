@@ -12,7 +12,7 @@ import (
 const RainReference = 600
 
 type RainSensor struct {
-	sync.RWMutex
+	m      sync.RWMutex
 	tracer trace.Tracer
 }
 
@@ -23,8 +23,8 @@ func (r *RainSensor) Find(ctx context.Context) (bool, error) {
 	default:
 		_, span := r.tracer.Start(ctx, "RainSensor.Find")
 		defer span.End()
-		r.RLock()
-		defer r.RUnlock()
+		r.m.RLock()
+		defer r.m.RUnlock()
 		if err := rpio.Open(); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())

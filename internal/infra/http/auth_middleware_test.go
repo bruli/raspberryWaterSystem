@@ -35,8 +35,8 @@ func TestAuthMiddleware(t *testing.T) {
 			t.Parallel()
 			middleware := http.AuthMiddleware("1234")
 			handler := middleware(nextHandler())
-			req := httptest.NewRequest(http2.MethodPost, "/", nil)
-			if len(tt.token) != 0 {
+			req := httptest.NewRequest(http2.MethodPost, "/", http2.NoBody)
+			if tt.token != "" {
 				req.Header.Set("Authorization", tt.token)
 			}
 			writer := httptest.NewRecorder()

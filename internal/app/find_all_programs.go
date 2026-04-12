@@ -24,7 +24,7 @@ type FindAllPrograms struct {
 	tracer           trace.Tracer
 }
 
-func (f FindAllPrograms) Handle(ctx context.Context, _ cqs.Query) (any, error) {
+func (f *FindAllPrograms) Handle(ctx context.Context, _ cqs.Query) (any, error) {
 	ctx, span := f.tracer.Start(ctx, "FindAllPrograms")
 	defer span.End()
 	dailies, err := f.daily.FindAll(ctx)
@@ -74,8 +74,8 @@ func NewFindAllPrograms(
 	weekly WeeklyProgramRepository,
 	temperature TemperatureProgramRepository,
 	tracer trace.Tracer,
-) FindAllPrograms {
-	return FindAllPrograms{daily: daily, odd: odd, even: even, weekly: weekly, temperature: temperature, tracer: tracer}
+) *FindAllPrograms {
+	return &FindAllPrograms{daily: daily, odd: odd, even: even, weekly: weekly, temperature: temperature, tracer: tracer}
 }
 
 type AllPrograms struct {

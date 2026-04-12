@@ -13,8 +13,8 @@ import (
 
 type StatusRepository struct {
 	currentStatus *status.Status
-	sync.RWMutex
-	tracer trace.Tracer
+	m             sync.RWMutex
+	tracer        trace.Tracer
 }
 
 func (s *StatusRepository) Find(ctx context.Context) (status.Status, error) {
@@ -24,8 +24,8 @@ func (s *StatusRepository) Find(ctx context.Context) (status.Status, error) {
 	default:
 		_, span := s.tracer.Start(ctx, "StatusRepository.Find")
 		defer span.End()
-		s.RLock()
-		defer s.RUnlock()
+		s.m.RLock()
+		defer s.m.RUnlock()
 		if s.currentStatus == nil {
 			err := vo.NotFoundError{}
 			span.RecordError(err)
@@ -62,8 +62,8 @@ func (s *StatusRepository) Save(ctx context.Context, st status.Status) error {
 	default:
 		_, span := s.tracer.Start(ctx, "StatusRepository.Save")
 		defer span.End()
-		s.Lock()
-		defer s.Unlock()
+		s.m.Lock()
+		defer s.m.Unlock()
 		s.currentStatus = &st
 		span.SetStatus(codes.Ok, "status saved")
 		return nil

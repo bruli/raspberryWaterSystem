@@ -122,7 +122,7 @@ func buildProgramWeeklyByHour(day *program.WeekDay, hour *program.Hour, prgms []
 	return &weekly
 }
 
-func (w WeeklyRepository) Save(ctx context.Context, program *program.Weekly) error {
+func (w WeeklyRepository) Save(ctx context.Context, prg *program.Weekly) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -135,7 +135,7 @@ func (w WeeklyRepository) Save(ctx context.Context, program *program.Weekly) err
 			span.SetStatus(codes.Error, err.Error())
 			return err
 		}
-		weekly[program.WeekDay().String()] = buildProgramMap(program.Programs())
+		weekly[prg.WeekDay().String()] = buildProgramMap(prg.Programs())
 		if err := writeYamlFile(w.path, weekly); err != nil {
 			span.RecordError(err)
 			span.SetStatus(codes.Error, err.Error())

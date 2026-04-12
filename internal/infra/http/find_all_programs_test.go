@@ -60,7 +60,7 @@ func TestFindAllPrograms(t *testing.T) {
 				},
 			}
 			handler := http.FindAllPrograms(qh, tracer())
-			req := httptest.NewRequest(http2.MethodGet, "/programs", nil)
+			req := httptest.NewRequest(http2.MethodGet, "/programs", http2.NoBody)
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)
 			resp := writer.Result()

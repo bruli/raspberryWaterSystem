@@ -50,7 +50,7 @@ func TestFindStatus(t *testing.T) {
 				},
 			}
 			handler := http.FindStatus(qh, tracer())
-			req := httptest.NewRequest(http2.MethodGet, "/status", nil)
+			req := httptest.NewRequest(http2.MethodGet, "/status", http2.NoBody)
 			writer := httptest.NewRecorder()
 			handler.ServeHTTP(writer, req)
 			resp := writer.Result()

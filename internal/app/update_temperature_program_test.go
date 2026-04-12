@@ -70,7 +70,7 @@ func TestUpdateTemperatureProgram_Handle(t *testing.T) {
 			repo.FindByTemperatureFunc = func(_ context.Context, _ float32) (*program.Temperature, error) {
 				return tt.program, tt.findErr
 			}
-			repo.SaveFunc = func(ctx context.Context, program *program.Temperature) error {
+			repo.SaveFunc = func(_ context.Context, _ *program.Temperature) error {
 				return tt.saveErr
 			}
 			handler := app.NewUpdateTemperatureProgram(repo, tracer())

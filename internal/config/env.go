@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 )
 
 const (
@@ -23,14 +22,6 @@ func NewEmptyEnvironmentKeyError(key string) EmptyEnvironmentKeyError {
 
 func (i EmptyEnvironmentKeyError) Error() string {
 	return fmt.Sprintf("empty value from environment key %q", i.key)
-}
-
-func Value(key string) (string, error) {
-	value := os.Getenv(key)
-	if len(value) == 0 {
-		return "", NewEmptyEnvironmentKeyError(key)
-	}
-	return value, nil
 }
 
 type EnvironmentType int

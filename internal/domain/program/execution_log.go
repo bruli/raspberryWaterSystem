@@ -32,7 +32,7 @@ func (e ExecutionLog) validate() error {
 	if _, err := ParseSeconds(e.seconds.Int()); err != nil {
 		return err
 	}
-	if len(e.zoneName) == 0 {
+	if e.zoneName == "" {
 		return ErrEmptyZoneName
 	}
 	if e.executedAt.IsZero() {

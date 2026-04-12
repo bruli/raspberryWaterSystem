@@ -72,6 +72,6 @@ type commandHandler struct {
 	err    error
 }
 
-func (c commandHandler) Handle(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+func (c commandHandler) Handle(_ context.Context, _ cqs.Command) ([]cqs.Event, error) {
 	return c.events, c.err
 }

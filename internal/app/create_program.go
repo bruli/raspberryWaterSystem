@@ -147,17 +147,17 @@ type CreateProgram struct {
 	zonesRepo   ZoneRepository
 }
 
-func (p CreateProgram) Create(ctx context.Context, program *program.Program) error {
-	hour := program.Hour()
+func (p CreateProgram) Create(ctx context.Context, prog *program.Program) error {
+	hour := prog.Hour()
 	_, err := p.programRepo.FindByHour(ctx, &hour)
 	switch {
 	case err == nil:
 		return CreateProgramError{msg: fmt.Sprintf("a program with hour %s, already exists", hour.String())}
 	case errors.As(err, &vo.NotFoundError{}):
-		if err = p.checkZone(ctx, program.Executions()); err != nil {
+		if err := p.checkZone(ctx, prog.Executions()); err != nil {
 			return err
 		}
-		return p.programRepo.Save(ctx, program)
+		return p.programRepo.Save(ctx, prog)
 	default:
 		return err
 	}

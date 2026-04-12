@@ -81,7 +81,7 @@ func TestFindExecutionLogsHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			elr := &ExecutionLogRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.ExecutionLog, error) {
+				FindAllFunc: func(_ context.Context) ([]program.ExecutionLog, error) {
 					return tt.logs, tt.findErr
 				},
 			}
