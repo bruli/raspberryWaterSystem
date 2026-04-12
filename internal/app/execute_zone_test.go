@@ -56,7 +56,7 @@ func TestExecuteZoneHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			zr := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
+				FindByIDFunc: func(_ context.Context, _ string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
 				},
 			}

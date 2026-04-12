@@ -59,7 +59,7 @@ func TestUpdateZone(t *testing.T) {
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			ch := &CommandHandlerMock{
-				HandleFunc: func(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+				HandleFunc: func(_ context.Context, _ cqs.Command) ([]cqs.Event, error) {
 					return nil, tt.chErr
 				},
 			}

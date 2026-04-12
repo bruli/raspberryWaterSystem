@@ -72,15 +72,15 @@ func TestCreateStatusHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			sr := &StatusRepositoryMock{
-				SaveFunc: func(ctx context.Context, st status.Status) error {
+				SaveFunc: func(_ context.Context, _ status.Status) error {
 					return tt.saveErr
 				},
-				FindFunc: func(ctx context.Context) (status.Status, error) {
+				FindFunc: func(_ context.Context) (status.Status, error) {
 					return status.Status{}, tt.findErr
 				},
 			}
 			lr := &LightRepositoryMock{
-				FindFunc: func(ctx context.Context, _ time.Time) (*status.Light, error) {
+				FindFunc: func(_ context.Context, _ time.Time) (*status.Light, error) {
 					return nil, tt.lightErr
 				},
 			}

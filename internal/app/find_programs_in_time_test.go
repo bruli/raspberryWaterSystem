@@ -100,27 +100,27 @@ func TestFindProgramsInTimeHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			daily := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+				FindByHourFunc: func(_ context.Context, _ *program.Hour) (*program.Program, error) {
 					return tt.daily, tt.dailyErr
 				},
 			}
 			odd := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+				FindByHourFunc: func(_ context.Context, _ *program.Hour) (*program.Program, error) {
 					return tt.odd, tt.oddErr
 				},
 			}
 			even := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+				FindByHourFunc: func(_ context.Context, _ *program.Hour) (*program.Program, error) {
 					return tt.even, tt.evenErr
 				},
 			}
 			weekly := &WeeklyProgramRepositoryMock{
-				FindByDayAndHourFunc: func(ctx context.Context, day *program.WeekDay, hour *program.Hour) (*program.Weekly, error) {
+				FindByDayAndHourFunc: func(_ context.Context, _ *program.WeekDay, _ *program.Hour) (*program.Weekly, error) {
 					return tt.weekly, tt.weeklyErr
 				},
 			}
 			temperature := &TemperatureProgramRepositoryMock{
-				FindByTemperatureAndHourFunc: func(ctx context.Context, temperature float32, hour program.Hour) (program.Temperature, error) {
+				FindByTemperatureAndHourFunc: func(_ context.Context, _ float32, _ program.Hour) (program.Temperature, error) {
 					return tt.temp, tt.tempErr
 				},
 			}

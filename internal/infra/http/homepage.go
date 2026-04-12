@@ -5,7 +5,7 @@ import (
 )
 
 func Homepage() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		WriteResponse(w, http.StatusOK, nil)
 	}
 }

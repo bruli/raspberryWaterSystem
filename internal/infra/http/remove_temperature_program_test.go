@@ -51,14 +51,14 @@ func TestRemoveTemperatureProgram(t *testing.T) {
 		when a request is sent`+tt.name, func(t *testing.T) {
 			t.Parallel()
 			ch := &CommandHandlerMock{
-				HandleFunc: func(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+				HandleFunc: func(_ context.Context, _ cqs.Command) ([]cqs.Event, error) {
 					return nil, tt.chErr
 				},
 			}
 			handler := http.RemoveTemperatureProgram(ch, tracer())
 			server := chi.NewMux()
 			server.Delete("/programs/temperature/{temperature}", handler)
-			req := httptest.NewRequest(http2.MethodDelete, fmt.Sprintf("/programs/temperature/%s", tt.temp), nil)
+			req := httptest.NewRequest(http2.MethodDelete, fmt.Sprintf("/programs/temperature/%s", tt.temp), http2.NoBody)
 			writer := httptest.NewRecorder()
 			server.ServeHTTP(writer, req)
 			resp := writer.Result()

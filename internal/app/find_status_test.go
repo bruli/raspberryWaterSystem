@@ -36,7 +36,7 @@ func TestFindStatusHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			sr := &StatusRepositoryMock{
-				FindFunc: func(ctx context.Context) (status.Status, error) {
+				FindFunc: func(_ context.Context) (status.Status, error) {
 					return tt.status, tt.findErr
 				},
 			}

@@ -70,10 +70,10 @@ func TestCreateWeeklyProgram_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			repo := &WeeklyProgramRepositoryMock{
-				FindByDayFunc: func(ctx context.Context, day *program.WeekDay) (*program.Weekly, error) {
+				FindByDayFunc: func(_ context.Context, _ *program.WeekDay) (*program.Weekly, error) {
 					return nil, tt.findErr
 				},
-				SaveFunc: func(ctx context.Context, programMoqParam *program.Weekly) error {
+				SaveFunc: func(_ context.Context, _ *program.Weekly) error {
 					return tt.saveErr
 				},
 			}

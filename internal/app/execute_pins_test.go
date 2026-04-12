@@ -40,7 +40,7 @@ func TestExecutePinsHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			pe := &PinExecutorMock{
-				ExecuteFunc: func(ctx context.Context, seconds uint, pins []string) error {
+				ExecuteFunc: func(_ context.Context, _ uint, _ []string) error {
 					return tt.execErr
 				},
 			}

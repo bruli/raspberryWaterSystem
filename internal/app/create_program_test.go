@@ -85,15 +85,15 @@ func TestCreateProgram_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			programRepo := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+				FindByHourFunc: func(_ context.Context, _ *program.Hour) (*program.Program, error) {
 					return nil, tt.findErr
 				},
-				SaveFunc: func(ctx context.Context, pr *program.Program) error {
+				SaveFunc: func(_ context.Context, _ *program.Program) error {
 					return tt.saveErr
 				},
 			}
 			zonesRepo := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
+				FindByIDFunc: func(_ context.Context, _ string) (*zone.Zone, error) {
 					return nil, tt.zoneErr
 				},
 			}

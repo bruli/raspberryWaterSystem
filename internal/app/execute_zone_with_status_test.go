@@ -94,12 +94,12 @@ func TestExecuteZoneWithStatusHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			zr := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
+				FindByIDFunc: func(_ context.Context, _ string) (*zone.Zone, error) {
 					return tt.zone, tt.findErr
 				},
 			}
 			sr := &StatusRepositoryMock{}
-			sr.FindFunc = func(ctx context.Context) (status.Status, error) {
+			sr.FindFunc = func(_ context.Context) (status.Status, error) {
 				return tt.st, tt.stErr
 			}
 			handler := app.NewExecuteZoneWithStatus(zr, sr, tracer())

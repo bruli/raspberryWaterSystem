@@ -46,7 +46,7 @@ func TestExecutePinsOnExecuteZoneListen(t *testing.T) {
 		when Listen method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			ch := &CommandHandlerMock{}
-			ch.HandleFunc = func(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+			ch.HandleFunc = func(_ context.Context, cmd cqs.Command) ([]cqs.Event, error) {
 				_, isExecute := cmd.(app.ExecutePinsCmd)
 				_, isLog := cmd.(app.SaveExecutionLogCmd)
 				_, isPublish := cmd.(app.PublishMessageCmd)

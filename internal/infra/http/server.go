@@ -19,7 +19,7 @@ func newServer(ctx context.Context, handler http.Handler) *http.Server {
 	}
 
 	// serve requests with our own context
-	server.BaseContext = func(ln net.Listener) context.Context {
+	server.BaseContext = func(_ net.Listener) context.Context {
 		return ctx
 	}
 

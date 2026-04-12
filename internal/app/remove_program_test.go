@@ -58,10 +58,10 @@ func TestRemoveDailyProgram_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			repo := &ProgramRepositoryMock{
-				FindByHourFunc: func(ctx context.Context, hour *program.Hour) (*program.Program, error) {
+				FindByHourFunc: func(_ context.Context, _ *program.Hour) (*program.Program, error) {
 					return nil, tt.findErr
 				},
-				RemoveFunc: func(ctx context.Context, hour *program.Hour) error {
+				RemoveFunc: func(_ context.Context, _ *program.Hour) error {
 					return tt.removeErr
 				},
 			}

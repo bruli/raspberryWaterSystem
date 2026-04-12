@@ -116,7 +116,7 @@ func TestExecutionInTime(t *testing.T) {
 		t.Run(`Given a ExecutionInTime function,
 		when is called `+tt.name, func(t *testing.T) {
 			qh := &QueryHandlerMock{
-				HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
+				HandleFunc: func(_ context.Context, query cqs.Query) (any, error) {
 					_, findStatus := query.(app.FindStatusQuery)
 					if findStatus {
 						return tt.statusResult, tt.findStatusErr
@@ -129,7 +129,7 @@ func TestExecutionInTime(t *testing.T) {
 				},
 			}
 			ch := &CommandHandlerMock{}
-			ch.HandleFunc = func(ctx context.Context, cmd cqs.Command) ([]cqs.Event, error) {
+			ch.HandleFunc = func(_ context.Context, _ cqs.Command) ([]cqs.Event, error) {
 				switch len(ch.HandleCalls()) {
 				case 1:
 					return nil, tt.dailyErr

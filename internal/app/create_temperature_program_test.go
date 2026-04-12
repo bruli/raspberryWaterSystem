@@ -70,10 +70,10 @@ func TestCreateTemperatureProgram_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			repo := &TemperatureProgramRepositoryMock{
-				FindByTemperatureFunc: func(ctx context.Context, temperature float32) (*program.Temperature, error) {
+				FindByTemperatureFunc: func(_ context.Context, _ float32) (*program.Temperature, error) {
 					return nil, tt.findErr
 				},
-				SaveFunc: func(ctx context.Context, program *program.Temperature) error {
+				SaveFunc: func(_ context.Context, _ *program.Temperature) error {
 					return tt.saveErr
 				},
 			}

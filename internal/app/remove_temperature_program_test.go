@@ -57,10 +57,10 @@ func TestRemoveTemperature_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			repo := &TemperatureProgramRepositoryMock{
-				FindByTemperatureFunc: func(ctx context.Context, temperature float32) (*program.Temperature, error) {
+				FindByTemperatureFunc: func(_ context.Context, _ float32) (*program.Temperature, error) {
 					return nil, tt.findErr
 				},
-				RemoveFunc: func(ctx context.Context, temperature float32) error {
+				RemoveFunc: func(_ context.Context, _ float32) error {
 					return tt.removeErr
 				},
 			}

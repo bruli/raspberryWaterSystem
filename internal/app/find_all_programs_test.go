@@ -101,27 +101,27 @@ func TestFindAllProgramsHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			temperature := &TemperatureProgramRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.Temperature, error) {
+				FindAllFunc: func(_ context.Context) ([]program.Temperature, error) {
 					return tt.temps, tt.tempErr
 				},
 			}
 			daily := &ProgramRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.Program, error) {
+				FindAllFunc: func(_ context.Context) ([]program.Program, error) {
 					return tt.dailies, tt.dailyErr
 				},
 			}
 			odd := &ProgramRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.Program, error) {
+				FindAllFunc: func(_ context.Context) ([]program.Program, error) {
 					return tt.odd, tt.oddErr
 				},
 			}
 			even := &ProgramRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.Program, error) {
+				FindAllFunc: func(_ context.Context) ([]program.Program, error) {
 					return tt.even, tt.evenErr
 				},
 			}
 			weekly := &WeeklyProgramRepositoryMock{
-				FindAllFunc: func(ctx context.Context) ([]program.Weekly, error) {
+				FindAllFunc: func(_ context.Context) ([]program.Weekly, error) {
 					return tt.weeklies, tt.weeklyErr
 				},
 			}

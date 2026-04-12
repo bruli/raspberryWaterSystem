@@ -44,7 +44,7 @@ func buildLogs(execLogs []program.ExecutionLog) []Log {
 		logs[i] = Log{
 			Seconds:    l.Seconds().Int(),
 			ZoneName:   l.ZoneName(),
-			ExecutedAt: time.Time(l.ExecutedAt()),
+			ExecutedAt: l.ExecutedAt(),
 		}
 	}
 	return logs

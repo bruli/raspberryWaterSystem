@@ -72,6 +72,6 @@ type queryHandler struct {
 	err    error
 }
 
-func (q queryHandler) Handle(ctx context.Context, query cqs.Query) (any, error) {
+func (q queryHandler) Handle(_ context.Context, _ cqs.Query) (any, error) {
 	return q.result, q.err
 }

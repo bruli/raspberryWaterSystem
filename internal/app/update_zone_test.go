@@ -79,10 +79,10 @@ func TestUpdateZone_Handle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			repo := &ZoneRepositoryMock{
-				FindByIDFunc: func(ctx context.Context, id string) (*zone.Zone, error) {
+				FindByIDFunc: func(_ context.Context, _ string) (*zone.Zone, error) {
 					return nil, tt.findErr
 				},
-				UpdateFunc: func(ctx context.Context, zo *zone.Zone) error {
+				UpdateFunc: func(_ context.Context, _ *zone.Zone) error {
 					return tt.updateErr
 				},
 			}

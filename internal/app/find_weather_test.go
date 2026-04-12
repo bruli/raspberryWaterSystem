@@ -49,12 +49,12 @@ func TestFindWeatherHandle(t *testing.T) {
 		when Handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			tr := &TemperatureRepositoryMock{
-				FindFunc: func(ctx context.Context) (weather.Temperature, weather.Humidity, error) {
+				FindFunc: func(_ context.Context) (weather.Temperature, weather.Humidity, error) {
 					return tt.temp, tt.hum, tt.tempErr
 				},
 			}
 			rr := &RainRepositoryMock{
-				FindFunc: func(ctx context.Context) (bool, error) {
+				FindFunc: func(_ context.Context) (bool, error) {
 					return false, tt.rainErr
 				},
 			}

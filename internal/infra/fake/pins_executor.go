@@ -11,7 +11,7 @@ func NewPinsExecutor() PinsExecutor {
 	return PinsExecutor{}
 }
 
-func (p PinsExecutor) Execute(ctx context.Context, seconds uint, pins []string) error {
+func (p PinsExecutor) Execute(ctx context.Context, seconds uint, _ []string) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()

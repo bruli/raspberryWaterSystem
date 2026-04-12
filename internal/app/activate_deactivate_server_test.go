@@ -54,10 +54,10 @@ func TestActivateDeactivateServerHandle(t *testing.T) {
 		when handle method is called `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			stRepo := &StatusRepositoryMock{}
-			stRepo.FindFunc = func(ctx context.Context) (status.Status, error) {
+			stRepo.FindFunc = func(_ context.Context) (status.Status, error) {
 				return tt.status, tt.findErr
 			}
-			stRepo.UpdateFunc = func(ctx context.Context, st status.Status) error {
+			stRepo.UpdateFunc = func(_ context.Context, _ status.Status) error {
 				return tt.updateErr
 			}
 			handler := app.NewActivateDeactivateServer(stRepo, tracer())

@@ -55,7 +55,7 @@ func TestFindAllPrograms(t *testing.T) {
 		when a request is sent `+tt.name, func(t *testing.T) {
 			t.Parallel()
 			qh := &QueryHandlerMock{
-				HandleFunc: func(ctx context.Context, query cqs.Query) (any, error) {
+				HandleFunc: func(_ context.Context, _ cqs.Query) (any, error) {
 					return tt.result, tt.qhErr
 				},
 			}
