@@ -3,24 +3,27 @@ package zone
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/bruli/raspberryWaterSystem/internal/cqs"
 )
 
-const ExecutionSecondsLimit = 300
+const (
+	ExecutionSecondsLimit = 300
+
+	RainingIgnoredReason     = "It's raining!!"
+	DeactivatedIgnoredReason = "Deactivated!!"
+
+	DefaultStabilizationFlux = 3 * time.Second
+)
 
 var (
 	ErrInvalidZoneID               = errors.New("zone id can not be empty")
 	ErrInvalidZoneName             = errors.New("zone name can not be empty")
 	ErrInvalidZoneRelays           = errors.New("zone relays can not be empty")
 	ErrInvalidSecondsExecutionZone = errors.New("execution zone has limit 300")
-)
-
-const (
-	RainingIgnoredReason     = "It's raining!!"
-	DeactivatedIgnoredReason = "Deactivated!!"
 )
 
 type Zone struct {
@@ -40,6 +43,10 @@ func (z *Zone) Name() string {
 
 func (z *Zone) Relays() []Relay {
 	return z.relays
+}
+
+func (z *Zone) StabilizationFlux() time.Duration {
+	return DefaultStabilizationFlux
 }
 
 func New(id, name string, relays []Relay) (*Zone, error) {
@@ -85,11 +92,12 @@ func (z *Zone) Execute(seconds uint) error {
 		pins[i] = p.pin
 	}
 	z.Record(Executed{
-		BasicEvent: cqs.NewBasicEvent(ExecutedEventName, uuid.New(), z.id),
-		ZoneID:     z.id,
-		ZoneName:   z.name,
-		Seconds:    seconds,
-		RelayPins:  pins,
+		BasicEvent:           cqs.NewBasicEvent(ExecutedEventName, uuid.New(), z.id),
+		ZoneID:               z.id,
+		ZoneName:             z.name,
+		Seconds:              seconds,
+		StabilizationSeconds: uint(z.StabilizationFlux().Seconds()),
+		RelayPins:            pins,
 	})
 	return nil
 }

@@ -9,10 +9,11 @@ const (
 
 type Executed struct {
 	cqs.BasicEvent
-	ZoneID    string
-	ZoneName  string
-	Seconds   uint
-	RelayPins []string
+	ZoneID               string
+	ZoneName             string
+	Seconds              uint
+	StabilizationSeconds uint
+	RelayPins            []string
 }
 
 type Ignored struct {

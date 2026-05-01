@@ -53,6 +53,7 @@ func TestNew(t *testing.T) {
 			require.Equal(t, zo.Id(), tt.id)
 			require.Equal(t, zo.Name(), tt.zoneName)
 			require.Equal(t, zo.Relays(), tt.relays)
+			require.Equal(t, zone.DefaultStabilizationFlux, zo.StabilizationFlux())
 		})
 	}
 }

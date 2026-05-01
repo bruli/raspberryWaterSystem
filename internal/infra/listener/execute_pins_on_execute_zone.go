@@ -22,7 +22,7 @@ func (e ExecutePinsOnExecuteZone) Listen(ctx context.Context, ev cqs.Event) erro
 	defer span.End()
 	event, _ := ev.(zone.Executed)
 	if _, err := e.ch.Handle(ctx, app.ExecutePinsCmd{
-		Seconds: event.Seconds,
+		Seconds: event.Seconds + event.StabilizationSeconds,
 		Pins:    event.RelayPins,
 	}); err != nil {
 		span.RecordError(err)
