@@ -7,6 +7,9 @@ const (
 	TwoRelayID
 	ThreeRelayID
 	FourRelayID
+	AirRelayID
+	FertilizerPumpID
+	CleanPumpID
 )
 
 type RelayID int
@@ -18,10 +21,13 @@ func (i RelayID) Int() int {
 var ErrUnknownRelay = errors.New("unknown relay")
 
 var enabledRelays = map[RelayID]string{
-	OneRelayID:   "18",
-	TwoRelayID:   "17",
-	ThreeRelayID: "23",
-	FourRelayID:  "24",
+	OneRelayID:       "18",
+	TwoRelayID:       "17",
+	ThreeRelayID:     "23",
+	FourRelayID:      "24",
+	AirRelayID:       "XX",
+	CleanPumpID:      "YY",
+	FertilizerPumpID: "ZZ",
 }
 
 type Relay struct {
