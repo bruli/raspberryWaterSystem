@@ -2,6 +2,7 @@ package disk
 
 import (
 	"context"
+	"maps"
 	"strconv"
 
 	"github.com/bruli/raspberryWaterSystem/internal/errors"
@@ -141,9 +142,7 @@ func (t TemperatureProgramRepository) FindByTemperatureAndHour(ctx context.Conte
 		programs := make(programMap, 0)
 		for tempKey, progs := range temp {
 			if temperature >= tempKey {
-				for hourKey, prgms := range progs {
-					programs[hourKey] = prgms
-				}
+				maps.Copy(programs, progs)
 			}
 		}
 		byHour, ok := programs[hour.String()]

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func readResponse(t *testing.T, resp *http2.Response, schema interface{}) {
+func readResponse(t *testing.T, resp *http2.Response, schema any) {
 	body := resp.Body
 	defer func() { _ = body.Close() }()
 	respBody, err := io.ReadAll(body)

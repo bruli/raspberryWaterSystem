@@ -11,9 +11,9 @@ import (
 
 // AppError is a query/command hnd error with context
 type AppError struct {
-	Name   string      `json:"name"`
-	Input  interface{} `json:"input"`
-	ErrMsg string      `json:"err_msg"`
+	Name   string `json:"name"`
+	Input  any    `json:"input"`
+	ErrMsg string `json:"err_msg"`
 }
 
 // QueryHandlerMiddleware is a type for decorating QueryHandlers

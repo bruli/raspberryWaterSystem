@@ -8,7 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func readYamlFile(path string, data interface{}) error {
+func readYamlFile(path string, data any) error {
 	if err := checkFile(path); err != nil {
 		return fmt.Errorf("failed to check %s file", path)
 	}
@@ -22,7 +22,7 @@ func readYamlFile(path string, data interface{}) error {
 	return nil
 }
 
-func readJsonFile(path string, data interface{}) error {
+func readJsonFile(path string, data any) error {
 	if err := checkFile(path); err != nil {
 		return fmt.Errorf("failed to check %s file", path)
 	}
@@ -48,7 +48,7 @@ func checkFile(path string) error {
 	return nil
 }
 
-func writeYamlFile(path string, data interface{}) error {
+func writeYamlFile(path string, data any) error {
 	dataFile, err := yaml.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
@@ -56,7 +56,7 @@ func writeYamlFile(path string, data interface{}) error {
 	return os.WriteFile(path, dataFile, 0o755)
 }
 
-func writeJsonFile(path string, data interface{}) error {
+func writeJsonFile(path string, data any) error {
 	dataFile, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
