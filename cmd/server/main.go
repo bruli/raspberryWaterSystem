@@ -122,6 +122,7 @@ func run() error {
 	chBus.Subscribe(app.UpdateStatusCmdName, logCHMdw(app.NewUpdateStatus(sr, lightRepo, tracer)))
 	chBus.Subscribe(app.CreateZoneCmdName, logCHMdw(app.NewCreateZone(zr, tracer)))
 	chBus.Subscribe(app.ExecuteZoneCmdName, eventsMultiCHMdw(app.NewExecuteZone(zr, tracer)))
+	chBus.Subscribe(app.ExecuteFertilizerZoneCmdName, eventsMultiCHMdw(app.NewExecuteFertilizerZone(zr, tracer)))
 	chBus.Subscribe(app.ExecutePinsCmdName, logCHMdw(app.NewExecutePins(pe, tracer)))
 	chBus.Subscribe(app.SaveExecutionLogCmdName, logCHMdw(app.NewSaveExecutionLog(execLogRepo, tracer)))
 	chBus.Subscribe(app.PublishMessageCmdName, logCHMdw(app.NewPublishMessage(messagePublisher, tracer)))
@@ -145,6 +146,7 @@ func run() error {
 	eventBus.Subscribe(zone.Executed{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.ExecutedEventName},
 	}, listener.NewExecutePinsOnExecuteZone(chBus, tracer), listener.NewWriteExecutionLogEventOnExecuteZone(eventsRepo, tracer))
+
 	eventBus.Subscribe(zone.Ignored{
 		BasicEvent: cqs.BasicEvent{NameAttr: zone.IgnoredEventName},
 	}, listener.NewPublishMessageOnZoneIgnored(chBus, tracer))
@@ -438,6 +440,11 @@ func handlersDefinition(chBus app.CommandBus, qhBus app.QueryBus, authToken stri
 			Endpoint:    "/zones/{id}/execute",
 			Method:      http.MethodPost,
 			HandlerFunc: authMdw(infrahttp.ExecuteZone(chBus, tracer)),
+		},
+		{
+			Endpoint:    "/zones/fertilizer/{id}/execute",
+			Method:      http.MethodPost,
+			HandlerFunc: authMdw(infrahttp.ExecuteFertilizerZone(chBus, tracer)),
 		},
 		{
 			Endpoint:    "/zones/{id}",
