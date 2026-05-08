@@ -18,7 +18,7 @@ services:
       - WEEKLY_PROGRAMS_FILE=${WEEKLY_PROGRAMS_FILE:-/tmp/weekly_programs.yml}
       - TEMPERATURE_PROGRAMS_FILE=${TEMPERATURE_PROGRAMS_FILE:-/tmp/temperature_programs.yml}
       - EXECUTION_LOGS_FILE=${EXECUTION_LOGS_FILE:-/tmp/execution_logs.json}
-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-token default}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-token_default}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-12345}
       - TELEGRAM_BOT_ENABLED=${TELEGRAM_BOT_ENABLED:-false}
       - NATS_SERVER_URL=${NATS_SERVER_URL:-nats://nats:4222}
@@ -31,6 +31,7 @@ services:
     depends_on:
       - nats
       - lgtm
+      - mockserver
     networks:
       - water_system
     command: ["air", "-c", ".air.toml"]
@@ -68,6 +69,16 @@ services:
     networks:
         - water_system
 
+  mockserver:
+      image: mockserver/mockserver:latest
+      ports:
+        - "1080:1080"
+      volumes:
+        - ./mockserver/expectations.json:/config/expectations.json
+      environment:
+        MOCKSERVER_INITIALIZATION_JSON_PATH: /config/expectations.json
+      networks:
+          - water_system
 networks:
   water_system:
     external: true

@@ -10,7 +10,7 @@ type Environment struct {
 
 type Config struct {
 	ServerURL               string `env:"SERVER_URL,required"`
-	environment             EnvironmentType
+	Environment             EnvironmentType
 	ZonesFile               string `env:"ZONES_FILE,required"`
 	AuthToken               string `env:"AUTH_TOKEN,required"`
 	DailyProgramsFile       string `env:"DAILY_PROGRAMS_FILE,required"`
@@ -43,6 +43,6 @@ func New() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	co.environment = envir
+	co.Environment = envir
 	return &co, nil
 }
