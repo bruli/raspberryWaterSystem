@@ -35,7 +35,7 @@ func TestPrograms(t *testing.T) {
 			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
 		})
 		t.Run(`with authorization,
-		then it returns unauthorized`, func(t *testing.T) {
+		then it returns ok`, func(t *testing.T) {
 			createPrReq := http.CreateProgramRequestJson{
 				Executions: []http.ExecutionRequest{
 					{
@@ -49,6 +49,21 @@ func TestPrograms(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, http2.StatusOK, resp.StatusCode)
 		})
+	})
+	t.Run(`Given a delete daily program endpoint
+	when a request is sent`, func(t *testing.T) {
+		t.Run(`without authorization,
+			then it returns unauthorized`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, nil, nil, http2.MethodDelete, "/programs/daily/12:45", cl)
+			require.NoError(t, err)
+			require.Equal(t, http2.StatusUnauthorized, resp.StatusCode)
+		})
+		t.Run(`with authorization,
+			then it returns ok`, func(t *testing.T) {
+			resp, err = buildRequestAndSend(ctx, nil, authorizationHeader(), http2.MethodDelete, "/programs/daily/12:45", cl)
+			require.NoError(t, err)
+			},
+		)
 	})
 	t.Run(`Given a create weekly program endpoint,
 	when a request is sent`, func(t *testing.T) {
