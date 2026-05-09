@@ -30,13 +30,11 @@ func (f FindWeather) Handle(ctx context.Context, _ cqs.Query) (any, error) {
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		return nil, err
 	}
 	rain, err := f.rr.Find(ctx)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
-		return nil, err
 	}
 	span.SetStatus(codes.Ok, "weather found")
 	return weather.New(temp, hum, rain), nil

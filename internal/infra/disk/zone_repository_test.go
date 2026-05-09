@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bruli/raspberryWaterSystem/internal/errors"
 	"github.com/bruli/raspberryWaterSystem/internal/fixtures"
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"
